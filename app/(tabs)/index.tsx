@@ -7,26 +7,24 @@ const SafeAreaView = styled(RNSafeAreaView);
 export default function App() {
   return (
     <SafeAreaView className="flex-1 bg-background p-5">
-      <Text className="text-xl font-bold text-success">
-        Welcome to Nativewind!
-      </Text>
+      <Text className="text-7xl font-sans-extrabold">Home</Text>
       <Link
         href="/onboarding"
-        className="mt-4 rounded-lg bg-primary text-white px-4 py-2"
+        className="mt-4 rounded-lg font-sans-bold bg-primary text-white px-4 py-2"
       >
-        <Text>Go to Onboarding</Text>
+        Go to Onboarding
       </Link>
       <Link
         href="/(auth)/sign-in"
-        className="mt-4 rounded-lg bg-primary text-white px-4 py-2"
+        className="mt-4 rounded-lg font-sans-bold bg-primary text-white px-4 py-2"
       >
-        <Text>Go to Sign In</Text>
+        Go to Sign In
       </Link>
       <Link
         href="/(auth)/sign-up"
-        className="mt-4 rounded-lg bg-primary text-white px-4 py-2"
+        className="mt-4 rounded-lg font-sans-bold bg-primary text-white px-4 py-2"
       >
-        <Text>Go to Sign Up</Text>
+        Go to Sign Up
       </Link>
     </SafeAreaView>
   );
