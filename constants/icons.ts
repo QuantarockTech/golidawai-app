@@ -13,14 +13,14 @@ import menu from "@/assets/icons/menu.png";
 import notion from "@/assets/icons/notion.png";
 import openai from "@/assets/icons/openai.png";
 import plus from "@/assets/icons/plus.png";
-import setting from "@/assets/icons/setting.png";
+import settings from "@/assets/icons/settings.png";
 import spotify from "@/assets/icons/spotify.png";
 import wallet from "@/assets/icons/wallet.png";
 
 export const icons = {
   home,
   wallet,
-  setting,
+  setting: settings,
   activity,
   add,
   back,
