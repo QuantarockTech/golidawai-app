@@ -2,7 +2,7 @@ import { Link, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Text, View } from "react-native";
 
-const subscriptionDetails = () => {
+const SubscriptionDetails = () => {
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
   const subscriptionId = Array.isArray(id) ? id[0] : id;
 
@@ -38,4 +38,4 @@ const subscriptionDetails = () => {
   );
 };
 
-export default subscriptionDetails;
+export default SubscriptionDetails;

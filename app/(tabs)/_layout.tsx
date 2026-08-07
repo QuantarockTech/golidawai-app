@@ -1,7 +1,8 @@
 import { tabs } from "@/constants/data";
 import { colors, components } from "@/constants/theme";
+import { useAuth } from "@clerk/clerk-expo";
 import clsx from "clsx";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import { Image, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -17,41 +18,41 @@ const TabIcon = ({ focused, icon }: TabIconProps) => {
   );
 };
 const TabLayout = () => {
+  const { isSignedIn, isLoaded } = useAuth();
   const insets = useSafeAreaInsets();
-  const bottomInset = Math.max(insets.bottom, 12);
+
+  // Wait for auth to load before rendering anything
+  if (!isLoaded) {
+    return null;
+  }
+
+  // Redirect to sign-in if user is not authenticated
+  if (!isSignedIn) {
+    return <Redirect href="/(auth)/sign-in" />;
+  }
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        contentStyle: {
-          paddingBottom: tabBar.height + bottomInset + 16,
-        },
         tabBarStyle: {
           position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: tabBar.height + bottomInset,
-          paddingBottom: bottomInset,
-          paddingHorizontal: tabBar.horizontalInset,
+          bottom: Math.max(insets.bottom, tabBar.horizontalInset),
+          height: tabBar.height,
+          marginHorizontal: tabBar.horizontalInset,
           borderRadius: tabBar.radius,
           backgroundColor: colors.primary,
           borderTopWidth: 0,
           elevation: 0,
-          shadowOpacity: 0,
         },
         tabBarItemStyle: {
-          justifyContent: "center",
-          paddingVertical: 0,
-          height: tabBar.height,
+          paddingVertical: tabBar.height / 2 - tabBar.iconFrame / 1.6,
         },
         tabBarIconStyle: {
           width: tabBar.iconFrame,
           height: tabBar.iconFrame,
           alignItems: "center",
-          justifyContent: "center",
         },
       }}
     >
@@ -67,12 +68,7 @@ const TabLayout = () => {
           }}
         />
       ))}
-      <Tabs.Screen
-        name="subscriptions/[id]"
-        options={{
-          href: null,
-        }}
-      />
+      <Tabs.Screen name="subscriptions/[id]" options={{ href: null }} />
     </Tabs>
   );
 };
