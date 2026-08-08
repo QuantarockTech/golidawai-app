@@ -1,9 +1,12 @@
 import "@/global.css";
-import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
+import { ClerkProvider, useAuth, useUser } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
-import { useEffect } from "react";
+import { PostHogErrorBoundary, PostHogProvider } from "posthog-react-native";
+import { useEffect, useRef } from "react";
+
+import { posthog } from "@/lib/posthog";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -13,8 +16,14 @@ if (!publishableKey) {
   throw new Error("Add your Clerk Publishable Key to the .env file");
 }
 
+function RootErrorFallback() {
+  return null;
+}
+
 function RootLayoutContent() {
   const { isLoaded: authLoaded } = useAuth();
+  const { user, isLoaded: userLoaded } = useUser();
+  const identifiedUserId = useRef<string | null>(null);
   const [fontsLoaded] = useFonts({
     "sans-regular": require("../assets/fonts/PlusJakartaSans-Regular.ttf"),
     "sans-bold": require("../assets/fonts/PlusJakartaSans-Bold.ttf"),
@@ -31,6 +40,31 @@ function RootLayoutContent() {
     }
   }, [fontsLoaded, authLoaded]);
 
+  useEffect(() => {
+    if (!userLoaded) {
+      return;
+    }
+
+    if (!user?.id) {
+      identifiedUserId.current = null;
+      return;
+    }
+
+    if (identifiedUserId.current === user.id) {
+      return;
+    }
+
+    const personProperties = {
+      ...(user.primaryEmailAddress?.emailAddress
+        ? { email: user.primaryEmailAddress.emailAddress }
+        : {}),
+      ...(user.fullName ? { name: user.fullName } : {}),
+    };
+
+    posthog?.identify(user.id, personProperties);
+    identifiedUserId.current = user.id;
+  }, [user, userLoaded]);
+
   // Don't render app until both are ready
   if (!fontsLoaded || !authLoaded) return null;
 
@@ -38,9 +72,19 @@ function RootLayoutContent() {
 }
 
 export default function RootLayout() {
+  const content = <RootLayoutContent />;
+
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <RootLayoutContent />
+      {posthog ? (
+        <PostHogProvider client={posthog}>
+          <PostHogErrorBoundary fallback={RootErrorFallback}>
+            {content}
+          </PostHogErrorBoundary>
+        </PostHogProvider>
+      ) : (
+        content
+      )}
     </ClerkProvider>
   );
 }

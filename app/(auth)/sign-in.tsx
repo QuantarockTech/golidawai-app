@@ -12,11 +12,13 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
+import { usePostHog } from "posthog-react-native";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
 const SignIn = () => {
   const { signIn, isLoaded, setActive } = useSignIn();
+  const posthog = usePostHog();
   const router = useRouter();
 
   const [emailAddress, setEmailAddress] = useState("");
@@ -51,6 +53,7 @@ const SignIn = () => {
 
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
+        posthog?.capture("user_signed_in", { method: "password" });
         router.replace("/(tabs)" as Href);
       } else if (result.status === "needs_second_factor") {
         await result.prepareSecondFactor({ strategy: "email_code" });
@@ -77,6 +80,7 @@ const SignIn = () => {
 
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
+        posthog?.capture("user_signed_in", { method: "email_second_factor" });
         router.replace("/(tabs)" as Href);
       }
     } catch (error) {
