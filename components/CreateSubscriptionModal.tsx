@@ -1,4 +1,5 @@
 import { icons } from "@/constants/icons";
+import { posthog } from "@/lib/posthog";
 import clsx from "clsx";
 import dayjs from "dayjs";
 import React, { useState } from "react";
@@ -99,6 +100,12 @@ const CreateSubscriptionModal = ({
       icon: icons.wallet,
       color: categoryColors[category],
     };
+
+    posthog?.capture("subscription_submit_clicked", {
+      frequency,
+      category,
+      price: numericPrice,
+    });
 
     onCreate(subscription);
     resetForm();
