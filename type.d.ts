@@ -23,6 +23,7 @@ declare global {
     startDate?: string;
     price: number;
     currency?: string;
+    frequency?: "Monthly" | "Yearly";
     billing: string;
     renewalDate?: string;
     color?: string;

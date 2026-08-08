@@ -6,6 +6,7 @@ import { SplashScreen, Stack } from "expo-router";
 import { PostHogErrorBoundary, PostHogProvider } from "posthog-react-native";
 import { useEffect, useRef } from "react";
 
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { posthog } from "@/lib/posthog";
 
 SplashScreen.preventAutoHideAsync();
@@ -72,7 +73,11 @@ function RootLayoutContent() {
 }
 
 export default function RootLayout() {
-  const content = <RootLayoutContent />;
+  const content = (
+    <SubscriptionProvider>
+      <RootLayoutContent />
+    </SubscriptionProvider>
+  );
 
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>

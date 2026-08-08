@@ -67,7 +67,7 @@
   }
 
   .home-user {
-    @apply flex-row items-center;
+    @apply min-w-0 flex-1 flex-row items-center;
   }
 
   .home-avatar {
@@ -75,7 +75,11 @@
   }
 
   .home-user-name {
-    @apply ml-4 text-2xl font-sans-bold text-primary;
+    @apply ml-4 min-w-0 flex-1 text-2xl font-sans-bold text-primary;
+  }
+
+  .home-add-button {
+    @apply ml-3 size-12 shrink-0 items-center justify-center;
   }
 
   .home-add-icon {
@@ -224,6 +228,38 @@
 
   .home-empty-state {
     @apply py-4 text-sm font-sans-medium text-black/60;
+  }
+
+  .subscription-search {
+    @apply flex-row items-center rounded-2xl border border-border bg-card;
+  }
+
+  .subscription-header {
+    @apply mb-5 flex-row items-center justify-between;
+  }
+
+  .subscription-add-icon {
+    @apply ml-3 size-10 shrink-0;
+  }
+
+  .subscription-search-label {
+    @apply mb-2 text-sm font-sans-semibold text-primary;
+  }
+
+  .subscription-count {
+    @apply mb-4 mt-4 text-sm font-sans-semibold text-muted-foreground;
+  }
+
+  .subscription-search-input {
+    @apply min-w-0 flex-1 px-4 py-4 text-base font-sans-medium text-primary;
+  }
+
+  .subscription-search-clear {
+    @apply mr-2 size-9 items-center justify-center rounded-full bg-muted;
+  }
+
+  .subscription-empty {
+    @apply items-center rounded-2xl border border-border bg-card px-5 py-10;
   }
 
   .auth-safe-area {
