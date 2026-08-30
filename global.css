@@ -17,6 +17,19 @@
   --color-destructive: #dc2626;
   --color-subscription: #8fd1bd;
 
+  /* Golidawai brand system — pulled from golidawayi.com's live palette */
+  --color-brand: #3fbbc0;
+  --color-brand-dark: #0f5d61;
+  --color-brand-light: #65c9cd;
+  --color-brand-ink: #04302f;
+  --color-mist: #f7fcfc;
+  --color-ink: #152a27;
+  --color-ink-muted: #5c7573;
+  --color-ink-faint: #8fa3a1;
+  --color-hairline: rgba(15, 60, 61, 0.14);
+  --color-hairline-soft: rgba(15, 60, 61, 0.08);
+  --color-emergency: #df1529;
+
   --spacing-0: 0px;
   --spacing-1: 4px;
   --spacing-2: 8px;
@@ -43,6 +56,14 @@
   --font-sans-semibold: sans-semibold;
   --font-sans-bold: sans-bold;
   --font-sans-extrabold: sans-extrabold;
+
+  /* Golidawai type — matches the site: Raleway headings, Poppins UI, Roboto body */
+  --font-heading: Raleway_800ExtraBold;
+  --font-heading-bold: Raleway_700Bold;
+  --font-ui: Poppins_500Medium;
+  --font-ui-semibold: Poppins_600SemiBold;
+  --font-body: Roboto_400Regular;
+  --font-body-medium: Roboto_500Medium;
 }
 
 @layer components {
@@ -453,4 +474,155 @@
   .category-chip-text-active {
     @apply text-accent;
   }
+}
+
+/*
+ * Golidawai auth screens (concept board frames 02 / 03).
+ *
+ * Deliberately NOT inside @layer components: react-native-web emits its own
+ * unlayered classes onto every Text/View, and an unlayered rule always beats a
+ * layered one regardless of specificity — so layered component classes are
+ * silently dropped on web. Keeping these unlayered makes them apply on web and
+ * native alike.
+ */
+
+
+
+
+/*
+ * One column that reads as a phone screen on a phone and as a centred form on
+ * a desktop browser. max-w never engages below 440px, so mobile is unaffected;
+ * the vertical centring is gated to md: so the keyboard can't fight it on a
+ * small screen.
+ */
+.ga-content {
+  @apply grow w-full max-w-[440px] self-center px-5 pb-10 pt-2 md:justify-center md:py-10;
+}
+
+.ga-topbar {
+  @apply mb-1 flex-row items-center justify-between;
+}
+
+.ga-back {
+  @apply -ml-2 size-10 items-center justify-center rounded-full;
+}
+
+.ga-header {
+  @apply items-center pb-5 pt-3;
+}
+
+.ga-title {
+  @apply mt-3 text-center text-[26px] leading-[32px] font-heading text-ink;
+}
+
+.ga-subtitle {
+  @apply mt-1.5 text-center text-[15px] leading-[20px] font-body text-ink-muted;
+}
+
+/*
+ * The track is tinted rather than mist: the selected pill is white, and on a
+ * mist screen a white-on-mist pill is ~3% contrast and reads as unselected.
+ */
+.ga-toggle {
+  @apply mb-5 flex-row rounded-2xl border border-hairline-soft bg-brand/10 p-1;
+}
+
+.ga-toggle-item {
+  @apply flex-1 items-center justify-center rounded-xl border border-transparent py-2.5;
+}
+
+.ga-toggle-item-active {
+  @apply bg-white border-hairline-soft;
+}
+
+.ga-toggle-text {
+  @apply text-[14px] font-ui-semibold text-ink-muted;
+}
+
+.ga-toggle-text-active {
+  @apply text-brand-dark;
+}
+
+.ga-field {
+  @apply mb-3.5 gap-1.5;
+}
+
+.ga-label {
+  @apply text-[13px] font-ui text-ink-muted;
+}
+
+.ga-input {
+  @apply rounded-2xl border border-hairline bg-white px-4 py-3.5 text-[15px] font-body text-ink;
+}
+
+.ga-input-error {
+  @apply border-emergency;
+}
+
+.ga-input-code {
+  @apply text-center text-[22px] tracking-[8px] font-ui-semibold;
+}
+
+.ga-error {
+  @apply text-[12px] font-body text-emergency;
+}
+
+.ga-helper {
+  @apply text-[12px] leading-[16px] font-body text-ink-faint;
+}
+
+.ga-forgot {
+  @apply mb-3 -mt-1 text-right text-[13px] font-ui text-brand-dark;
+}
+
+.ga-consent {
+  @apply mb-3 text-center text-[12px] leading-[16px] font-body text-ink-faint;
+}
+
+.ga-btn {
+  @apply flex-row items-center justify-center gap-2 rounded-2xl bg-brand py-4;
+}
+
+.ga-btn-disabled {
+  @apply bg-brand/45;
+}
+
+.ga-btn-text {
+  @apply text-[16px] font-ui-semibold text-brand-ink;
+}
+
+.ga-btn-outline {
+  @apply mt-3 flex-row items-center justify-center gap-2 rounded-2xl border border-brand bg-white py-4;
+}
+
+.ga-btn-outline-text {
+  @apply text-[16px] font-ui-semibold text-brand-dark;
+}
+
+.ga-divider-row {
+  @apply my-5 flex-row items-center gap-3;
+}
+
+.ga-divider-line {
+  @apply h-px flex-1 bg-hairline;
+}
+
+.ga-divider-text {
+  @apply text-[13px] font-body text-ink-faint;
+}
+
+.ga-social-row {
+  @apply flex-row gap-2.5;
+}
+
+.ga-social-btn {
+  @apply flex-1 flex-row items-center justify-center gap-2 rounded-2xl border border-hairline bg-white py-3.5;
+}
+
+.ga-social-btn-disabled {
+  @apply opacity-50;
+}
+
+.ga-social-text {
+  @apply text-[14px] font-ui text-ink;
 }

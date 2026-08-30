@@ -12,6 +12,9 @@
   },
   "dependencies": {
     "@clerk/clerk-expo": "^2.19.31",
+    "@expo-google-fonts/poppins": "^0.4.1",
+    "@expo-google-fonts/raleway": "^0.4.2",
+    "@expo-google-fonts/roboto": "^0.4.3",
     "@expo/vector-icons": "^15.0.3",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",

@@ -1,4 +1,10 @@
 import "@/global.css";
+import { Poppins_500Medium } from "@expo-google-fonts/poppins/500Medium";
+import { Poppins_600SemiBold } from "@expo-google-fonts/poppins/600SemiBold";
+import { Raleway_700Bold } from "@expo-google-fonts/raleway/700Bold";
+import { Raleway_800ExtraBold } from "@expo-google-fonts/raleway/800ExtraBold";
+import { Roboto_400Regular } from "@expo-google-fonts/roboto/400Regular";
+import { Roboto_500Medium } from "@expo-google-fonts/roboto/500Medium";
 import { ClerkProvider, useAuth, useUser } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import { useFonts } from "expo-font";
@@ -32,6 +38,13 @@ function RootLayoutContent() {
     "sans-semibold": require("../assets/fonts/PlusJakartaSans-SemiBold.ttf"),
     "sans-extrabold": require("../assets/fonts/PlusJakartaSans-ExtraBold.ttf"),
     "sans-light": require("../assets/fonts/PlusJakartaSans-Light.ttf"),
+    // Golidawai brand type — mirrors golidawayi.com
+    Raleway_700Bold,
+    Raleway_800ExtraBold,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Roboto_400Regular,
+    Roboto_500Medium,
   });
 
   useEffect(() => {
