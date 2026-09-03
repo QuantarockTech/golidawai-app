@@ -499,12 +499,18 @@
 
 /*
  * One column that reads as a phone screen on a phone and as a centred form on
- * a desktop browser. max-w never engages below 440px, so mobile is unaffected;
- * the vertical centring is gated to md: so the keyboard can't fight it on a
- * small screen.
+ * a desktop browser. max-w never engages below 440px, so narrow screens are
+ * unaffected.
+ *
+ * Centring is NOT gated to md:. Phones are below that breakpoint, so gating it
+ * left every spare pixel below the last field — ~196px on an iPhone 14, ~284px
+ * on a Pro Max. Safe at every size because `grow` (not `flex-1`) lets the
+ * column exceed its parent when the content is taller: there is then no free
+ * space to distribute, so an overflowing form still starts at the top and
+ * scrolls normally rather than being centred and clipped.
  */
 .ga-content {
-  @apply grow w-full max-w-[440px] self-center px-5 pb-2 pt-2 md:justify-center md:py-10;
+  @apply w-full max-w-[440px] self-center px-5 pb-2 pt-2 md:py-6;
 }
 
 .ga-topbar {

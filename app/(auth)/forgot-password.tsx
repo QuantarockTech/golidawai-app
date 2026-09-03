@@ -161,7 +161,8 @@ const ForgotPassword = () => {
       <SafeAreaView className="flex-1">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
+        /* Phones stack from the top; a desktop browser centres the whole card. */
+        className="flex-1 md:justify-center"
       >
         {/*
          * Held outside the ScrollView so the brand lockup and title stay put
@@ -180,8 +181,20 @@ const ForgotPassword = () => {
           ) : null}
         </View>
 
+        {/*
+         * `shrink`, not `flex-1`: the scroll area takes only the height its
+         * content needs, so the fields sit directly under the header and the
+         * footer directly under the fields. When the content is taller than
+         * the space available it shrinks to fit and scrolls as normal, which
+         * keeps the footer pinned to the bottom exactly when that matters.
+         */}
         <ScrollView
-          className="flex-1"
+          /*
+           * Inline, not a utility class: react-native-web's own ScrollView
+           * class sets flexGrow:1 and outranks one, so the scroll area would
+           * keep filling the screen and push the footer away from the fields.
+           */
+          style={{ flexGrow: 0, flexShrink: 1 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
