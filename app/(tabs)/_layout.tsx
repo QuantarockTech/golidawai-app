@@ -3,9 +3,8 @@ import { colors, components } from "@/constants/theme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/i18n/translations";
 import { useAuth } from "@clerk/clerk-expo";
-import clsx from "clsx";
 import { Redirect, Tabs } from "expo-router";
-import { Image, View } from "react-native";
+import { Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const tabBar = components.tabBar;
@@ -21,15 +20,27 @@ const TAB_TITLE_KEYS: Partial<Record<string, TranslationKey>> = {
   settings: "tabs.settings",
 };
 
-const TabIcon = ({ focused, icon }: TabIconProps) => {
-  return (
-    <View className="tabs-icon">
-      <View className={clsx("tabs-pill", focused && "tabs-active")}>
-        <Image source={icon} resizeMode="contain" className="tabs-glyph" />
-      </View>
-    </View>
-  );
-};
+/**
+ * Board frame 04 marks the selected tab by colouring the icon, not by putting a
+ * filled pill behind it. The artwork is a white PNG, so the colour has to come
+ * from tintColor rather than a text colour.
+ */
+const TabIcon = ({ focused, icon }: TabIconProps) => (
+  <Image
+    source={icon}
+    resizeMode="contain"
+    /*
+     * Inline, not a class: react-native-web writes the source image's intrinsic
+     * dimensions as an inline style, which outranks any class. Without this
+     * each icon drew at its natural 120x120 on web.
+     */
+    style={{
+      width: tabBar.iconSize,
+      height: tabBar.iconSize,
+      tintColor: focused ? colors.brandDark : colors.inkFaint,
+    }}
+  />
+);
 const TabLayout = () => {
   const { isSignedIn, isLoaded } = useAuth();
   const { t } = useLanguage();
@@ -49,24 +60,26 @@ const TabLayout = () => {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarShowLabel: false,
+        // The board labels every tab; unlabelled line icons are a guessing game.
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: colors.brandDark,
+        tabBarInactiveTintColor: colors.inkFaint,
         tabBarStyle: {
-          position: "absolute",
-          bottom: Math.max(insets.bottom, tabBar.horizontalInset),
-          height: tabBar.height,
-          marginHorizontal: tabBar.horizontalInset,
-          borderRadius: tabBar.radius,
-          backgroundColor: colors.primary,
-          borderTopWidth: 0,
+          // A flat white strip on a hairline, flush to the bottom edge —
+          // board frame 04, replacing the template's floating dark pill.
+          backgroundColor: colors.white,
+          borderTopWidth: 1,
+          borderTopColor: colors.hairlineSoft,
+          // The inset is padding rather than height so the bar's colour runs
+          // under the home indicator instead of leaving a strip of screen.
+          height: tabBar.height + insets.bottom,
+          paddingTop: tabBar.paddingTop,
+          paddingBottom: insets.bottom,
           elevation: 0,
         },
-        tabBarItemStyle: {
-          paddingVertical: tabBar.height / 2 - tabBar.iconFrame / 1.6,
-        },
-        tabBarIconStyle: {
-          width: tabBar.iconFrame,
-          height: tabBar.iconFrame,
-          alignItems: "center",
+        tabBarLabelStyle: {
+          fontFamily: "Poppins_500Medium",
+          fontSize: tabBar.labelSize,
         },
       }}
     >
