@@ -1,4 +1,6 @@
 import { useRouter } from "expo-router";
+
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Pressable, Text, View } from "react-native";
 
 type AuthToggleProps = {
@@ -20,10 +22,11 @@ const ACTIVE_SHADOW = {
 /** Segmented Sign In / Sign Up switch that sits above both auth forms. */
 const AuthToggle = ({ active }: AuthToggleProps) => {
   const router = useRouter();
+  const { t } = useLanguage();
 
   const options = [
-    { key: "sign-in", label: "Sign In", href: "/(auth)/sign-in" },
-    { key: "sign-up", label: "Sign Up", href: "/(auth)/sign-up" },
+    { key: "sign-in", label: t("auth.signIn"), href: "/(auth)/sign-in" },
+    { key: "sign-up", label: t("auth.signUp"), href: "/(auth)/sign-up" },
   ] as const;
 
   return (

@@ -1,42 +1,81 @@
-import { Link } from "expo-router";
+import clsx from "clsx";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter, type Href } from "expo-router";
+import { styled } from "nativewind";
 import React from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
-const onboarding = () => {
+import BrandMark from "@/components/BrandMark";
+import LanguageToggle from "@/components/LanguageToggle";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+// NativeWind only auto-handles React Native's own components; third-party ones
+// need styled() or their className is dropped on native.
+const SafeAreaView = styled(RNSafeAreaView);
+
+const SIGN_IN_ROUTE = "/(auth)/sign-in" as Href;
+
+// Straight from the concept board: linear-gradient(160deg, #0f5d61, #0b3f42).
+// LinearGradient takes start/end points rather than an angle, so 160° is
+// expressed as the vector it describes — mostly downward, leaning left.
+const HERO_GRADIENT = ["#0f5d61", "#0b3f42"] as const;
+const HERO_START = { x: 0.82, y: 0 } as const;
+const HERO_END = { x: 0.18, y: 1 } as const;
+
+/** Splash / Welcome — concept board frame 01. */
+const Onboarding = () => {
+  const router = useRouter();
+  const { t, isHindi } = useLanguage();
+
   return (
-    <View className="flex-1 bg-background px-5 pt-12">
-      <Text className="text-4xl font-bold text-primary">Welcome</Text>
-      <Text className="mt-2 text-2xl font-semibold text-primary">
-        Manage your subscriptions smarter
-      </Text>
+    <LinearGradient
+      colors={HERO_GRADIENT}
+      start={HERO_START}
+      end={HERO_END}
+      style={{ flex: 1 }}
+    >
+      <SafeAreaView className="flex-1">
+        <View className="ga-hero">
 
-      <View className="mt-10 gap-4">
-        <Link
-          href="/(auth)/sign-in"
-          className="rounded-xl bg-primary px-5 py-4"
-        >
-          <Text className="text-center text-base font-bold text-background">
-            Sign In
-          </Text>
-        </Link>
+          <BrandMark variant="mark" tone="light" size={64} />
 
-        <Link
-          href="/(auth)/sign-up"
-          className="rounded-xl border border-primary/20 bg-white px-5 py-4"
-        >
-          <Text className="text-center text-base font-bold text-primary">
-            Create Account
-          </Text>
-        </Link>
+          {/* Golidawai is the brand name — it stays Latin in both languages. */}
+          <Text className="ga-hero-wordmark">Golidawai</Text>
 
-        <Link href="/(tabs)" className="mt-2">
-          <Text className="text-center text-sm font-medium text-primary/70">
-            Continue to app
+          <Text
+            className={clsx(
+              "ga-hero-tagline-hi",
+              isHindi && "deva-tagline",
+            )}
+          >
+            {t("splash.taglinePrimary")}
           </Text>
-        </Link>
-      </View>
-    </View>
+          <Text
+            className={clsx("ga-hero-tagline-en", isHindi && "deva-tagline")}
+          >
+            {t("splash.taglineSecondary")}
+          </Text>
+
+          <Pressable
+            className="ga-hero-btn"
+            onPress={() => router.push(SIGN_IN_ROUTE)}
+            accessibilityRole="button"
+          >
+            <Text className="ga-hero-btn-text">{t("splash.getStarted")}</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+
+      {/*
+       * The board puts the language choice ahead of sign-in on purpose: someone
+       * who reads only Hindi needs it before the first form. Outside the
+       * SafeAreaView so the top inset isn't applied twice — it positions itself
+       * off the live inset instead.
+       */}
+      <LanguageToggle tone="dark" floating />
+    </LinearGradient>
   );
 };
 
-export default onboarding;
+export default Onboarding;

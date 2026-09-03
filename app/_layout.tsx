@@ -1,6 +1,8 @@
 import "@/global.css";
+import { Poppins_400Regular } from "@expo-google-fonts/poppins/400Regular";
 import { Poppins_500Medium } from "@expo-google-fonts/poppins/500Medium";
 import { Poppins_600SemiBold } from "@expo-google-fonts/poppins/600SemiBold";
+import { Poppins_700Bold } from "@expo-google-fonts/poppins/700Bold";
 import { Raleway_700Bold } from "@expo-google-fonts/raleway/700Bold";
 import { Raleway_800ExtraBold } from "@expo-google-fonts/raleway/800ExtraBold";
 import { Roboto_400Regular } from "@expo-google-fonts/roboto/400Regular";
@@ -12,6 +14,7 @@ import { SplashScreen, Stack } from "expo-router";
 import { PostHogErrorBoundary, PostHogProvider } from "posthog-react-native";
 import { useEffect, useRef } from "react";
 
+import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { posthog } from "@/lib/posthog";
 
@@ -30,6 +33,7 @@ function RootErrorFallback() {
 function RootLayoutContent() {
   const { isLoaded: authLoaded } = useAuth();
   const { user, isLoaded: userLoaded } = useUser();
+  const { isLoaded: languageLoaded } = useLanguage();
   const identifiedUserId = useRef<string | null>(null);
   const [fontsLoaded] = useFonts({
     "sans-regular": require("../assets/fonts/PlusJakartaSans-Regular.ttf"),
@@ -45,14 +49,17 @@ function RootLayoutContent() {
     Poppins_600SemiBold,
     Roboto_400Regular,
     Roboto_500Medium,
+    // Devanagari stack for Hindi — Poppins is the only loaded face that has it.
+    Poppins_400Regular,
+    Poppins_700Bold,
   });
 
   useEffect(() => {
-    // Hide splash only when both fonts and auth are loaded
-    if (fontsLoaded && authLoaded) {
+    // Hide splash only when fonts, auth and the saved language are all ready
+    if (fontsLoaded && authLoaded && languageLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, authLoaded]);
+  }, [fontsLoaded, authLoaded, languageLoaded]);
 
   useEffect(() => {
     if (!userLoaded) {
@@ -79,17 +86,20 @@ function RootLayoutContent() {
     identifiedUserId.current = user.id;
   }, [user, userLoaded]);
 
-  // Don't render app until both are ready
-  if (!fontsLoaded || !authLoaded) return null;
+  // Don't render app until fonts, auth and the language choice are all ready —
+  // rendering earlier would flash English before a Hindi user's saved choice loads.
+  if (!fontsLoaded || !authLoaded || !languageLoaded) return null;
 
   return <Stack screenOptions={{ headerShown: false }} />;
 }
 
 export default function RootLayout() {
   const content = (
-    <SubscriptionProvider>
-      <RootLayoutContent />
-    </SubscriptionProvider>
+    <LanguageProvider>
+      <SubscriptionProvider>
+        <RootLayoutContent />
+      </SubscriptionProvider>
+    </LanguageProvider>
   );
 
   return (

@@ -1,5 +1,7 @@
 import { tabs } from "@/constants/data";
 import { colors, components } from "@/constants/theme";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/i18n/translations";
 import { useAuth } from "@clerk/clerk-expo";
 import clsx from "clsx";
 import { Redirect, Tabs } from "expo-router";
@@ -7,6 +9,17 @@ import { Image, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const tabBar = components.tabBar;
+
+/*
+ * constants/data.ts stores each tab's English title; the route name is the
+ * stable key, so titles are looked up at render time and follow the language.
+ */
+const TAB_TITLE_KEYS: Partial<Record<string, TranslationKey>> = {
+  index: "tabs.home",
+  subscriptions: "tabs.subscriptions",
+  insights: "tabs.insights",
+  settings: "tabs.settings",
+};
 
 const TabIcon = ({ focused, icon }: TabIconProps) => {
   return (
@@ -19,6 +32,7 @@ const TabIcon = ({ focused, icon }: TabIconProps) => {
 };
 const TabLayout = () => {
   const { isSignedIn, isLoaded } = useAuth();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
 
   // Wait for auth to load before rendering anything
@@ -56,18 +70,23 @@ const TabLayout = () => {
         },
       }}
     >
-      {tabs.map((tab) => (
-        <Tabs.Screen
-          key={tab.name}
-          name={tab.name}
-          options={{
-            title: tab.title,
-            tabBarIcon: ({ focused }) => (
-              <TabIcon focused={focused} icon={tab.icon} />
-            ),
-          }}
-        />
-      ))}
+      {tabs.map((tab) => {
+        // A tab added without a key keeps its English title rather than blanking.
+        const titleKey = TAB_TITLE_KEYS[tab.name];
+
+        return (
+          <Tabs.Screen
+            key={tab.name}
+            name={tab.name}
+            options={{
+              title: titleKey ? t(titleKey) : tab.title,
+              tabBarIcon: ({ focused }) => (
+                <TabIcon focused={focused} icon={tab.icon} />
+              ),
+            }}
+          />
+        );
+      })}
       <Tabs.Screen name="subscriptions/[id]" options={{ href: null }} />
     </Tabs>
   );

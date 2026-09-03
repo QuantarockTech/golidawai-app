@@ -1,4 +1,6 @@
+import LanguageToggle from "@/components/LanguageToggle";
 import images from "@/constants/images";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useClerk, useUser } from "@clerk/clerk-expo";
 import { usePostHog } from "posthog-react-native";
 import { styled } from "nativewind";
@@ -10,6 +12,7 @@ const Settings = () => {
   const { signOut } = useClerk();
   const { user } = useUser();
   const posthog = usePostHog();
+  const { t } = useLanguage();
 
   const handleSignOut = async () => {
     await signOut();
@@ -26,9 +29,12 @@ const Settings = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-background p-5">
-      <Text className="text-3xl font-sans-bold text-primary mb-6">
-        Settings
-      </Text>
+      <View className="mb-6 flex-row items-center justify-between">
+        <Text className="text-3xl font-sans-bold text-primary">
+          {t("settings.title")}
+        </Text>
+        <LanguageToggle />
+      </View>
 
       {/* User Profile Section */}
       <View className="auth-card mb-5">
@@ -53,12 +59,12 @@ const Settings = () => {
       {/* Account Section */}
       <View className="auth-card mb-5">
         <Text className="text-base font-sans-semibold text-primary mb-3">
-          Account
+          {t("settings.account")}
         </Text>
         <View className="gap-2">
           <View className="flex-row justify-between items-center py-2">
             <Text className="text-sm font-sans-medium text-muted-foreground">
-              Account ID
+              {t("settings.accountId")}
             </Text>
             <Text
               className="text-sm font-sans-medium text-primary"
@@ -70,20 +76,31 @@ const Settings = () => {
           </View>
           <View className="flex-row justify-between items-center py-2">
             <Text className="text-sm font-sans-medium text-muted-foreground">
-              Joined
+              {t("settings.joined")}
             </Text>
             <Text className="text-sm font-sans-medium text-primary">
               {user?.createdAt
                 ? new Date(user.createdAt).toLocaleDateString()
-                : "N/A"}
+                : t("settings.notAvailable")}
             </Text>
           </View>
         </View>
       </View>
 
+      {/* Language — board frame 09 gives the EN/हिं switch a permanent home here,
+          beyond the header toggle. */}
+      <View className="auth-card mb-5">
+        <View className="flex-row items-center justify-between">
+          <Text className="text-base font-sans-semibold text-primary">
+            {t("settings.language")}
+          </Text>
+          <LanguageToggle />
+        </View>
+      </View>
+
       {/* Sign Out Button */}
       <Pressable className="auth-button bg-destructive" onPress={handleSignOut}>
-        <Text className="auth-button-text text-white">Sign Out</Text>
+        <Text className="auth-button-text text-white">{t("settings.signOut")}</Text>
       </Pressable>
     </SafeAreaView>
   );

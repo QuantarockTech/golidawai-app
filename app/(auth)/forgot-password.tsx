@@ -1,4 +1,5 @@
 import { useSignIn } from "@clerk/clerk-expo";
+import clsx from "clsx";
 import { useRouter, type Href } from "expo-router";
 import { styled } from "nativewind";
 import { usePostHog } from "posthog-react-native";
@@ -15,6 +16,9 @@ import {
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 import BrandMark from "@/components/BrandMark";
+import LanguageToggle from "@/components/LanguageToggle";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useKeyboardVisible } from "@/lib/useKeyboardVisible";
 import { isEmailLike, readErrorMessage } from "@/lib/auth";
 
 // NativeWind only auto-handles React Native's own components; third-party ones
@@ -32,6 +36,8 @@ type Step = "request" | "code" | "password";
 
 const ForgotPassword = () => {
   const { signIn, isLoaded, setActive } = useSignIn();
+  const { t, isHindi } = useLanguage();
+  const keyboardVisible = useKeyboardVisible();
   const posthog = usePostHog();
   const router = useRouter();
 
@@ -54,7 +60,7 @@ const ForgotPassword = () => {
 
     setEmailTouched(true);
     if (!isEmailLike(email)) {
-      setErrorMessage("Enter the email address on your account.");
+      setErrorMessage(t("reset.needEmail"));
       return;
     }
 
@@ -68,7 +74,7 @@ const ForgotPassword = () => {
       setCode("");
       setStep("code");
     } catch (error) {
-      setErrorMessage(readErrorMessage(error, "Unable to send a reset code"));
+      setErrorMessage(readErrorMessage(error, t("reset.sendFailed")));
     } finally {
       setIsSubmitting(false);
     }
@@ -94,9 +100,12 @@ const ForgotPassword = () => {
       if (result.status === "complete" && result.createdSessionId) {
         await setActive?.({ session: result.createdSessionId });
         router.replace(HOME_ROUTE);
+        return;
       }
+
+      setErrorMessage(t("reset.codeFailed"));
     } catch (error) {
-      setErrorMessage(readErrorMessage(error, "That code didn't work"));
+      setErrorMessage(readErrorMessage(error, t("verify.badCode")));
     } finally {
       setIsSubmitting(false);
     }
@@ -119,9 +128,12 @@ const ForgotPassword = () => {
         await setActive?.({ session: result.createdSessionId });
         posthog?.capture("user_reset_password");
         router.replace(HOME_ROUTE);
+        return;
       }
+
+      setErrorMessage(t("reset.saveFailed"));
     } catch (error) {
-      setErrorMessage(readErrorMessage(error, "Unable to set a new password"));
+      setErrorMessage(readErrorMessage(error, t("reset.setPasswordFailed")));
     } finally {
       setIsSubmitting(false);
     }
@@ -131,44 +143,56 @@ const ForgotPassword = () => {
 
   const copy = {
     request: {
-      title: "Reset password",
-      subtitle: "We'll email you a code to set a new one.",
+      title: t("reset.requestTitle"),
+      subtitle: t("reset.requestSubtitle"),
     },
     code: {
-      title: "Enter your code",
-      subtitle: `We sent a 6-digit code to ${email.trim().toLowerCase()}.`,
+      title: t("verify.title"),
+      subtitle: t("verify.sentTo", { email: email.trim().toLowerCase() }),
     },
     password: {
-      title: "Set a new password",
-      subtitle: "Choose something you haven't used before.",
+      title: t("reset.passwordTitle"),
+      subtitle: t("reset.passwordSubtitle"),
     },
   }[step];
 
   return (
-    <SafeAreaView className="flex-1 bg-mist">
+    <View className="flex-1 bg-mist">
+      <SafeAreaView className="flex-1">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
+        {/*
+         * Held outside the ScrollView so the brand lockup and title stay put
+         * while only the form scrolls.
+         */}
+        <View className="ga-fixed-header">
+          {/* Reclaims ~130px for the fields while the keyboard is up. */}
+          {!keyboardVisible ? <BrandMark variant="full" size={92} /> : null}
+          <Text className={clsx("ga-title", isHindi && "deva-title")}>
+            {copy.title}
+          </Text>
+          {!keyboardVisible ? (
+            <Text className={clsx("ga-subtitle", isHindi && "deva-body")}>
+              {copy.subtitle}
+            </Text>
+          ) : null}
+        </View>
+
         <ScrollView
           className="flex-1"
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           <View className="ga-content">
-            <View className="ga-header">
-              <BrandMark variant="full" size={92} />
-              <Text className="ga-title">{copy.title}</Text>
-              <Text className="ga-subtitle">{copy.subtitle}</Text>
-            </View>
-
             {step === "request" ? (
               <View className="ga-field">
-                <Text className="ga-label">Email address</Text>
+                <Text className="ga-label">{t("auth.email")}</Text>
                 <TextInput
                   className={`ga-input ${emailTouched && !emailValid ? "ga-input-error" : ""}`}
                   value={email}
-                  placeholder="aditi@email.com"
+                  placeholder={t("auth.emailPlaceholder")}
                   placeholderTextColor="#8fa3a1"
                   onChangeText={setEmail}
                   onBlur={() => setEmailTouched(true)}
@@ -179,16 +203,14 @@ const ForgotPassword = () => {
                   autoFocus
                 />
                 {emailTouched && !emailValid ? (
-                  <Text className="ga-error">
-                    Please enter a valid email address
-                  </Text>
+                  <Text className="ga-error">{t("auth.invalidEmail")}</Text>
                 ) : null}
               </View>
             ) : null}
 
             {step === "code" ? (
               <View className="ga-field">
-                <Text className="ga-label">Verification code</Text>
+                <Text className="ga-label">{t("verify.label")}</Text>
                 <TextInput
                   className="ga-input ga-input-code"
                   value={code}
@@ -208,7 +230,7 @@ const ForgotPassword = () => {
 
             {step === "password" ? (
               <View className="ga-field">
-                <Text className="ga-label">New password</Text>
+                <Text className="ga-label">{t("reset.newPassword")}</Text>
                 <TextInput
                   className={`ga-input ${passwordTouched && !passwordValid ? "ga-input-error" : ""}`}
                   value={password}
@@ -221,9 +243,7 @@ const ForgotPassword = () => {
                   autoFocus
                 />
                 {passwordTouched && !passwordValid ? (
-                  <Text className="ga-error">
-                    Use at least 8 characters, and avoid common passwords
-                  </Text>
+                  <Text className="ga-error">{t("auth.passwordTooShort")}</Text>
                 ) : null}
               </View>
             ) : null}
@@ -239,7 +259,7 @@ const ForgotPassword = () => {
                 disabled={!isEmailLike(email) || isSubmitting}
               >
                 <Text className="ga-btn-text">
-                  {isSubmitting ? "Sending…" : "Send reset code"}
+                  {isSubmitting ? t("reset.sending") : t("reset.send")}
                 </Text>
               </Pressable>
             ) : null}
@@ -252,7 +272,7 @@ const ForgotPassword = () => {
                   disabled={code.length !== 6 || isSubmitting}
                 >
                   <Text className="ga-btn-text">
-                    {isSubmitting ? "Verifying…" : "Continue"}
+                    {isSubmitting ? t("verify.submitting") : t("reset.continue")}
                   </Text>
                 </Pressable>
                 <Pressable
@@ -260,7 +280,7 @@ const ForgotPassword = () => {
                   onPress={handleRequestCode}
                   disabled={isSubmitting}
                 >
-                  <Text className="ga-btn-outline-text">Resend code</Text>
+                  <Text className="ga-btn-outline-text">{t("verify.resend")}</Text>
                 </Pressable>
               </>
             ) : null}
@@ -272,7 +292,7 @@ const ForgotPassword = () => {
                 disabled={!passwordValid || isSubmitting}
               >
                 <Text className="ga-btn-text">
-                  {isSubmitting ? "Saving…" : "Save and sign in"}
+                  {isSubmitting ? t("reset.saving") : t("reset.save")}
                 </Text>
               </Pressable>
             ) : null}
@@ -282,13 +302,21 @@ const ForgotPassword = () => {
               onPress={() => router.replace(SIGN_IN_ROUTE)}
             >
               <View className="ga-divider-line" />
-              <Text className="ga-divider-text">Back to sign in</Text>
+              <Text className="ga-divider-text">{t("reset.backToSignIn")}</Text>
               <View className="ga-divider-line" />
             </Pressable>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+      </SafeAreaView>
+
+      {/*
+       * Outside both the ScrollView (or it scrolls away) and the SafeAreaView
+       * (or the top inset is applied twice, pushing it down the screen).
+       * It positions itself off the live inset instead.
+       */}
+      <LanguageToggle floating />
+    </View>
   );
 };
 

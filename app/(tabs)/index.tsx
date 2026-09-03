@@ -1,10 +1,12 @@
 import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
+import LanguageToggle from "@/components/LanguageToggle";
 import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import { HOME_BALANCE, UPCOMING_SUBSCRIPTIONS } from "@/constants/data";
 import { icons } from "@/constants/icons";
 import images from "@/constants/images";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscriptions } from "@/contexts/SubscriptionContext";
 import "@/global.css";
 import { formatCurrency } from "@/lib/utils";
@@ -18,6 +20,7 @@ const SafeAreaView = styled(RNSafeAreaView);
 
 export default function App() {
   const { user } = useUser();
+  const { t } = useLanguage();
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<
     string | null
   >(null);
@@ -33,38 +36,45 @@ export default function App() {
 
   return (
     <SafeAreaView className="flex-1 bg-background p-5">
+      {/*
+       * Outside the FlatList on purpose — as part of ListHeaderComponent this
+       * row (and the language toggle in it) scrolled away with the list.
+       */}
+      <View className="home-header">
+        <View className="home-user">
+          <Image
+            source={
+              user?.imageUrl ? { uri: user.imageUrl } : images.AVATAR
+            }
+            className="home-avatar"
+          />
+          <Text
+            className="home-user-name"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {displayName}
+          </Text>
+        </View>
+
+        <View className="flex-row items-center gap-3">
+          <LanguageToggle />
+          <Pressable
+            accessibilityLabel={t("home.addSubscription")}
+            onPress={() => setIsCreateModalVisible(true)}
+            hitSlop={8}
+            className="home-add-button"
+          >
+            <Image source={icons.add} className="home-add-icon" />
+          </Pressable>
+        </View>
+      </View>
+
       <FlatList
         ListHeaderComponent={() => (
           <>
-            <View className="home-header">
-              <View className="home-user">
-                <Image
-                  source={
-                    user?.imageUrl ? { uri: user.imageUrl } : images.AVATAR
-                  }
-                  className="home-avatar"
-                />
-                <Text
-                  className="home-user-name"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {displayName}
-                </Text>
-              </View>
-
-              <Pressable
-                accessibilityLabel="Add subscription"
-                onPress={() => setIsCreateModalVisible(true)}
-                hitSlop={8}
-                className="home-add-button"
-              >
-                <Image source={icons.add} className="home-add-icon" />
-              </Pressable>
-            </View>
-
             <View className="home-balance-card">
-              <Text className="home-balance-label">Balance</Text>
+              <Text className="home-balance-label">{t("home.balance")}</Text>
 
               <View className="home-balance-row">
                 <Text className="home-balance-amount">
@@ -77,7 +87,7 @@ export default function App() {
             </View>
 
             <View className="mb-5">
-              <ListHeading title="Upcoming" />
+              <ListHeading title={t("home.upcoming")} />
 
               <FlatList
                 data={UPCOMING_SUBSCRIPTIONS}
@@ -88,14 +98,12 @@ export default function App() {
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 ListEmptyComponent={
-                  <Text className="home-empty-state">
-                    No upcoming renewals yet.
-                  </Text>
+<Text className="home-empty-state">{t("home.noUpcoming")}</Text>
                 }
               />
             </View>
 
-            <ListHeading title="All Subscriptions" />
+            <ListHeading title={t("home.allSubscriptions")} />
           </>
         )}
         data={subscriptions}
@@ -115,7 +123,7 @@ export default function App() {
         ItemSeparatorComponent={() => <View className="h-4" />}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <Text className="home-empty-state">No subscriptions yet.</Text>
+          <Text className="home-empty-state">{t("home.noSubscriptions")}</Text>
         }
         contentContainerClassName="pb-30"
       />

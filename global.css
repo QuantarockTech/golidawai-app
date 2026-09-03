@@ -64,6 +64,14 @@
   --font-ui-semibold: Poppins_600SemiBold;
   --font-body: Roboto_400Regular;
   --font-body-medium: Roboto_500Medium;
+
+  /*
+   * Devanagari stack. Raleway, Roboto and Plus Jakarta Sans ship zero
+   * Devanagari glyphs, so Hindi text in them renders as tofu on Android.
+   * Poppins covers both scripts, so Hindi swaps the whole stack to it.
+   */
+  --font-deva-heading: Poppins_700Bold;
+  --font-deva-body: Poppins_400Regular;
 }
 
 @layer components {
@@ -496,7 +504,7 @@
  * small screen.
  */
 .ga-content {
-  @apply grow w-full max-w-[440px] self-center px-5 pb-10 pt-2 md:justify-center md:py-10;
+  @apply grow w-full max-w-[440px] self-center px-5 pb-2 pt-2 md:justify-center md:py-10;
 }
 
 .ga-topbar {
@@ -511,8 +519,37 @@
   @apply items-center pb-5 pt-3;
 }
 
+/*
+ * Brand lockup + title, held above the scroll area so only the form moves.
+ * Carries ga-content's width and centring itself, since it now sits outside it.
+ *
+ * The hairline matters: header and form share the mist background, so without
+ * it a field clipped at the scroll boundary reads as a rendering glitch rather
+ * than as content passing under a fixed header.
+ */
+.ga-fixed-header {
+  @apply w-full self-center items-center border-b border-hairline-soft px-5 pb-2 pt-2;
+}
+
+/*
+ * Keeps header rows on the same 440px column as the form below them. The top
+ * margin replaces the padding ga-header used to contribute — without it the
+ * row butts straight up against the subtitle.
+ */
+.ga-fixed-header-row {
+  @apply mt-4 w-full max-w-[440px] self-center;
+}
+
+/*
+ * Pinned submit area. Mirrors the header's hairline so the scroll region reads
+ * as bounded top and bottom rather than as content clipped at random.
+ */
+.ga-fixed-footer {
+  @apply w-full max-w-[440px] self-center border-t border-hairline-soft px-5 pb-4 pt-2;
+}
+
 .ga-title {
-  @apply mt-3 text-center text-[26px] leading-[32px] font-heading text-ink;
+  @apply mt-2 text-center text-[26px] leading-[32px] font-heading text-ink;
 }
 
 .ga-subtitle {
@@ -524,7 +561,7 @@
  * mist screen a white-on-mist pill is ~3% contrast and reads as unselected.
  */
 .ga-toggle {
-  @apply mb-5 flex-row rounded-2xl border border-hairline-soft bg-brand/10 p-1;
+  @apply mb-3 w-full flex-row rounded-2xl border border-hairline-soft bg-brand/10 p-1;
 }
 
 .ga-toggle-item {
@@ -544,7 +581,7 @@
 }
 
 .ga-field {
-  @apply mb-3.5 gap-1.5;
+  @apply mb-2.5 gap-1;
 }
 
 .ga-label {
@@ -552,7 +589,7 @@
 }
 
 .ga-input {
-  @apply rounded-2xl border border-hairline bg-white px-4 py-3.5 text-[15px] font-body text-ink;
+  @apply rounded-2xl border border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
 }
 
 .ga-input-error {
@@ -573,10 +610,6 @@
 
 .ga-forgot {
   @apply mb-3 -mt-1 text-right text-[13px] font-ui text-brand-dark;
-}
-
-.ga-consent {
-  @apply mb-3 text-center text-[12px] leading-[16px] font-body text-ink-faint;
 }
 
 .ga-btn {
@@ -625,4 +658,120 @@
 
 .ga-social-text {
   @apply text-[14px] font-ui text-ink;
+}
+
+/*
+ * Splash / Welcome (concept board frame 01). Unlayered for the same
+ * react-native-web reason as the auth block above.
+ *
+ * The deep-teal gradient itself lives on <LinearGradient> rather than in CSS:
+ * background-image never reaches native, so the hero would flatten to nothing
+ * there. These classes cover everything stacked on top of it.
+ */
+.ga-hero {
+  @apply flex-1 items-center justify-center px-6;
+}
+
+/*
+ * EN/हिं switch. Two tones, both straight from the board: "dark" for the teal
+ * hero, "on-light" for every mist/cream screen behind it.
+ */
+.ga-lang {
+  @apply flex-row items-center rounded-full bg-white/15 p-0.5;
+}
+
+/*
+ * Pinned to the top-right corner. Must be rendered as a sibling of the
+ * ScrollView/FlatList, never inside it, or it scrolls away with the content.
+ * z-20 keeps it above the list as that list scrolls underneath.
+ *
+ * No `top` here: the app is edge-to-edge on Android, so the vertical offset
+ * comes from the live safe-area inset in LanguageToggle, not a fixed value —
+ * otherwise it sits under the status bar / notch.
+ */
+.ga-lang-floating {
+  @apply absolute right-4 z-20;
+}
+
+.ga-lang-on-light {
+  @apply border border-hairline-soft bg-mist;
+}
+
+.ga-lang-item {
+  @apply rounded-full px-2 py-1;
+}
+
+.ga-lang-item-active {
+  @apply bg-white;
+}
+
+.ga-lang-item-active-on-light {
+  @apply bg-brand;
+}
+
+/*
+ * No font-family here on purpose. Poppins ships Latin only, and the हिं label
+ * has no Devanagari to fall back to — the browser substitutes silently, but RN
+ * on Android draws tofu. Leaving it unset lets each platform pick a font that
+ * actually covers the script; the Latin "EN" opts back in below.
+ */
+.ga-lang-text {
+  @apply text-[11px] leading-[17px] text-white/65;
+}
+
+.ga-lang-text-latin {
+  @apply font-ui-semibold;
+}
+
+.ga-lang-text-active {
+  @apply text-brand-dark;
+}
+
+.ga-lang-text-on-light {
+  @apply text-ink-muted;
+}
+
+.ga-lang-text-active-on-light {
+  @apply text-brand-ink;
+}
+
+.ga-hero-wordmark {
+  @apply mt-5 text-[28px] leading-[34px] font-heading text-white;
+}
+
+/* Board pairs the Hindi line in brand-light and the English one in faded white. */
+.ga-hero-tagline-hi {
+  @apply mt-2 text-center text-[14px] font-ui text-[#a9e6e4];
+}
+
+.ga-hero-tagline-en {
+  @apply mt-1 text-center text-[14px] font-body text-white/70;
+}
+
+.ga-hero-btn {
+  @apply mt-8 w-[180px] flex-row items-center justify-center rounded-xl bg-brand py-3.5;
+}
+
+.ga-hero-btn-text {
+  @apply text-[15px] font-ui-semibold text-brand-ink;
+}
+
+/*
+ * Devanagari overrides. Applied alongside the base class when Hindi is active
+ * — only where the base uses a Latin-only face (Raleway/Roboto/Jakarta).
+ * Anything already on Poppins covers both scripts and needs nothing here.
+ *
+ * Devanagari sits taller than Latin (matras above, conjuncts below), so these
+ * also relax the line-height the Latin sizes were tuned to.
+ */
+.deva-title {
+  @apply font-deva-heading leading-[38px];
+}
+
+.deva-body {
+  @apply font-deva-body leading-[22px];
+}
+
+.deva-tagline {
+  @apply font-deva-body leading-[22px];
 }

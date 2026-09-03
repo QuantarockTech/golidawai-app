@@ -1,4 +1,5 @@
 import { useAuth, useSignUp } from "@clerk/clerk-expo";
+import clsx from "clsx";
 import { useRouter, type Href } from "expo-router";
 import { usePostHog } from "posthog-react-native";
 import { useState } from "react";
@@ -16,7 +17,10 @@ import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 import AuthToggle from "@/components/AuthToggle";
 import BrandMark from "@/components/BrandMark";
+import LanguageToggle from "@/components/LanguageToggle";
 import VerifyCodeStep from "@/components/VerifyCodeStep";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useKeyboardVisible } from "@/lib/useKeyboardVisible";
 import {
   isEmailLike,
   isPhoneLike,
@@ -35,6 +39,8 @@ const HOME_ROUTE = "/(tabs)" as Href;
 const SignUp = () => {
   const { signUp, isLoaded, setActive } = useSignUp();
   const { isSignedIn } = useAuth();
+  const { t, isHindi } = useLanguage();
+  const keyboardVisible = useKeyboardVisible();
   const posthog = usePostHog();
   const router = useRouter();
 
@@ -93,7 +99,7 @@ const SignUp = () => {
       setCode("");
       setAwaitingCode(true);
     } catch (error) {
-      setErrorMessage(readErrorMessage(error, "Unable to create account"));
+      setErrorMessage(readErrorMessage(error, t("signUp.failed")));
     } finally {
       setIsSubmitting(false);
     }
@@ -109,9 +115,14 @@ const SignUp = () => {
 
       if (result.status === "complete" && result.createdSessionId) {
         await finish(result.createdSessionId);
+        return;
       }
+
+      // Email is the only verification step on this instance, so anything other
+      // than a complete sign-up means a required field is still missing.
+      setErrorMessage(t("signUp.incomplete"));
     } catch (error) {
-      setErrorMessage(readErrorMessage(error, "That code didn't work"));
+      setErrorMessage(readErrorMessage(error, t("verify.badCode")));
     } finally {
       setIsSubmitting(false);
     }
@@ -122,7 +133,7 @@ const SignUp = () => {
     try {
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
     } catch (error) {
-      setErrorMessage(readErrorMessage(error, "Unable to resend the code"));
+      setErrorMessage(readErrorMessage(error, t("signUp.resendFailed")));
     }
   };
 
@@ -133,9 +144,9 @@ const SignUp = () => {
   if (awaitingCode) {
     return (
       <VerifyCodeStep
-        title="Verify your email"
-        subtitle={`We sent a 6-digit code to ${email.trim().toLowerCase()}.`}
-        backLabel="Use a different email"
+        title={t("signUp.verifyTitle")}
+        subtitle={t("verify.sentTo", { email: email.trim().toLowerCase() })}
+        backLabel={t("signUp.useDifferentEmail")}
         code={code}
         onChangeCode={setCode}
         onVerify={handleVerify}
@@ -147,37 +158,52 @@ const SignUp = () => {
         }}
         isSubmitting={isSubmitting}
         errorMessage={errorMessage}
-        verifyLabel="Create Account"
+        verifyLabel={t("signUp.submit")}
       />
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-mist">
+    <View className="flex-1 bg-mist">
+      <SafeAreaView className="flex-1">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
+        {/*
+         * Held outside the ScrollView so the brand lockup and title stay put
+         * while only the form scrolls.
+         */}
+        <View className="ga-fixed-header">
+          {/* Reclaims ~130px for the fields while the keyboard is up. */}
+          {!keyboardVisible ? <BrandMark variant="full" size={92} /> : null}
+          <Text className={clsx("ga-title", isHindi && "deva-title")}>
+            {t("signUp.title")}
+          </Text>
+          {!keyboardVisible ? (
+            <Text className={clsx("ga-subtitle", isHindi && "deva-body")}>
+              {t("signUp.subtitle")}
+            </Text>
+          ) : null}
+
+          {/* Pinned with the header so switching flows never needs a scroll. */}
+          <View className="ga-fixed-header-row">
+            <AuthToggle active="sign-up" />
+          </View>
+        </View>
+
         <ScrollView
           className="flex-1"
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           <View className="ga-content">
-            <View className="ga-header">
-              <BrandMark variant="full" size={92} />
-              <Text className="ga-title">Create account</Text>
-              <Text className="ga-subtitle">Takes less than a minute.</Text>
-            </View>
-
-            <AuthToggle active="sign-up" />
-
             <View className="ga-field">
-              <Text className="ga-label">Full name</Text>
+              <Text className="ga-label">{t("signUp.fullName")}</Text>
               <TextInput
                 className={`ga-input ${nameTouched && !nameValid ? "ga-input-error" : ""}`}
                 value={fullName}
-                placeholder="Aditi Sharma"
+                placeholder={t("signUp.fullNamePlaceholder")}
                 placeholderTextColor="#8fa3a1"
                 onChangeText={setFullName}
                 onBlur={() => setNameTouched(true)}
@@ -185,16 +211,16 @@ const SignUp = () => {
                 autoComplete="name"
               />
               {nameTouched && !nameValid ? (
-                <Text className="ga-error">Please enter your name</Text>
+                <Text className="ga-error">{t("signUp.nameRequired")}</Text>
               ) : null}
             </View>
 
             <View className="ga-field">
-              <Text className="ga-label">Mobile number</Text>
+              <Text className="ga-label">{t("signUp.mobile")}</Text>
               <TextInput
                 className={`ga-input ${phoneTouched && !phoneValid ? "ga-input-error" : ""}`}
                 value={phone}
-                placeholder="98765 43210"
+                placeholder={t("signUp.mobilePlaceholder")}
                 placeholderTextColor="#8fa3a1"
                 onChangeText={setPhone}
                 onBlur={() => setPhoneTouched(true)}
@@ -202,16 +228,16 @@ const SignUp = () => {
                 autoComplete="tel"
               />
               {phoneTouched && !phoneValid ? (
-                <Text className="ga-error">Enter a valid mobile number</Text>
+                <Text className="ga-error">{t("signUp.invalidMobile")}</Text>
               ) : null}
             </View>
 
             <View className="ga-field">
-              <Text className="ga-label">Email address</Text>
+              <Text className="ga-label">{t("auth.email")}</Text>
               <TextInput
                 className={`ga-input ${emailTouched && !emailValid ? "ga-input-error" : ""}`}
                 value={email}
-                placeholder="aditi@email.com"
+                placeholder={t("auth.emailPlaceholder")}
                 placeholderTextColor="#8fa3a1"
                 onChangeText={setEmail}
                 onBlur={() => setEmailTouched(true)}
@@ -221,14 +247,12 @@ const SignUp = () => {
                 autoComplete="email"
               />
               {emailTouched && !emailValid ? (
-                <Text className="ga-error">
-                  Please enter a valid email address
-                </Text>
+                <Text className="ga-error">{t("auth.invalidEmail")}</Text>
               ) : null}
             </View>
 
             <View className="ga-field">
-              <Text className="ga-label">Password</Text>
+              <Text className="ga-label">{t("auth.password")}</Text>
               <TextInput
                 className={`ga-input ${passwordTouched && !passwordValid ? "ga-input-error" : ""}`}
                 value={password}
@@ -240,36 +264,46 @@ const SignUp = () => {
                 autoComplete="new-password"
               />
               {passwordTouched && !passwordValid ? (
-                <Text className="ga-error">
-                  Use at least 8 characters, and avoid common passwords
-                </Text>
+                <Text className="ga-error">{t("auth.passwordTooShort")}</Text>
               ) : null}
             </View>
 
-            <Text className="ga-consent">
-              By continuing you agree to our Terms &amp; Privacy Policy.
-            </Text>
-
-            {errorMessage ? (
-              <Text className="ga-error mb-3">{errorMessage}</Text>
-            ) : null}
-
-            <Pressable
-              className={`ga-btn ${!formValid || isSubmitting ? "ga-btn-disabled" : ""}`}
-              onPress={handleSubmit}
-              disabled={!formValid || isSubmitting}
-            >
-              <Text className="ga-btn-text">
-                {isSubmitting ? "Creating account…" : "Create Account"}
-              </Text>
-            </Pressable>
-
-            {/* Required for Clerk's bot protection */}
-            <View nativeID="clerk-captcha" />
           </View>
         </ScrollView>
+
+        {/*
+         * Pinned footer: the submit button shouldn't need hunting for. The
+         * error travels with it — an error the user has to scroll to find is
+         * an error that looks like a dead button.
+         */}
+        <View className="ga-fixed-footer">
+          {errorMessage ? (
+            <Text className="ga-error mb-3">{errorMessage}</Text>
+          ) : null}
+
+          <Pressable
+            className={`ga-btn ${!formValid || isSubmitting ? "ga-btn-disabled" : ""}`}
+            onPress={handleSubmit}
+            disabled={!formValid || isSubmitting}
+          >
+            <Text className="ga-btn-text">
+              {isSubmitting ? t("signUp.submitting") : t("signUp.submit")}
+            </Text>
+          </Pressable>
+
+          {/* Required for Clerk's bot protection */}
+          <View nativeID="clerk-captcha" />
+        </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+      </SafeAreaView>
+
+      {/*
+       * Outside both the ScrollView (or it scrolls away) and the SafeAreaView
+       * (or the top inset is applied twice, pushing it down the screen).
+       * It positions itself off the live inset instead.
+       */}
+      <LanguageToggle floating />
+    </View>
   );
 };
 
