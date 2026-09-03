@@ -25,3 +25,20 @@ export const formatStatusLabel = (value?: string): string => {
   if (!value) return "Unknown";
   return value.charAt(0).toUpperCase() + value.slice(1);
 };
+
+/**
+ * Rupees, the way a price is written on an Indian pharmacy label: no decimals
+ * and lakh/crore grouping. Kept separate from formatCurrency, which is USD and
+ * two-decimal for the subscription screens.
+ */
+export const formatRupees = (value: number): string => {
+  try {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch {
+    return `₹${Math.round(value)}`;
+  }
+};

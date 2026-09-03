@@ -53,6 +53,31 @@ declare global {
   interface ListHeadingProps {
     title: string;
   }
+
+  /** Home dashboard — concept board frame 04. */
+  type QuickActionKey =
+    | "uploadRx"
+    | "orderMedicine"
+    | "ambulance"
+    | "doctorConsult"
+    | "labTests"
+    | "insurance";
+
+  interface QuickAction {
+    key: QuickActionKey;
+    /** MaterialCommunityIcons glyph name. */
+    icon: string;
+    /** "emergency" is reserved for Ambulance — the board uses red nowhere else. */
+    tone: "brand" | "emergency";
+  }
+
+  interface ReorderItem {
+    id: string;
+    name: string;
+    /** Tablets per strip; the label itself is translated, not stored. */
+    tabletsPerStrip: number;
+    price: number;
+  }
 }
 
 export { };

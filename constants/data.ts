@@ -105,3 +105,32 @@ export const HOME_SUBSCRIPTIONS: Subscription[] = [
     color: "#b8e8d0",
   },
 ];
+
+/*
+ * Home dashboard content — concept board frame 04.
+ *
+ * Placeholder, exactly like HOME_SUBSCRIPTIONS above: there is no backend yet,
+ * so these are the board's own sample values. Labels live in the translation
+ * dictionary rather than here, so the list works in both languages.
+ */
+export const QUICK_ACTIONS: QuickAction[] = [
+  { key: "uploadRx", icon: "camera-outline", tone: "brand" },
+  { key: "orderMedicine", icon: "pill", tone: "brand" },
+  // The board uses emergency red here and nowhere else, so it is instantly
+  // recognisable as the one urgent action on the screen.
+  { key: "ambulance", icon: "ambulance", tone: "emergency" },
+  { key: "doctorConsult", icon: "heart-pulse", tone: "brand" },
+  { key: "labTests", icon: "file-document-outline", tone: "brand" },
+  { key: "insurance", icon: "shield-check-outline", tone: "brand" },
+];
+
+export const REORDER_ITEMS: ReorderItem[] = [
+  { id: "dolo-650", name: "Dolo 650", tabletsPerStrip: 15, price: 32 },
+  { id: "shelcal-500", name: "Shelcal 500", tabletsPerStrip: 15, price: 118 },
+];
+
+/** Pharmacy line the "Call to order" banner dials. Placeholder until confirmed. */
+export const PHARMACY_PHONE = "+911234567890";
+
+/** WhatsApp ordering line behind the floating button. Placeholder. */
+export const WHATSAPP_NUMBER = "911234567890";

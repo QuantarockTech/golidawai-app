@@ -1,20 +1,23 @@
+import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
 import LanguageToggle from "@/components/LanguageToggle";
 import SubscriptionCard from "@/components/SubscriptionCard";
+import { icons } from "@/constants/icons";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscriptions } from "@/contexts/SubscriptionContext";
 import { styled } from "nativewind";
 import React, { useState } from "react";
-import { FlatList, Pressable, Text, TextInput, View } from "react-native";
+import { FlatList, Image, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 const SafeAreaView = styled(RNSafeAreaView);
 
 const Subscriptions = () => {
-  const { subscriptions } = useSubscriptions();
+  const { subscriptions, addSubscription } = useSubscriptions();
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<
     string | null
   >(null);
+  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const filteredSubscriptions = subscriptions.filter((subscription) => {
@@ -49,7 +52,21 @@ const Subscriptions = () => {
             {t("subs.subtitle")}
           </Text>
         </View>
-        <LanguageToggle />
+        <View className="flex-row items-center gap-2">
+          <LanguageToggle />
+          {/*
+           * Moved here when the dashboard replaced the old Home screen, which
+           * was previously the only way to create a subscription.
+           */}
+          <Pressable
+            accessibilityLabel={t("home.addSubscription")}
+            onPress={() => setIsCreateModalVisible(true)}
+            hitSlop={8}
+            className="size-10 items-center justify-center"
+          >
+            <Image source={icons.add} className="size-10" />
+          </Pressable>
+        </View>
       </View>
 
       <FlatList
@@ -114,6 +131,11 @@ const Subscriptions = () => {
             </Text>
           </View>
         }
+      />
+      <CreateSubscriptionModal
+        visible={isCreateModalVisible}
+        onClose={() => setIsCreateModalVisible(false)}
+        onCreate={addSubscription}
       />
     </SafeAreaView>
   );

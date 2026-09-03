@@ -75,22 +75,6 @@
 }
 
 @layer components {
-  .tabs-icon {
-    @apply size-12 items-center justify-center;
-  }
-
-  .tabs-pill {
-    @apply size-12 items-center justify-center rounded-full bg-transparent;
-  }
-
-  .tabs-active {
-    @apply bg-accent;
-  }
-
-  .tabs-glyph {
-    @apply size-6;
-  }
-
   .home-header {
     @apply mb-2.5 flex-row items-center justify-between;
   }
@@ -780,4 +764,162 @@
 
 .deva-tagline {
   @apply font-deva-body leading-[22px];
+}
+
+/*
+ * Home dashboard — concept board frame 04.
+ *
+ * Unlayered for the same react-native-web reason as the auth block above.
+ * The board draws a 254px-wide mockup, so its px are not literal: sizes here
+ * are scaled to a real handset while keeping the board's proportions, radii
+ * and palette.
+ */
+.gd-screen {
+  @apply flex-1 bg-mist;
+}
+
+.gd-scroll-content {
+  @apply w-full max-w-[440px] self-center px-5 pb-28 pt-1;
+}
+
+/* Greeting row */
+.gd-greet-row {
+  @apply flex-row items-center gap-3 pb-4 pt-1;
+}
+
+.gd-avatar {
+  @apply size-14 items-center justify-center rounded-full bg-brand-dark;
+}
+
+.gd-avatar-text {
+  @apply text-[18px] font-heading text-white;
+}
+
+.gd-greet-hello {
+  @apply text-[12px] font-body text-ink-muted;
+}
+
+.gd-greet-name {
+  @apply text-[16px] font-ui-semibold text-ink;
+}
+
+.gd-icon-btn {
+  @apply size-9 items-center justify-center rounded-full;
+}
+
+/* Search */
+.gd-search {
+  @apply mb-4 flex-row items-center gap-2 rounded-2xl border border-hairline bg-white px-4 py-3;
+}
+
+.gd-search-text {
+  @apply flex-1 text-[14px] font-body text-ink-faint;
+}
+
+/* Promo */
+.gd-promo {
+  @apply mb-1 rounded-2xl px-4 py-4;
+}
+
+.gd-promo-title {
+  @apply text-[17px] font-heading text-white;
+}
+
+.gd-promo-body {
+  @apply mt-1 text-[13px] font-body text-white/90;
+}
+
+/* Section heading */
+.gd-section-title {
+  @apply mb-3 mt-6 text-[12px] uppercase tracking-[0.08em] font-ui-semibold text-ink-muted;
+}
+
+/* Quick actions — 3 across, matching the board's grid */
+.gd-grid {
+  @apply flex-row flex-wrap justify-between gap-y-3;
+}
+
+.gd-tile {
+  @apply w-[31%] items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-2 py-3;
+}
+
+.gd-tile-icon {
+  @apply size-10 items-center justify-center rounded-xl bg-brand/12;
+}
+
+.gd-tile-icon-emergency {
+  @apply bg-emergency/10;
+}
+
+/*
+ * Fixed to two lines. Labels differ in length ("Order Medicine" wraps, "Lab
+ * Tests" does not) and Devanagari is taller than Latin, so without this the
+ * grid rows come out at different heights. 34px fits two lines in both scripts.
+ */
+.gd-tile-label {
+  @apply h-[34px] text-center text-[12px] leading-[16px] font-ui text-ink;
+}
+
+/* Call to order */
+.gd-call {
+  @apply flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+}
+
+.gd-call-icon {
+  @apply size-10 items-center justify-center rounded-xl bg-brand/12;
+}
+
+.gd-call-title {
+  @apply text-[14px] font-ui-semibold text-ink;
+}
+
+.gd-call-body {
+  @apply mt-0.5 text-[12px] font-body text-ink-muted;
+}
+
+.gd-call-cta {
+  @apply rounded-full border border-brand px-3 py-1.5;
+}
+
+.gd-call-cta-text {
+  @apply text-[12px] font-ui-semibold text-brand-dark;
+}
+
+/* Reorder list */
+.gd-med-card {
+  @apply rounded-2xl border border-hairline-soft bg-white px-4;
+}
+
+.gd-med-row {
+  @apply flex-row items-center gap-3 py-3;
+}
+
+.gd-med-divider {
+  @apply border-t border-hairline-soft;
+}
+
+.gd-med-thumb {
+  @apply size-11 items-center justify-center rounded-xl bg-mist;
+}
+
+.gd-med-name {
+  @apply text-[15px] font-ui-semibold text-ink;
+}
+
+.gd-med-sub {
+  @apply mt-0.5 text-[12px] font-body text-ink-muted;
+}
+
+.gd-med-price {
+  @apply text-[14px] font-ui-semibold text-ink;
+}
+
+.gd-med-add {
+  @apply size-8 items-center justify-center rounded-lg bg-brand;
+}
+
+/* Floating WhatsApp button — sits clear of the tab bar */
+.gd-fab {
+  @apply absolute right-5 size-14 items-center justify-center rounded-full;
+  box-shadow: 0 8px 18px rgba(37, 211, 102, 0.45);
 }
