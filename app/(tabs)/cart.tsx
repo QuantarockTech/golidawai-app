@@ -44,7 +44,7 @@ export default function Cart() {
         </View>
 
         {lines.length === 0 ? (
-          <View className="flex-1 items-center justify-center px-8">
+          <View className="gd-empty-screen">
             <MaterialCommunityIcons
               name="cart-outline"
               size={44}

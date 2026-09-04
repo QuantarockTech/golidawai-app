@@ -30,7 +30,7 @@ export default function OrderDetail() {
       <View className="gd-screen">
         <SafeAreaView className="flex-1" edges={["top"]}>
           <ScreenHeader title={t("orders.title")} />
-          <View className="flex-1 items-center justify-center px-8">
+          <View className="gd-empty-screen">
             <Text className="gd-empty-text">{t("orders.empty")}</Text>
           </View>
         </SafeAreaView>

@@ -29,7 +29,7 @@ export default function Orders() {
         </View>
 
         {orders.length === 0 ? (
-          <View className="flex-1 items-center justify-center px-8">
+          <View className="gd-empty-screen">
             <MaterialCommunityIcons
               name="file-document-outline"
               size={44}

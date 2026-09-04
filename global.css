@@ -961,6 +961,17 @@
   @apply text-[15px] font-ui-semibold text-ink;
 }
 
+/*
+ * Whole-screen empty state (no orders, empty cart, missing order).
+ *
+ * Carries the same width cap as `.gd-scroll-content`, without which the
+ * content and its call-to-action stretch the full width of a desktop window
+ * while every other screen stays in its column.
+ */
+.gd-empty-screen {
+  @apply w-full max-w-[440px] flex-1 items-center justify-center self-center px-8;
+}
+
 /* Empty state when a search matches nothing */
 .gd-empty {
   @apply items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-4 py-8;
