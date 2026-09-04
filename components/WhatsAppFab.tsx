@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WHATSAPP_NUMBER } from "@/constants/data";
 import { colors, components } from "@/constants/theme";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { pressSmall } from "@/lib/press";
 
 /** Clears the floating tab bar rather than sitting on top of it. */
 const GAP_ABOVE_TAB_BAR = 16;
@@ -24,11 +25,13 @@ const WhatsAppFab = () => {
   return (
     <Pressable
       className="gd-fab"
-      style={{
-        backgroundColor: colors.whatsapp,
-        bottom:
-          insets.bottom + components.tabBar.height + GAP_ABOVE_TAB_BAR,
-      }}
+      style={(state) => [
+        {
+          backgroundColor: colors.whatsapp,
+          bottom: insets.bottom + components.tabBar.height + GAP_ABOVE_TAB_BAR,
+        },
+        pressSmall(state),
+      ]}
       onPress={open}
       accessibilityRole="button"
       accessibilityLabel={t("home.whatsapp")}

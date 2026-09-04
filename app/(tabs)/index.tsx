@@ -2,8 +2,17 @@ import { useUser } from "@clerk/clerk-expo";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import dayjs from "dayjs";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter, type Href } from "expo-router";
 import { styled } from "nativewind";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { useMemo, useState } from "react";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 import CallToOrderBanner from "@/components/CallToOrderBanner";
@@ -13,9 +22,12 @@ import ReorderList from "@/components/ReorderList";
 import WhatsAppFab from "@/components/WhatsAppFab";
 import { QUICK_ACTIONS, REORDER_ITEMS } from "@/constants/data";
 import { colors } from "@/constants/theme";
+import { useCart } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import "@/global.css";
 import type { TranslationKey } from "@/lib/i18n/translations";
+import { pressRow, pressSmall } from "@/lib/press";
+import { formatRupees } from "@/lib/utils";
 
 // NativeWind only auto-handles React Native's own components; third-party ones
 // need styled() or their className is dropped on native.
@@ -44,6 +56,40 @@ const greetingKey = (hour: number): TranslationKey => {
 export default function Home() {
   const { user } = useUser();
   const { t } = useLanguage();
+  const { itemCount, total } = useCart();
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+
+  const results = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return REORDER_ITEMS;
+    return REORDER_ITEMS.filter((item) =>
+      item.name.toLowerCase().includes(needle),
+    );
+  }, [query]);
+
+  /** Anything with no screen of its own yet, e.g. notifications. */
+  const comingSoon = (feature: string) => {
+    Alert.alert(
+      t("home.comingSoonTitle"),
+      t("home.comingSoonBody", { feature }),
+      [{ text: t("common.ok") }],
+    );
+  };
+
+  /*
+   * Board frames 05-07 have their own screens. Doctor Consult, Lab Tests and
+   * Insurance have no board design, so they share one callback screen keyed by
+   * route param rather than three invented flows.
+   */
+  const QUICK_ACTION_ROUTES: Record<QuickActionKey, Href> = {
+    uploadRx: "/upload-prescription",
+    orderMedicine: "/order-medicines",
+    ambulance: "/ambulance",
+    doctorConsult: "/service/doctorConsult",
+    labTests: "/service/labTests",
+    insurance: "/service/insurance",
+  };
 
   const displayName =
     user?.firstName ||
@@ -78,6 +124,8 @@ export default function Home() {
 
             <Pressable
               className="gd-icon-btn"
+              style={pressSmall}
+              onPress={() => comingSoon(t("home.notifications"))}
               accessibilityRole="button"
               accessibilityLabel={t("home.notifications")}
               hitSlop={6}
@@ -91,20 +139,43 @@ export default function Home() {
           </View>
 
           {/*
-           * Deliberately a Pressable, not a TextInput: search has no backend to
-           * query yet, and a field that takes focus and returns nothing reads
-           * as broken. This navigates once the search screen exists.
+           * Filters the medicine list below as you type. No backend needed —
+           * it searches what's already on the screen, which is honest and
+           * immediately useful, and becomes a server query later.
            */}
-          <Pressable className="gd-search" accessibilityRole="search">
+          <View className="gd-search">
             <MaterialCommunityIcons
               name="magnify"
               size={18}
               color={colors.inkFaint}
             />
-            <Text className="gd-search-text" numberOfLines={1}>
-              {t("home.searchPlaceholder")}
-            </Text>
-          </Pressable>
+            <TextInput
+              className="gd-search-input"
+              value={query}
+              onChangeText={setQuery}
+              placeholder={t("home.searchPlaceholder")}
+              placeholderTextColor={colors.inkFaint}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+              accessibilityLabel={t("home.searchPlaceholder")}
+            />
+            {query.length > 0 ? (
+              <Pressable
+                style={pressSmall}
+                onPress={() => setQuery("")}
+                accessibilityRole="button"
+                accessibilityLabel={t("home.clearSearch")}
+                hitSlop={8}
+              >
+                <MaterialCommunityIcons
+                  name="close-circle"
+                  size={18}
+                  color={colors.inkFaint}
+                />
+              </Pressable>
+            ) : null}
+          </View>
 
           <LinearGradient
             colors={PROMO_GRADIENT}
@@ -124,9 +195,7 @@ export default function Home() {
                 icon={action.icon}
                 tone={action.tone}
                 label={t(ACTION_LABEL_KEYS[action.key])}
-                // Destinations arrive with their own screens (board frames
-                // 05-07); the grid ships first so the shape is real.
-                onPress={() => {}}
+                onPress={() => router.push(QUICK_ACTION_ROUTES[action.key])}
               />
             ))}
           </View>
@@ -135,7 +204,36 @@ export default function Home() {
           <CallToOrderBanner />
 
           <Text className="gd-section-title">{t("home.reorder")}</Text>
-          <ReorderList items={REORDER_ITEMS} onAdd={() => {}} />
+          {results.length > 0 ? (
+            <ReorderList items={results} />
+          ) : (
+            <View className="gd-empty">
+              <Text className="gd-empty-text">
+                {t("home.searchEmpty", { query: query.trim() })}
+              </Text>
+              <Pressable
+                style={pressRow}
+                onPress={() => setQuery("")}
+                accessibilityRole="button"
+              >
+                <Text className="gd-empty-action">{t("home.clearSearch")}</Text>
+              </Pressable>
+            </View>
+          )}
+
+          {/*
+           * Only appears once something is in the cart, so the screen doesn't
+           * carry an empty total. There is no checkout yet, so this reports
+           * state rather than pretending to be a way through to payment.
+           */}
+          {itemCount > 0 ? (
+            <View className="gd-cart-bar">
+              <Text className="gd-cart-count">
+                {t("home.inCart", { count: itemCount })}
+              </Text>
+              <Text className="gd-cart-total">{formatRupees(total)}</Text>
+            </View>
+          ) : null}
         </ScrollView>
       </SafeAreaView>
 

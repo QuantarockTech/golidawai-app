@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { Pressable, Text, View } from "react-native";
 
 import { colors } from "@/constants/theme";
+import { pressSmall } from "@/lib/press";
 
 type QuickActionTileProps = {
   icon: string;
@@ -23,6 +24,7 @@ const QuickActionTile = ({
   return (
     <Pressable
       className="gd-tile"
+      style={pressSmall}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}

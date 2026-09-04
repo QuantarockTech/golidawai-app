@@ -15,7 +15,8 @@ import { PostHogErrorBoundary, PostHogProvider } from "posthog-react-native";
 import { useEffect, useRef } from "react";
 
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
-import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import { CartProvider } from "@/contexts/CartContext";
+import { OrdersProvider } from "@/contexts/OrdersContext";
 import { posthog } from "@/lib/posthog";
 
 SplashScreen.preventAutoHideAsync();
@@ -96,9 +97,11 @@ function RootLayoutContent() {
 export default function RootLayout() {
   const content = (
     <LanguageProvider>
-      <SubscriptionProvider>
-        <RootLayoutContent />
-      </SubscriptionProvider>
+      <CartProvider>
+        <OrdersProvider>
+          <RootLayoutContent />
+        </OrdersProvider>
+      </CartProvider>
     </LanguageProvider>
   );
 

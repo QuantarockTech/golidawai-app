@@ -1,46 +1,54 @@
-import { tabs } from "@/constants/data";
-import { colors, components } from "@/constants/theme";
-import { useLanguage } from "@/contexts/LanguageContext";
-import type { TranslationKey } from "@/lib/i18n/translations";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useAuth } from "@clerk/clerk-expo";
 import { Redirect, Tabs } from "expo-router";
-import { Image } from "react-native";
+import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { colors, components } from "@/constants/theme";
+import { useCart } from "@/contexts/CartContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/i18n/translations";
 
 const tabBar = components.tabBar;
 
-/*
- * constants/data.ts stores each tab's English title; the route name is the
- * stable key, so titles are looked up at render time and follow the language.
+/**
+ * Board frame 09's tab bar: Home, Orders, Cart, Profile. Icons come from the
+ * vector set rather than PNGs so they tint cleanly and match the line weight
+ * used everywhere else in the app.
  */
-const TAB_TITLE_KEYS: Partial<Record<string, TranslationKey>> = {
-  index: "tabs.home",
-  subscriptions: "tabs.subscriptions",
-  insights: "tabs.insights",
-  settings: "tabs.settings",
+const TAB_SCREENS: {
+  name: string;
+  titleKey: TranslationKey;
+  icon: string;
+}[] = [
+  { name: "index", titleKey: "tabs.home", icon: "home-outline" },
+  { name: "orders", titleKey: "tabs.orders", icon: "file-document-outline" },
+  { name: "cart", titleKey: "tabs.cart", icon: "cart-outline" },
+  { name: "profile", titleKey: "tabs.profile", icon: "account-outline" },
+];
+
+/** Count of items in the cart, drawn over the Cart tab's icon. */
+const CartIcon = ({ focused }: { focused: boolean }) => {
+  const { itemCount } = useCart();
+
+  return (
+    <View>
+      <MaterialCommunityIcons
+        name="cart-outline"
+        size={tabBar.iconSize}
+        color={focused ? colors.brandDark : colors.inkFaint}
+      />
+      {itemCount > 0 ? (
+        <View className="gd-tab-badge">
+          <Text className="gd-tab-badge-text">
+            {itemCount > 9 ? "9+" : itemCount}
+          </Text>
+        </View>
+      ) : null}
+    </View>
+  );
 };
 
-/**
- * Board frame 04 marks the selected tab by colouring the icon, not by putting a
- * filled pill behind it. The artwork is a white PNG, so the colour has to come
- * from tintColor rather than a text colour.
- */
-const TabIcon = ({ focused, icon }: TabIconProps) => (
-  <Image
-    source={icon}
-    resizeMode="contain"
-    /*
-     * Inline, not a class: react-native-web writes the source image's intrinsic
-     * dimensions as an inline style, which outranks any class. Without this
-     * each icon drew at its natural 120x120 on web.
-     */
-    style={{
-      width: tabBar.iconSize,
-      height: tabBar.iconSize,
-      tintColor: focused ? colors.brandDark : colors.inkFaint,
-    }}
-  />
-);
 const TabLayout = () => {
   const { isSignedIn, isLoaded } = useAuth();
   const { t } = useLanguage();
@@ -83,24 +91,25 @@ const TabLayout = () => {
         },
       }}
     >
-      {tabs.map((tab) => {
-        // A tab added without a key keeps its English title rather than blanking.
-        const titleKey = TAB_TITLE_KEYS[tab.name];
-
-        return (
-          <Tabs.Screen
-            key={tab.name}
-            name={tab.name}
-            options={{
-              title: titleKey ? t(titleKey) : tab.title,
-              tabBarIcon: ({ focused }) => (
-                <TabIcon focused={focused} icon={tab.icon} />
+      {TAB_SCREENS.map((tab) => (
+        <Tabs.Screen
+          key={tab.name}
+          name={tab.name}
+          options={{
+            title: t(tab.titleKey),
+            tabBarIcon: ({ focused }) =>
+              tab.name === "cart" ? (
+                <CartIcon focused={focused} />
+              ) : (
+                <MaterialCommunityIcons
+                  name={tab.icon as never}
+                  size={tabBar.iconSize}
+                  color={focused ? colors.brandDark : colors.inkFaint}
+                />
               ),
-            }}
-          />
-        );
-      })}
-      <Tabs.Screen name="subscriptions/[id]" options={{ href: null }} />
+          }}
+        />
+      ))}
     </Tabs>
   );
 };

@@ -4,6 +4,7 @@ import { Linking, Pressable, Text, View } from "react-native";
 import { PHARMACY_PHONE } from "@/constants/data";
 import { colors } from "@/constants/theme";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { pressRow } from "@/lib/press";
 
 /**
  * "Call to order" — concept board frame 04.
@@ -23,6 +24,7 @@ const CallToOrderBanner = () => {
   return (
     <Pressable
       className="gd-call"
+      style={pressRow}
       onPress={call}
       accessibilityRole="button"
       accessibilityLabel={`${t("home.callToOrder")}. ${t("home.callToOrderBody")}`}

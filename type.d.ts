@@ -78,6 +78,58 @@ declare global {
     tabletsPerStrip: number;
     price: number;
   }
+
+  /** Order Medicines — concept board frame 06. */
+  type MedicineCategory =
+    | "fever"
+    | "diabetes"
+    | "skin"
+    | "heart"
+    | "stomach"
+    | "vitamins";
+
+  interface Medicine extends ReorderItem {
+    category: MedicineCategory;
+    /** Routes the item into the pharmacist-review queue at checkout. */
+    rxRequired: boolean;
+  }
+
+  /** Ambulance Booking — concept board frame 07. */
+  interface AmbulanceType {
+    id: string;
+    /** Minutes to arrival, as quoted on the board. */
+    etaMinutes: number;
+    price: number;
+  }
+
+  /**
+   * Services the board doesn't design a screen for. They share one
+   * request-a-callback screen rather than three invented flows.
+   */
+  type ServiceKey = "doctorConsult" | "labTests" | "insurance";
+
+  /** Checkout & Tracking — concept board frame 08. */
+  type OrderStatus = "placed" | "verified" | "packed" | "outForDelivery";
+
+  interface OrderLine {
+    id: string;
+    name: string;
+    quantity: number;
+    /** Line total, not unit price. */
+    price: number;
+  }
+
+  interface Order {
+    /** Display id, e.g. "GD1042". */
+    id: string;
+    placedAt: string;
+    status: OrderStatus;
+    lines: OrderLine[];
+    deliveryFee: number;
+    total: number;
+    /** Set when any line needed a prescription, so it shows the review step. */
+    needsPharmacistReview: boolean;
+  }
 }
 
 export { };

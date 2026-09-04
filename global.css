@@ -13,7 +13,7 @@
   --color-primary: #081126;
   --color-accent: #ea7a53;
   --color-border: rgba(0, 0, 0, 0.1);
-  --color-success: #16a34a;
+  --color-success: #059652;
   --color-destructive: #dc2626;
   --color-subscription: #8fd1bd;
 
@@ -29,6 +29,7 @@
   --color-hairline: rgba(15, 60, 61, 0.14);
   --color-hairline-soft: rgba(15, 60, 61, 0.08);
   --color-emergency: #df1529;
+  --color-whatsapp: #25d366;
 
   --spacing-0: 0px;
   --spacing-1: 4px;
@@ -922,4 +923,402 @@
 .gd-fab {
   @apply absolute right-5 size-14 items-center justify-center rounded-full;
   box-shadow: 0 8px 18px rgba(37, 211, 102, 0.45);
+}
+
+/* Search input — a real field once it filters the list */
+.gd-search-input {
+  @apply flex-1 text-[14px] font-body text-ink;
+}
+
+/* Quantity stepper, shown on a reorder row once it is in the cart */
+.gd-stepper {
+  @apply flex-row items-center gap-1 rounded-lg border border-brand/40 bg-brand/10 px-1 py-0.5;
+}
+
+.gd-stepper-btn {
+  @apply size-7 items-center justify-center rounded-md;
+}
+
+.gd-stepper-count {
+  @apply min-w-5 text-center text-[13px] font-ui-semibold text-brand-dark;
+}
+
+/* Cart summary strip under the reorder list */
+.gd-cart-bar {
+  @apply mt-3 flex-row items-center justify-between rounded-2xl border border-brand/40 bg-brand/10 px-4 py-3;
+}
+
+.gd-cart-count {
+  @apply text-[13px] font-ui-semibold text-brand-dark;
+}
+
+.gd-cart-total {
+  @apply text-[15px] font-ui-semibold text-ink;
+}
+
+/* Empty state when a search matches nothing */
+.gd-empty {
+  @apply items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-4 py-8;
+}
+
+.gd-empty-text {
+  @apply text-center text-[13px] font-body text-ink-muted;
+}
+
+.gd-empty-action {
+  @apply text-[13px] font-ui-semibold text-brand-dark;
+}
+
+/* ---- Screens behind "What do you need?" (board frames 05-07) ---- */
+
+.gd-topbar {
+  @apply flex-row items-center gap-1 px-5 pb-2 pt-1;
+}
+
+.gd-topbar-back {
+  @apply -ml-2 size-10 items-center justify-center rounded-full;
+}
+
+.gd-topbar-title {
+  @apply flex-1 text-[20px] font-heading text-ink;
+}
+
+.gd-topbar-title-emergency {
+  @apply text-emergency;
+}
+
+/* Upload Prescription — frame 05 */
+.gd-rx-drop {
+  @apply items-center gap-1 rounded-2xl border-[1.6px] border-dashed border-brand bg-brand/8 px-4 py-7;
+}
+
+.gd-rx-drop-icon {
+  @apply mb-1 size-11 items-center justify-center rounded-full bg-brand/15;
+}
+
+.gd-rx-drop-title {
+  @apply text-[15px] font-ui-semibold text-ink;
+}
+
+.gd-rx-drop-hint {
+  @apply text-[12px] font-body text-ink-muted;
+}
+
+.gd-rx-thumbs {
+  @apply mt-3 flex-row flex-wrap gap-2;
+}
+
+.gd-rx-thumb {
+  @apply size-16 overflow-hidden rounded-xl bg-brand-dark;
+}
+
+.gd-rx-thumb-remove {
+  @apply absolute right-0.5 top-0.5 size-5 items-center justify-center rounded-full bg-ink/70;
+}
+
+.gd-rx-add {
+  @apply size-16 items-center justify-center rounded-xl border-[1.4px] border-dashed border-brand/50;
+}
+
+.gd-textarea {
+  @apply h-24 rounded-2xl border border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
+}
+
+.gd-address {
+  @apply flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+}
+
+.gd-address-text {
+  @apply flex-1 text-[14px] font-body text-ink;
+}
+
+.gd-link-row {
+  @apply mt-3 items-center;
+}
+
+.gd-link {
+  @apply text-[13px] font-ui-semibold text-brand-dark;
+}
+
+/* Order Medicines — frame 06 */
+.gd-chips {
+  @apply flex-row gap-2 pb-1;
+}
+
+.gd-chip {
+  @apply rounded-full border border-hairline bg-mist px-3.5 py-1.5;
+}
+
+.gd-chip-active {
+  @apply border-brand bg-brand;
+}
+
+.gd-chip-text {
+  @apply text-[13px] font-ui text-brand-dark;
+}
+
+.gd-chip-text-active {
+  @apply text-brand-ink;
+}
+
+.gd-rx-tag {
+  @apply mt-1 self-start rounded-full bg-emergency/10 px-2 py-0.5;
+}
+
+.gd-rx-tag-text {
+  @apply text-[10px] font-ui-semibold text-emergency;
+}
+
+/* Sticky cart bar — frame 06 */
+.gd-cart-dock {
+  @apply mx-5 mb-3 flex-row items-center gap-3 rounded-2xl bg-brand-dark px-4 py-3.5;
+}
+
+.gd-cart-dock-text {
+  @apply flex-1 text-[14px] font-ui-semibold text-white;
+}
+
+.gd-cart-dock-action {
+  @apply text-[14px] font-ui-semibold text-white;
+}
+
+/* Ambulance — frame 07 */
+.gd-map {
+  @apply h-32 items-center justify-center rounded-2xl bg-brand/15;
+}
+
+.gd-map-note {
+  @apply mt-2 text-center text-[11px] font-body text-ink-muted;
+}
+
+.gd-amb-type {
+  @apply mt-2 flex-row items-center gap-3 rounded-2xl border-[1.4px] border-hairline-soft bg-white px-3 py-3;
+}
+
+.gd-amb-type-selected {
+  @apply border-emergency bg-emergency/8;
+}
+
+.gd-amb-icon {
+  @apply size-10 items-center justify-center rounded-xl bg-emergency/10;
+}
+
+.gd-amb-name {
+  @apply text-[14px] font-ui-semibold text-ink;
+}
+
+.gd-amb-body {
+  @apply text-[12px] font-body text-ink-muted;
+}
+
+.gd-amb-eta {
+  @apply text-right text-[13px] font-ui-semibold text-brand-dark;
+}
+
+.gd-amb-price {
+  @apply text-right text-[12px] font-body text-ink-muted;
+}
+
+.gd-btn-emergency {
+  @apply flex-row items-center justify-center gap-2 rounded-2xl bg-emergency py-4;
+}
+
+.gd-btn-emergency-text {
+  @apply text-[16px] font-ui-semibold text-white;
+}
+
+/* Service request — no board frame */
+.gd-service-hero {
+  @apply items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-4 py-6;
+}
+
+.gd-service-icon {
+  @apply size-14 items-center justify-center rounded-full bg-brand/12;
+}
+
+.gd-service-body {
+  @apply text-center text-[14px] leading-[20px] font-body text-ink-muted;
+}
+
+.gd-contact-row {
+  @apply mt-3 flex-row gap-2.5;
+}
+
+.gd-contact-btn {
+  @apply flex-1 flex-row items-center justify-center gap-2 rounded-2xl border border-hairline bg-white py-3.5;
+}
+
+.gd-contact-text {
+  @apply text-[14px] font-ui text-ink;
+}
+
+/* Primary / WhatsApp buttons for the service screens */
+.gd-btn {
+  @apply flex-row items-center justify-center gap-2 rounded-2xl bg-brand py-4;
+}
+
+.gd-btn-text {
+  @apply text-[16px] font-ui-semibold text-brand-ink;
+}
+
+.gd-btn-whatsapp {
+  @apply flex-row items-center justify-center gap-2 rounded-2xl bg-whatsapp py-4;
+}
+
+.gd-btn-whatsapp-text {
+  @apply text-[15px] font-ui-semibold text-white;
+}
+
+/* ---- Cart, Orders, Profile (board frames 08/09) ---- */
+
+.gd-tab-badge {
+  @apply absolute -right-2 -top-1 min-w-4 items-center justify-center rounded-full bg-emergency px-1 py-0.5;
+}
+
+.gd-tab-badge-text {
+  @apply text-[10px] font-ui-semibold text-white;
+}
+
+.gd-notice {
+  @apply flex-row items-start gap-2 rounded-2xl border border-emergency/25 bg-emergency/8 px-4 py-3;
+}
+
+.gd-notice-text {
+  @apply flex-1 text-[12px] leading-[17px] font-body text-ink;
+}
+
+.gd-totals {
+  @apply mt-4 gap-2 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+}
+
+.gd-total-row {
+  @apply flex-row items-center justify-between;
+}
+
+.gd-total-label {
+  @apply text-[13px] font-body text-ink-muted;
+}
+
+.gd-total-value {
+  @apply text-[13px] font-body text-ink;
+}
+
+.gd-total-grand {
+  @apply mt-1 border-t border-hairline-soft pt-2;
+}
+
+.gd-total-grand-label {
+  @apply text-[15px] font-ui-semibold text-ink;
+}
+
+.gd-total-grand-value {
+  @apply text-[16px] font-ui-semibold text-brand-dark;
+}
+
+/* Orders list */
+.gd-order-card {
+  @apply mb-2.5 flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+}
+
+.gd-order-id {
+  @apply text-[15px] font-ui-semibold text-ink;
+}
+
+.gd-order-meta {
+  @apply mt-0.5 text-[12px] font-body text-ink-muted;
+}
+
+.gd-order-status {
+  @apply rounded-full bg-brand/12 px-2.5 py-1;
+}
+
+.gd-order-status-text {
+  @apply text-[11px] font-ui-semibold text-brand-dark;
+}
+
+/* Order tracker — frame 08 */
+.gd-stepper-track {
+  @apply flex-row items-start;
+}
+
+.gd-step {
+  @apply flex-1 items-center;
+}
+
+/*
+ * The connector is drawn from each step back to the previous one, so it starts
+ * at the far left of this cell and stops at its centre.
+ */
+.gd-step-line {
+  @apply absolute right-1/2 top-[9px] h-0.5 w-full bg-hairline;
+}
+
+.gd-step-line-done {
+  @apply bg-brand;
+}
+
+.gd-step-dot {
+  @apply size-5 items-center justify-center rounded-full bg-hairline;
+}
+
+.gd-step-dot-done {
+  @apply bg-brand;
+}
+
+.gd-step-label {
+  @apply mt-1.5 text-center text-[10px] leading-[13px] font-ui text-ink-muted;
+}
+
+.gd-eta {
+  @apply mt-4 rounded-2xl bg-success/12 px-4 py-3;
+}
+
+.gd-eta-title {
+  @apply text-[14px] font-ui-semibold text-success;
+}
+
+.gd-eta-body {
+  @apply mt-0.5 text-[12px] font-body text-ink-muted;
+}
+
+/* Profile — frame 09 */
+.gd-profile-row {
+  @apply flex-row items-center gap-3 py-3;
+}
+
+.gd-profile-name {
+  @apply text-[17px] font-ui-semibold text-ink;
+}
+
+.gd-profile-phone {
+  @apply mt-0.5 text-[13px] font-body text-ink-muted;
+}
+
+.gd-list-card {
+  @apply overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+}
+
+.gd-list-item {
+  @apply flex-row items-center gap-3 px-4 py-3.5;
+}
+
+/* Applied from index > 0; :last-child has no meaning on native. */
+.gd-list-divider {
+  @apply border-t border-hairline-soft;
+}
+
+.gd-list-icon {
+  @apply size-8 items-center justify-center rounded-lg bg-brand/12;
+}
+
+.gd-list-icon-danger {
+  @apply size-8 items-center justify-center rounded-lg bg-emergency/10;
+}
+
+.gd-list-label {
+  @apply flex-1 text-[14px] font-ui text-ink;
+}
+
+.gd-list-label-danger {
+  @apply flex-1 text-[14px] font-ui text-emergency;
 }

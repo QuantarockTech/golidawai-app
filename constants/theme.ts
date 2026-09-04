@@ -7,7 +7,7 @@ export const colors = {
   primary: "#081126",
   accent: "#ea7a53",
   border: "rgba(0, 0, 0, 0.1)",
-  success: "#16a34a",
+  success: "#059652",
   destructive: "#dc2626",
   subscription: "#8fd1bd",
 
