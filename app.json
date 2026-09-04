@@ -8,6 +8,9 @@
     "scheme": "golidawai",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "ios": {
       "supportsTablet": true
     },
@@ -77,6 +80,9 @@
         "projectId": "34a05dce-4696-48df-a2b2-7b61f21d3d2b"
       }
     },
-    "owner": "quantarock"
+    "owner": "quantarock",
+    "updates": {
+      "url": "https://u.expo.dev/34a05dce-4696-48df-a2b2-7b61f21d3d2b"
+    }
   }
 }
