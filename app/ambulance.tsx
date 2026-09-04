@@ -2,7 +2,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import clsx from "clsx";
 import { styled } from "nativewind";
 import { useState } from "react";
-import { Alert, Linking, Pressable, ScrollView, Text, View } from "react-native";
+import { Linking, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 import ScreenHeader from "@/components/ScreenHeader";
@@ -11,6 +11,7 @@ import { colors } from "@/constants/theme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import "@/global.css";
 import type { TranslationKey } from "@/lib/i18n/translations";
+import { confirm } from "@/lib/dialog";
 import { pressRow } from "@/lib/press";
 import { formatRupees } from "@/lib/utils";
 
@@ -28,18 +29,14 @@ export default function Ambulance() {
   const [selected, setSelected] = useState(AMBULANCE_TYPES[0].id);
 
   const callDispatch = () => {
-    Alert.alert(
-      t("home.ambulanceTitle"),
-      t("home.ambulanceBody", { number: AMBULANCE_PHONE }),
-      [
-        { text: t("common.cancel"), style: "cancel" },
-        {
-          text: t("home.ambulanceConfirm"),
-          style: "destructive",
-          onPress: () => void Linking.openURL(`tel:${AMBULANCE_PHONE}`),
-        },
-      ],
-    );
+    confirm({
+      title: t("home.ambulanceTitle"),
+      message: t("home.ambulanceBody", { number: AMBULANCE_PHONE }),
+      confirmLabel: t("home.ambulanceConfirm"),
+      cancelLabel: t("common.cancel"),
+      destructive: true,
+      onConfirm: () => void Linking.openURL(`tel:${AMBULANCE_PHONE}`),
+    });
   };
 
   return (

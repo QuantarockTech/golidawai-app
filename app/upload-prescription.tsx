@@ -1,11 +1,9 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { styled } from "nativewind";
 import { useState } from "react";
 import {
-  Alert,
   Linking,
   Pressable,
   ScrollView,
@@ -20,6 +18,8 @@ import { PHARMACY, WHATSAPP_NUMBER } from "@/constants/data";
 import { colors } from "@/constants/theme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import "@/global.css";
+import { notify } from "@/lib/dialog";
+import { useGoBack } from "@/lib/nav";
 import { pressRow, pressSmall } from "@/lib/press";
 
 const SafeAreaView = styled(RNSafeAreaView);
@@ -27,45 +27,78 @@ const SafeAreaView = styled(RNSafeAreaView);
 /** The board caps an upload at five files. */
 const MAX_FILES = 5;
 
+/*
+ * Loaded lazily rather than imported at the top.
+ *
+ * expo-image-picker is a native module, so it only exists in a build made
+ * after the package was added. In an older development build it is absent, and
+ * a static import takes this whole screen down on open. Loading it on demand
+ * keeps the rest of the screen — notes, address, and the WhatsApp route that
+ * actually delivers today — working regardless.
+ */
+type Picker = typeof import("expo-image-picker");
+
+const loadPicker = (): Picker | null => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require("expo-image-picker") as Picker;
+  } catch {
+    return null;
+  }
+};
+
 /** Upload Prescription — concept board frame 05. */
 export default function UploadPrescription() {
   const { t } = useLanguage();
   const router = useRouter();
+  const goBack = useGoBack();
 
   const [photos, setPhotos] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
 
   const pick = async (fromCamera: boolean) => {
     if (photos.length >= MAX_FILES) {
-      Alert.alert(t("rx.title"), t("rx.limit"));
+      notify(t("rx.title"), t("rx.limit"), t("common.ok"));
       return;
     }
 
-    const permission = fromCamera
-      ? await ImagePicker.requestCameraPermissionsAsync()
-      : await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (!permission.granted) {
-      Alert.alert(t("rx.title"), t("rx.permission"));
+    const ImagePicker = loadPicker();
+    if (!ImagePicker) {
+      notify(t("rx.title"), t("rx.pickerUnavailable"), t("common.ok"));
       return;
     }
 
-    const options: ImagePicker.ImagePickerOptions = {
-      mediaTypes: ["images"],
-      quality: 0.7,
-      allowsMultipleSelection: !fromCamera,
-      selectionLimit: MAX_FILES - photos.length,
-    };
+    try {
+      const permission = fromCamera
+        ? await ImagePicker.requestCameraPermissionsAsync()
+        : await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    const result = fromCamera
-      ? await ImagePicker.launchCameraAsync(options)
-      : await ImagePicker.launchImageLibraryAsync(options);
+      if (!permission.granted) {
+        notify(t("rx.title"), t("rx.permission"), t("common.ok"));
+        return;
+      }
 
-    if (result.canceled) return;
+      const result = fromCamera
+        ? await ImagePicker.launchCameraAsync({
+            mediaTypes: ["images"],
+            quality: 0.7,
+          })
+        : await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ["images"],
+            quality: 0.7,
+            allowsMultipleSelection: true,
+            selectionLimit: MAX_FILES - photos.length,
+          });
 
-    setPhotos((current) =>
-      [...current, ...result.assets.map((a) => a.uri)].slice(0, MAX_FILES),
-    );
+      if (result.canceled) return;
+
+      setPhotos((current) =>
+        [...current, ...result.assets.map((a) => a.uri)].slice(0, MAX_FILES),
+      );
+    } catch {
+      // Thrown when the native module is missing from this build.
+      notify(t("rx.title"), t("rx.pickerUnavailable"), t("common.ok"));
+    }
   };
 
   /**
@@ -75,14 +108,15 @@ export default function UploadPrescription() {
    */
   const submit = () => {
     if (photos.length === 0) {
-      Alert.alert(t("rx.title"), t("rx.needOne"));
+      notify(t("rx.title"), t("rx.needOne"), t("common.ok"));
       return;
     }
-    Alert.alert(
+    notify(
       t("rx.sentTitle"),
       t("rx.sentBody", { phone: PHARMACY.phoneDisplay }),
-      [{ text: t("common.ok"), onPress: () => router.back() }],
+      t("common.ok"),
     );
+    goBack();
   };
 
   const sendViaWhatsApp = () => {

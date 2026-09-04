@@ -294,6 +294,16 @@ const SignUp = () => {
             <Text className="ga-error mb-3">{errorMessage}</Text>
           ) : null}
 
+          {/*
+           * Above the button on purpose. Clerk's bot protection injects its
+           * widget here, and a challenge that appears *below* the control that
+           * triggered it is easy to miss — especially at the bottom of a form.
+           * Sitting above, it lands in reading order right where the eye
+           * already is. The spacing lives on the container so there is no gap
+           * on the renders where no challenge is shown.
+           */}
+          <View className="ga-captcha" nativeID="clerk-captcha" />
+
           <Pressable
             className={`ga-btn ${!formValid || isSubmitting ? "ga-btn-disabled" : ""}`}
             onPress={handleSubmit}
@@ -303,9 +313,6 @@ const SignUp = () => {
               {isSubmitting ? t("signUp.submitting") : t("signUp.submit")}
             </Text>
           </Pressable>
-
-          {/* Required for Clerk's bot protection */}
-          <View nativeID="clerk-captcha" />
         </View>
       </KeyboardAvoidingView>
       </SafeAreaView>

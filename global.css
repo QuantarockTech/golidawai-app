@@ -779,8 +779,13 @@
   @apply flex-1 bg-mist;
 }
 
+/*
+ * Phone: a single thumb-width column with room for the tab bar.
+ * Browser: a website container — wider, more padding, and no tab-bar gap
+ * because desktop navigates from the top instead.
+ */
 .gd-scroll-content {
-  @apply w-full max-w-[440px] self-center px-5 pb-28 pt-1;
+  @apply w-full max-w-[440px] self-center px-5 pb-28 pt-1 md:max-w-[1120px] md:px-8 md:pb-16 md:pt-6;
 }
 
 /* Greeting row */
@@ -841,7 +846,7 @@
 }
 
 .gd-tile {
-  @apply w-[31%] items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-2 py-3;
+  @apply w-[31%] items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-2 py-3 md:w-[15.5%] md:py-5;
 }
 
 .gd-tile-icon {
@@ -969,10 +974,41 @@
   @apply text-[13px] font-ui-semibold text-brand-dark;
 }
 
+/* "Add what you typed" — the way out of the empty state */
+.gd-empty-add {
+  @apply mt-1 flex-row items-center gap-1.5 rounded-full border border-brand px-3.5 py-2;
+}
+
+/*
+ * Medicines the customer typed themselves. Shares the catalogue card so the two
+ * lists read as one order, but carries no price: nothing here has been matched
+ * to stock yet.
+ */
+.gd-custom-actions {
+  @apply flex-row items-center gap-2;
+}
+
+.gd-custom-action {
+  @apply size-8 items-center justify-center rounded-lg bg-mist;
+}
+
+.gd-custom-action-save {
+  @apply bg-brand;
+}
+
+/* The row turns into this while a typed name is being corrected. */
+.gd-custom-input {
+  @apply flex-1 rounded-lg border border-brand bg-white px-3 py-2 text-[15px] font-body text-ink;
+}
+
+.gd-custom-note {
+  @apply mt-2 text-[12px] leading-[17px] font-body text-ink-muted;
+}
+
 /* ---- Screens behind "What do you need?" (board frames 05-07) ---- */
 
 .gd-topbar {
-  @apply flex-row items-center gap-1 px-5 pb-2 pt-1;
+  @apply w-full max-w-[440px] flex-row items-center gap-1 self-center px-5 pb-2 pt-1 md:max-w-[1120px] md:px-8 md:pt-4;
 }
 
 .gd-topbar-back {
@@ -1321,4 +1357,43 @@
 
 .gd-list-label-danger {
   @apply flex-1 text-[14px] font-ui text-emergency;
+}
+
+/* ---- Website chrome (browser only, md and up) ---- */
+
+.gd-webnav {
+  @apply w-full border-b border-hairline-soft bg-white;
+}
+
+.gd-webnav-inner {
+  @apply w-full max-w-[1120px] flex-row items-center gap-6 self-center px-8 py-3;
+}
+
+.gd-webnav-links {
+  @apply flex-1 flex-row items-center gap-6;
+}
+
+.gd-webnav-link {
+  @apply text-[14px] font-ui text-ink-muted;
+}
+
+.gd-webnav-link-active {
+  @apply font-ui-semibold text-brand-dark;
+}
+
+.gd-webnav-actions {
+  @apply flex-row items-center gap-3;
+}
+
+.gd-webnav-icon {
+  @apply size-9 items-center justify-center rounded-full;
+}
+
+/*
+ * Holder for Clerk's CAPTCHA widget. `empty:` keeps the gap off the layout
+ * until Cloudflare actually injects the challenge, so the button doesn't sit
+ * above dead space on the many renders where none is shown.
+ */
+.ga-captcha {
+  @apply items-center not-empty:mb-4;
 }

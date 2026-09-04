@@ -6,7 +6,6 @@ import { useRouter, type Href } from "expo-router";
 import { styled } from "nativewind";
 import { useMemo, useState } from "react";
 import {
-  Alert,
   Pressable,
   ScrollView,
   Text,
@@ -26,6 +25,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import "@/global.css";
 import type { TranslationKey } from "@/lib/i18n/translations";
+import { notify } from "@/lib/dialog";
 import { pressRow, pressSmall } from "@/lib/press";
 import { formatRupees } from "@/lib/utils";
 
@@ -70,10 +70,10 @@ export default function Home() {
 
   /** Anything with no screen of its own yet, e.g. notifications. */
   const comingSoon = (feature: string) => {
-    Alert.alert(
+    notify(
       t("home.comingSoonTitle"),
       t("home.comingSoonBody", { feature }),
-      [{ text: t("common.ok") }],
+      t("common.ok"),
     );
   };
 

@@ -46,6 +46,10 @@ const en = {
   "signIn.failed": "Unable to sign in",
   "signIn.incomplete": "Couldn't finish signing in. Please try again.",
   "signIn.googleFailed": "Unable to continue with Google",
+  "signIn.googleNeedsMore":
+    "Google signed you in, but this account still needs: {fields}. Create an account with your email first, then sign in with Google.",
+  "signIn.googleNoSession":
+    "Google signed you in, but the account couldn’t be completed. Please sign in with your email and password.",
 
   // Sign up
   "signUp.title": "Create account",
@@ -191,6 +195,8 @@ const en = {
   "rx.needOne": "Add at least one photo of your prescription.",
   "rx.limit": "You can attach up to 5 files.",
   "rx.permission": "We need photo access to attach your prescription.",
+  "rx.pickerUnavailable":
+    "Photo attachments need a newer build of the app. Send your prescription on WhatsApp instead.",
   "rx.remove": "Remove photo {index}",
   "rx.sentTitle": "Sent for review",
   "rx.sentBody": "Our pharmacist will check it and call you on {phone} to confirm.",
@@ -210,6 +216,14 @@ const en = {
   "order.notFoundBody": "Call and we\u2019ll source it for you",
   "order.viewCart": "View Cart",
   "order.empty": "Nothing matches that search.",
+  "order.addTyped": "Add “{name}” to your list",
+  "order.customTitle": "Medicines you typed",
+  "order.customNote":
+    "Not in our catalogue, so there is no price yet. Send the list and our pharmacist will confirm price and availability.",
+  "order.customSend": "Send list on WhatsApp",
+  "order.customRemove": "Remove {name} from your list",
+  "order.customEdit": "Edit {name}",
+  "order.customSave": "Save name",
   "amb.title": "Ambulance",
   "amb.pickup": "Pickup",
   "amb.chooseType": "Choose ambulance type",
@@ -303,6 +317,10 @@ const hi: Record<TranslationKey, string> = {
   "signIn.failed": "साइन इन नहीं हो सका",
   "signIn.incomplete": "साइन इन पूरा नहीं हो सका। कृपया दोबारा कोशिश करें।",
   "signIn.googleFailed": "Google से जारी नहीं रखा जा सका",
+  "signIn.googleNeedsMore":
+    "गूगल से लॉगिन हुआ, पर खाते में यह बाकी है: {fields}। पहले ईमेल से खाता बनाएँ।",
+  "signIn.googleNoSession":
+    "गूगल से लॉगिन हुआ, पर खाता पूरा नहीं हो सका। ईमेल और पासवर्ड से लॉगिन करें।",
 
   // Sign up
   "signUp.title": "खाता बनाएँ",
@@ -447,6 +465,8 @@ const hi: Record<TranslationKey, string> = {
   "rx.needOne": "\u0915\u092e \u0938\u0947 \u0915\u092e \u090f\u0915 \u092b\u094b\u091f\u094b \u091c\u094b\u0921\u093c\u0947\u0902\u0964",
   "rx.limit": "\u0906\u092a 5 \u092b\u093c\u093e\u0907\u0932 \u0924\u0915 \u091c\u094b\u0921\u093c \u0938\u0915\u0924\u0947 \u0939\u0948\u0902\u0964",
   "rx.permission": "\u092a\u0930\u094d\u091a\u0940 \u091c\u094b\u0921\u093c\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u092b\u094b\u091f\u094b \u0915\u0940 \u0905\u0928\u0941\u092e\u0924\u093f \u091a\u093e\u0939\u093f\u090f\u0964",
+  "rx.pickerUnavailable":
+    "\u092b\u094b\u091f\u094b \u091c\u094b\u0921\u093c\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u0928\u092f\u093e \u092c\u093f\u0932\u094d\u0921 \u091a\u093e\u0939\u093f\u090f\u0964 \u092a\u0930\u094d\u091a\u0940 \u0935\u094d\u0939\u093e\u091f\u094d\u0938\u0910\u092a \u092a\u0930 \u092d\u0947\u091c\u0947\u0902\u0964",
   "rx.remove": "\u092b\u094b\u091f\u094b {index} \u0939\u091f\u093e\u090f\u0901",
   "rx.sentTitle": "\u091c\u093e\u0901\u091a \u0915\u0947 \u0932\u093f\u090f \u092d\u0947\u091c \u0926\u093f\u092f\u093e",
   "rx.sentBody": "\u0939\u092e\u093e\u0930\u0947 \u092b\u093e\u0930\u094d\u092e\u093e\u0938\u093f\u0938\u094d\u091f \u091c\u093e\u0901\u091a \u0915\u0930 {phone} \u092a\u0930 \u0915\u0949\u0932 \u0915\u0930\u0947\u0902\u0917\u0947\u0964",
@@ -466,6 +486,14 @@ const hi: Record<TranslationKey, string> = {
   "order.notFoundBody": "\u0915\u0949\u0932 \u0915\u0930\u0947\u0902, \u0939\u092e \u092e\u0902\u0917\u0935\u093e \u0926\u0947\u0902\u0917\u0947",
   "order.viewCart": "\u0915\u093e\u0930\u094d\u091f \u0926\u0947\u0916\u0947\u0902",
   "order.empty": "\u0907\u0938 \u0916\u094b\u091c \u0938\u0947 \u0915\u0941\u091b \u0928\u0939\u0940\u0902 \u092e\u093f\u0932\u093e\u0964",
+  "order.addTyped": "\u201c{name}\u201d \u0915\u094b \u0905\u092a\u0928\u0940 \u0938\u0942\u091a\u0940 \u092e\u0947\u0902 \u091c\u094b\u0921\u093c\u0947\u0902",
+  "order.customTitle": "\u0906\u092a\u0915\u0940 \u0932\u093f\u0916\u0940 \u0926\u0935\u093e\u090f\u0901",
+  "order.customNote":
+    "\u092f\u0947 \u0939\u092e\u093e\u0930\u0940 \u0938\u0942\u091a\u0940 \u092e\u0947\u0902 \u0928\u0939\u0940\u0902 \u0939\u0948\u0902, \u0907\u0938\u0932\u093f\u090f \u0905\u092d\u0940 \u0926\u093e\u092e \u0928\u0939\u0940\u0902 \u0939\u0948\u0964 \u0938\u0942\u091a\u0940 \u092d\u0947\u091c\u0947\u0902, \u092b\u093e\u0930\u094d\u092e\u093e\u0938\u093f\u0938\u094d\u091f \u0926\u093e\u092e \u0914\u0930 \u0909\u092a\u0932\u092c\u094d\u0927\u0924\u093e \u092c\u0924\u093e \u0926\u0947\u0902\u0917\u0947\u0964",
+  "order.customSend": "\u0938\u0942\u091a\u0940 \u0935\u094d\u0939\u093e\u091f\u094d\u0938\u090f\u092a \u092a\u0930 \u092d\u0947\u091c\u0947\u0902",
+  "order.customRemove": "{name} \u0915\u094b \u0938\u0942\u091a\u0940 \u0938\u0947 \u0939\u091f\u093e\u090f\u0901",
+  "order.customEdit": "{name} \u092e\u0947\u0902 \u092c\u0926\u0932\u093e\u0935 \u0915\u0930\u0947\u0902",
+  "order.customSave": "\u0928\u093e\u092e \u0938\u0939\u0947\u091c\u0947\u0902",
   "amb.title": "\u090f\u092e\u094d\u092c\u0941\u0932\u0947\u0902\u0938",
   "amb.pickup": "\u092a\u093f\u0915\u0905\u092a",
   "amb.chooseType": "\u090f\u092e\u094d\u092c\u0941\u0932\u0947\u0902\u0938 \u091a\u0941\u0928\u0947\u0902",

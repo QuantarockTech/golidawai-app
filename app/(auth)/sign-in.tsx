@@ -111,7 +111,12 @@ const SignIn = () => {
     setIsSubmitting(true);
     setErrorMessage("");
     try {
-      const { createdSessionId, setActive: setActiveSSO } = await startSSOFlow({
+      const {
+        createdSessionId,
+        setActive: setActiveSSO,
+        signUp: ssoSignUp,
+        authSessionResult,
+      } = await startSSOFlow({
         strategy: "oauth_google",
         redirectUrl: AuthSession.makeRedirectUri(),
       });
@@ -122,6 +127,23 @@ const SignIn = () => {
         router.replace(HOME_ROUTE);
         return;
       }
+
+      // The user backed out of the Google sheet; not an error worth shouting about.
+      if (authSessionResult?.type !== "success") return;
+
+      /*
+       * Google returned an account but Clerk gave us no session, which means the
+       * sign-up is still missing something it requires — on this instance that
+       * is a password, since password is configured as required and Google
+       * cannot supply one. Say so instead of returning silently, which just
+       * dumps the user back on this screen with no explanation.
+       */
+      const missing = ssoSignUp?.missingFields ?? [];
+      setErrorMessage(
+        missing.length > 0
+          ? t("signIn.googleNeedsMore", { fields: missing.join(", ") })
+          : t("signIn.googleNoSession"),
+      );
     } catch (error) {
       setErrorMessage(readErrorMessage(error, t("signIn.googleFailed")));
     } finally {

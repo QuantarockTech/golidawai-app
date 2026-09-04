@@ -3,7 +3,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useRouter, type Href } from "expo-router";
 import clsx from "clsx";
 import { styled } from "nativewind";
-import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 import LanguageToggle from "@/components/LanguageToggle";
@@ -11,6 +11,7 @@ import { colors } from "@/constants/theme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import "@/global.css";
 import type { TranslationKey } from "@/lib/i18n/translations";
+import { confirm, notify } from "@/lib/dialog";
 import { pressRow } from "@/lib/press";
 
 const SafeAreaView = styled(RNSafeAreaView);
@@ -61,20 +62,30 @@ export default function Profile() {
       : "";
 
   const comingSoon = (label: string) => {
-    Alert.alert(t("home.comingSoonTitle"), t("home.comingSoonBody", {
-      feature: label,
-    }), [{ text: t("common.ok") }]);
+    notify(
+      t("home.comingSoonTitle"),
+      t("home.comingSoonBody", { feature: label }),
+      t("common.ok"),
+    );
   };
 
   const confirmLogout = () => {
-    Alert.alert(t("profile.logout"), t("profile.logoutConfirm"), [
-      { text: t("common.cancel"), style: "cancel" },
-      {
-        text: t("profile.logout"),
-        style: "destructive",
-        onPress: () => void signOut(),
+    confirm({
+      title: t("profile.logout"),
+      message: t("profile.logoutConfirm"),
+      confirmLabel: t("profile.logout"),
+      cancelLabel: t("common.cancel"),
+      destructive: true,
+      onConfirm: async () => {
+        try {
+          await signOut();
+          // The tabs layout redirects to sign-in once the session is gone, but
+          // say so explicitly so a failure can never look like a dead button.
+        } catch {
+          notify(t("profile.logout"), t("signIn.failed"), t("common.ok"));
+        }
       },
-    ]);
+    });
   };
 
   const renderRow = (row: Row, index: number) => (

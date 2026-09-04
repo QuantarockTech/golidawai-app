@@ -16,7 +16,9 @@ import ScreenHeader from "@/components/ScreenHeader";
 import {
   MEDICINE_CATEGORIES,
   MEDICINES,
+  PHARMACY,
   PHARMACY_PHONE,
+  WHATSAPP_NUMBER,
 } from "@/constants/data";
 import { colors } from "@/constants/theme";
 import { useCart } from "@/contexts/CartContext";
@@ -44,6 +46,16 @@ export default function OrderMedicines() {
 
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<MedicineCategory | null>(null);
+  /*
+   * Medicines the customer typed that the catalogue doesn't stock. Kept out of
+   * the cart on purpose: a cart line needs a price, and nothing here has been
+   * matched to stock, so these travel to the pharmacist over WhatsApp instead
+   * of through a checkout that would have to invent a total.
+   */
+  const [customItems, setCustomItems] = useState<string[]>([]);
+  /** Index of the typed row being corrected, or -1 when none is. */
+  const [editIndex, setEditIndex] = useState(-1);
+  const [editText, setEditText] = useState("");
 
   const results = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -53,6 +65,67 @@ export default function OrderMedicines() {
       return matchesCategory && matchesQuery;
     });
   }, [category, query]);
+
+  const typed = query.trim();
+  const alreadyTyped = customItems.some(
+    (name) => name.toLowerCase() === typed.toLowerCase(),
+  );
+
+  const addTyped = () => {
+    setCustomItems((current) => [...current, typed]);
+    // Clearing the box puts the freshly added name in view above.
+    setQuery("");
+  };
+
+  const startEdit = (index: number) => {
+    setEditIndex(index);
+    setEditText(customItems[index]);
+  };
+
+  /**
+   * Commits the correction. An empty box or a name already on the list would
+   * both leave the row in a worse state than before, so either just closes the
+   * editor and keeps what was there.
+   */
+  const commitEdit = () => {
+    const next = editText.trim();
+
+    setCustomItems((current) => {
+      const clashes = current.some(
+        (name, index) =>
+          index !== editIndex && name.toLowerCase() === next.toLowerCase(),
+      );
+      if (!next || clashes) return current;
+
+      return current.map((name, index) => (index === editIndex ? next : name));
+    });
+
+    setEditIndex(-1);
+    setEditText("");
+  };
+
+  const removeTyped = (index: number) => {
+    setCustomItems((current) => current.filter((_, i) => i !== index));
+    // The row under it would otherwise inherit the open editor.
+    setEditIndex(-1);
+  };
+
+  /**
+   * WhatsApp is the one route that reaches the pharmacist today, so the typed
+   * list goes out as plain text they can read and price by hand.
+   */
+  const sendCustomList = () => {
+    const lines = [
+      t("order.customTitle"),
+      ...customItems.map((name, index) => `${index + 1}. ${name}`),
+      "",
+      `${t("rx.deliverTo")}: ${PHARMACY.addressLines.join(", ")}`,
+    ];
+
+    void Linking.openURL(
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`,
+    );
+  };
 
   return (
     <View className="gd-screen">
@@ -141,6 +214,136 @@ export default function OrderMedicines() {
             })}
           </ScrollView>
 
+          {/*
+           * Sits above the catalogue: these are the medicines the customer
+           * actually came for, so they shouldn't be buried under a list of
+           * everything else.
+           */}
+          {customItems.length > 0 ? (
+            <>
+              <Text className="gd-section-title">
+                {t("order.customTitle")}
+              </Text>
+
+              <View className="gd-med-card">
+                {customItems.map((name, index) => {
+                  const editing = index === editIndex;
+
+                  return (
+                    <View
+                      key={name}
+                      className={clsx(
+                        "gd-med-row",
+                        index > 0 && "gd-med-divider",
+                      )}
+                    >
+                      {editing ? (
+                        <>
+                          <TextInput
+                            className="gd-custom-input"
+                            value={editText}
+                            onChangeText={setEditText}
+                            placeholderTextColor={colors.inkFaint}
+                            autoFocus
+                            autoCapitalize="words"
+                            autoCorrect={false}
+                            returnKeyType="done"
+                            onSubmitEditing={commitEdit}
+                          />
+
+                          <Pressable
+                            className="gd-custom-action gd-custom-action-save"
+                            style={pressSmall}
+                            onPress={commitEdit}
+                            accessibilityRole="button"
+                            accessibilityLabel={t("order.customSave")}
+                            hitSlop={8}
+                          >
+                            <MaterialCommunityIcons
+                              name="check"
+                              size={16}
+                              color={colors.brandInk}
+                            />
+                          </Pressable>
+                        </>
+                      ) : (
+                        <>
+                          <View className="gd-med-thumb">
+                            <MaterialCommunityIcons
+                              name="note-text-outline"
+                              size={20}
+                              color={colors.brandDark}
+                            />
+                          </View>
+
+                          <View className="min-w-0 flex-1">
+                            <Text className="gd-med-name" numberOfLines={2}>
+                              {name}
+                            </Text>
+                          </View>
+
+                          <View className="gd-custom-actions">
+                            <Pressable
+                              className="gd-custom-action"
+                              style={pressSmall}
+                              onPress={() => startEdit(index)}
+                              accessibilityRole="button"
+                              accessibilityLabel={t("order.customEdit", {
+                                name,
+                              })}
+                              hitSlop={8}
+                            >
+                              <MaterialCommunityIcons
+                                name="pencil-outline"
+                                size={16}
+                                color={colors.brandDark}
+                              />
+                            </Pressable>
+
+                            <Pressable
+                              className="gd-custom-action"
+                              style={pressSmall}
+                              onPress={() => removeTyped(index)}
+                              accessibilityRole="button"
+                              accessibilityLabel={t("order.customRemove", {
+                                name,
+                              })}
+                              hitSlop={8}
+                            >
+                              <MaterialCommunityIcons
+                                name="trash-can-outline"
+                                size={16}
+                                color={colors.brandDark}
+                              />
+                            </Pressable>
+                          </View>
+                        </>
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+
+              <Text className="gd-custom-note">{t("order.customNote")}</Text>
+
+              <Pressable
+                className="gd-btn-whatsapp mt-3"
+                style={pressRow}
+                onPress={sendCustomList}
+                accessibilityRole="button"
+              >
+                <MaterialCommunityIcons
+                  name="whatsapp"
+                  size={20}
+                  color="#ffffff"
+                />
+                <Text className="gd-btn-whatsapp-text">
+                  {t("order.customSend")}
+                </Text>
+              </Pressable>
+            </>
+          ) : null}
+
           <Text className="gd-section-title">
             {query.trim()
               ? t("order.resultsFor", { query: query.trim() })
@@ -150,6 +353,30 @@ export default function OrderMedicines() {
           {results.length === 0 ? (
             <View className="gd-empty">
               <Text className="gd-empty-text">{t("order.empty")}</Text>
+
+              {/*
+               * The catalogue is small, so "no results" is the common case for
+               * a real prescription. Rather than dead-end, it takes the name
+               * exactly as typed.
+               */}
+              {typed && !alreadyTyped ? (
+                <Pressable
+                  className="gd-empty-add"
+                  style={pressSmall}
+                  onPress={addTyped}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("order.addTyped", { name: typed })}
+                >
+                  <MaterialCommunityIcons
+                    name="plus"
+                    size={16}
+                    color={colors.brandDark}
+                  />
+                  <Text className="gd-empty-action" numberOfLines={1}>
+                    {t("order.addTyped", { name: typed })}
+                  </Text>
+                </Pressable>
+              ) : null}
             </View>
           ) : (
             <View className="gd-med-card">

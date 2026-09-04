@@ -1,9 +1,8 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { styled } from "nativewind";
 import { useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Linking,
   Platform,
@@ -22,6 +21,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import "@/global.css";
 import { isPhoneLike, toE164 } from "@/lib/auth";
 import type { TranslationKey } from "@/lib/i18n/translations";
+import { notify } from "@/lib/dialog";
+import { useGoBack } from "@/lib/nav";
 import { pressRow } from "@/lib/press";
 
 const SafeAreaView = styled(RNSafeAreaView);
@@ -60,7 +61,7 @@ const isServiceKey = (value: string): value is ServiceKey =>
 export default function ServiceRequest() {
   const { key } = useLocalSearchParams<{ key: string }>();
   const { t } = useLanguage();
-  const router = useRouter();
+  const goBack = useGoBack();
 
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
@@ -73,14 +74,15 @@ export default function ServiceRequest() {
 
   const submit = () => {
     if (!isPhoneLike(phone)) {
-      Alert.alert(t(copy.title), t("service.needNumber"));
+      notify(t(copy.title), t("service.needNumber"), t("common.ok"));
       return;
     }
-    Alert.alert(
+    notify(
       t("service.sentTitle"),
       t("service.sentBody", { phone: toE164(phone) }),
-      [{ text: t("common.ok"), onPress: () => router.back() }],
+      t("common.ok"),
     );
+    goBack();
   };
 
   const whatsapp = () => {

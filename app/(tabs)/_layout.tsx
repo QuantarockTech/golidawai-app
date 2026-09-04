@@ -4,10 +4,12 @@ import { Redirect, Tabs } from "expo-router";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import WebNav from "@/components/WebNav";
 import { colors, components } from "@/constants/theme";
 import { useCart } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/i18n/translations";
+import { useIsDesktop } from "@/lib/useIsDesktop";
 
 const tabBar = components.tabBar;
 
@@ -53,6 +55,7 @@ const TabLayout = () => {
   const { isSignedIn, isLoaded } = useAuth();
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
+  const isDesktop = useIsDesktop();
 
   // Wait for auth to load before rendering anything
   if (!isLoaded) {
@@ -67,12 +70,19 @@ const TabLayout = () => {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        /*
+         * A browser gets a website's top navigation; a phone keeps the bottom
+         * tab bar. Both render the same screens underneath.
+         */
+        headerShown: isDesktop,
+        header: () => <WebNav />,
         // The board labels every tab; unlabelled line icons are a guessing game.
         tabBarShowLabel: true,
         tabBarActiveTintColor: colors.brandDark,
         tabBarInactiveTintColor: colors.inkFaint,
-        tabBarStyle: {
+        tabBarStyle: isDesktop
+          ? { display: "none" }
+          : {
           // A flat white strip on a hairline, flush to the bottom edge —
           // board frame 04, replacing the template's floating dark pill.
           backgroundColor: colors.white,
