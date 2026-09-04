@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "golidawai",
+    "scheme": "golidawayi",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "runtimeVersion": {
@@ -65,8 +65,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Golidawai to access your photos so you can upload a prescription.",
-          "cameraPermission": "Allow Golidawai to use your camera so you can photograph a prescription.",
+          "photosPermission": "Allow GoliDawayi to access your photos so you can upload a prescription.",
+          "cameraPermission": "Allow GoliDawayi to use your camera so you can photograph a prescription.",
           "microphonePermission": false
         }
       ]

@@ -17,7 +17,7 @@
   --color-destructive: #dc2626;
   --color-subscription: #8fd1bd;
 
-  /* Golidawai brand system — pulled from golidawayi.com's live palette */
+  /* GoliDawayi brand system — pulled from golidawayi.com's live palette */
   --color-brand: #3fbbc0;
   --color-brand-dark: #0f5d61;
   --color-brand-light: #65c9cd;
@@ -58,7 +58,7 @@
   --font-sans-bold: sans-bold;
   --font-sans-extrabold: sans-extrabold;
 
-  /* Golidawai type — matches the site: Raleway headings, Poppins UI, Roboto body */
+  /* GoliDawayi type — matches the site: Raleway headings, Poppins UI, Roboto body */
   --font-heading: Raleway_800ExtraBold;
   --font-heading-bold: Raleway_700Bold;
   --font-ui: Poppins_500Medium;
@@ -470,7 +470,7 @@
 }
 
 /*
- * Golidawai auth screens (concept board frames 02 / 03).
+ * GoliDawayi auth screens (concept board frames 02 / 03).
  *
  * Deliberately NOT inside @layer components: react-native-web emits its own
  * unlayered classes onto every Text/View, and an unlayered rule always beats a

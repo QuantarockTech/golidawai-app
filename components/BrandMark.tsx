@@ -5,9 +5,9 @@ import { View } from "react-native";
 export const BRAND_TEAL = "#00A79D";
 
 const ART = {
-  mark: require("../assets/images/golidawai-mark.png"),
-  full: require("../assets/images/golidawai-logo.png"),
-  markWhite: require("../assets/images/golidawai-mark-white.png"),
+  mark: require("../assets/images/golidawayi-mark.png"),
+  full: require("../assets/images/golidawayi-logo.png"),
+  markWhite: require("../assets/images/golidawayi-mark-white.png"),
 } as const;
 
 // Intrinsic sizes of the artwork, used to keep each variant in proportion.

@@ -16,7 +16,7 @@ import {
   type TranslationKey,
 } from "@/lib/i18n/translations";
 
-const STORAGE_KEY = "golidawai.language";
+const STORAGE_KEY = "golidawayi.language";
 
 type LanguageContextValue = {
   language: Language;
