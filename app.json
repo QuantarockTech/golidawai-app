@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Golidawai",
+    "name": "GoliDawayi",
     "slug": "Golidawai",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,7 +12,8 @@
       "policy": "appVersion"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.golidawayi.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +24,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.quantarock.Golidawai",
+      "package": "com.golidawayi.app",
       "permissions": [
         "android.permission.CAMERA"
       ]

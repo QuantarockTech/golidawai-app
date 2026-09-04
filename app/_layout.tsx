@@ -43,7 +43,7 @@ function RootLayoutContent() {
     "sans-semibold": require("../assets/fonts/PlusJakartaSans-SemiBold.ttf"),
     "sans-extrabold": require("../assets/fonts/PlusJakartaSans-ExtraBold.ttf"),
     "sans-light": require("../assets/fonts/PlusJakartaSans-Light.ttf"),
-    // Golidawai brand type — mirrors golidawayi.com
+    // GoliDawayi brand type — mirrors golidawayi.com
     Raleway_700Bold,
     Raleway_800ExtraBold,
     Poppins_500Medium,

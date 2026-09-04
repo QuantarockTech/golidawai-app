@@ -40,8 +40,8 @@ const Onboarding = () => {
 
           <BrandMark variant="mark" tone="light" size={64} />
 
-          {/* Golidawai is the brand name — it stays Latin in both languages. */}
-          <Text className="ga-hero-wordmark">Golidawai</Text>
+          {/* GoliDawayi is the brand name — it stays Latin in both languages. */}
+          <Text className="ga-hero-wordmark">GoliDawayi</Text>
 
           <Text
             className={clsx(

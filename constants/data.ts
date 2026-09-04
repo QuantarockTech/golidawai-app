@@ -80,9 +80,10 @@ export const PHARMACY = {
     "444, Shyam Nagar (Main), Sukhliya",
     "Indore, M.P, India-452010",
   ],
-  phone: "+919755517194",
+  // TEMPORARY test number. Revert to +919755517194 / "+91 9755517194".
+  phone: "+919755683486",
   /** Same line, formatted for display rather than for the dialler. */
-  phoneDisplay: "+91 9755517194",
+  phoneDisplay: "+91 9755683486",
   email: "ravi@golidawayi.com",
 } as const;
 
@@ -93,4 +94,5 @@ export const PHARMACY_PHONE = PHARMACY.phone;
 export const AMBULANCE_PHONE = "108";
 
 /** WhatsApp ordering line behind the floating button. wa.me wants no "+". */
-export const WHATSAPP_NUMBER = "919755517194";
+// TEMPORARY test number. Revert to "919755517194".
+export const WHATSAPP_NUMBER = "919755683486";

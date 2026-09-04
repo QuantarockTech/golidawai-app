@@ -11,7 +11,7 @@ export const colors = {
   destructive: "#dc2626",
   subscription: "#8fd1bd",
 
-  // Golidawai brand system — mirrors the @theme block in global.css. Duplicated
+  // GoliDawayi brand system — mirrors the @theme block in global.css. Duplicated
   // here because icon and gradient props take JS values, not class names; keep
   // the two in step.
   brand: "#3fbbc0",

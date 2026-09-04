@@ -180,7 +180,7 @@ const en = {
   "profile.insurance": "Health insurance",
   "profile.language": "App language",
   "profile.logout": "Log out",
-  "profile.logoutConfirm": "Sign out of Golidawai?",
+  "profile.logoutConfirm": "Sign out of GoliDawayi?",
   "profile.noPhone": "Add your mobile number",
   "screen.back": "Back",
   "rx.title": "Upload Prescription",
