@@ -69,6 +69,12 @@
           "cameraPermission": "Allow GoliDawayi to use your camera so you can photograph a prescription.",
           "microphonePermission": false
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow GoliDawayi to use your location so we can deliver your order to the right address."
+        }
       ]
     ],
     "experiments": {

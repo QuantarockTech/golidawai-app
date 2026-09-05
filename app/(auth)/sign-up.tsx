@@ -1,5 +1,5 @@
 import { useAuth, useSignUp } from "@clerk/clerk-expo";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import { useRouter, type Href } from "expo-router";
 import { usePostHog } from "posthog-react-native";
 import { useState } from "react";

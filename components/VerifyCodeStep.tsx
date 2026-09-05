@@ -10,7 +10,7 @@ import {
 import { styled } from "nativewind";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
-import clsx from "clsx";
+import { clsx } from "clsx";
 
 import BrandMark from "@/components/BrandMark";
 import LanguageToggle from "@/components/LanguageToggle";

@@ -1,35 +1,78 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import { Pressable, Text, View } from "react-native";
 
 import { colors } from "@/constants/theme";
 import { useCart } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useOrderDraft } from "@/contexts/OrderDraftContext";
 import { pressSmall } from "@/lib/press";
-import { formatRupees } from "@/lib/utils";
+import type { ReorderEntry } from "@/lib/useReorder";
 
 type ReorderListProps = {
-  items: ReorderItem[];
+  entries: ReorderEntry[];
 };
 
-/** "Reorder" list — concept board frame 04. */
-const ReorderList = ({ items }: ReorderListProps) => {
+/**
+ * "Reorder" list — concept board frame 04, now filled from the customer's own
+ * history rather than a fixed six.
+ *
+ * A row goes back to wherever it came from. A catalogue medicine returns to the
+ * cart; one the customer typed returns to the typed list, because it still has
+ * no price and the pharmacist still has to quote it.
+ */
+const ReorderList = ({ entries }: ReorderListProps) => {
   const { t } = useLanguage();
   const { quantityOf, add, remove } = useCart();
+  const { typedItems, setTypedItems } = useOrderDraft();
+
+  const typedQuantity = (name: string) =>
+    typedItems.find(
+      (item) => item.name.toLowerCase() === name.toLowerCase(),
+    )?.quantity ?? 0;
+
+  const stepTyped = (name: string, by: number) => {
+    setTypedItems((current) => {
+      const index = current.findIndex(
+        (item) => item.name.toLowerCase() === name.toLowerCase(),
+      );
+
+      if (index === -1) return by > 0 ? [...current, { name, quantity: 1 }] : current;
+
+      return current.flatMap((item, i) => {
+        if (i !== index) return [item];
+        const quantity = item.quantity + by;
+        return quantity > 0 ? [{ ...item, quantity }] : [];
+      });
+    });
+  };
 
   return (
     <View className="gd-med-card">
-      {items.map((item, index) => {
-        const quantity = quantityOf(item.id);
+      {entries.map((entry, index) => {
+        const quantity =
+          entry.kind === "catalogue"
+            ? quantityOf(entry.id)
+            : typedQuantity(entry.name);
+
+        const addOne = () =>
+          entry.kind === "catalogue"
+            ? add(entry.item)
+            : stepTyped(entry.name, 1);
+
+        const removeOne = () =>
+          entry.kind === "catalogue"
+            ? remove(entry.id)
+            : stepTyped(entry.name, -1);
 
         return (
           <View
-            key={item.id}
+            key={entry.id}
             className={clsx("gd-med-row", index > 0 && "gd-med-divider")}
           >
             <View className="gd-med-thumb">
               <MaterialCommunityIcons
-                name="pill"
+                name={entry.kind === "catalogue" ? "pill" : "note-text-outline"}
                 size={20}
                 color={colors.brandDark}
               />
@@ -37,14 +80,14 @@ const ReorderList = ({ items }: ReorderListProps) => {
 
             <View className="min-w-0 flex-1">
               <Text className="gd-med-name" numberOfLines={1}>
-                {item.name}
+                {entry.name}
               </Text>
               <Text className="gd-med-sub" numberOfLines={1}>
-                {t("home.strip", { count: item.tabletsPerStrip })}
+                {entry.kind === "catalogue"
+                  ? t("home.strip", { count: entry.item.tabletsPerStrip })
+                  : t("home.typedItem")}
               </Text>
             </View>
-
-            <Text className="gd-med-price">{formatRupees(item.price)}</Text>
 
             {/*
              * Once an item is in the cart the single "+" becomes a stepper, so
@@ -55,9 +98,9 @@ const ReorderList = ({ items }: ReorderListProps) => {
               <Pressable
                 className="gd-med-add"
                 style={pressSmall}
-                onPress={() => add(item)}
+                onPress={addOne}
                 accessibilityRole="button"
-                accessibilityLabel={t("home.addToCart", { name: item.name })}
+                accessibilityLabel={t("home.addToCart", { name: entry.name })}
                 hitSlop={8}
               >
                 <MaterialCommunityIcons
@@ -71,10 +114,10 @@ const ReorderList = ({ items }: ReorderListProps) => {
                 <Pressable
                   className="gd-stepper-btn"
                   style={pressSmall}
-                  onPress={() => remove(item.id)}
+                  onPress={removeOne}
                   accessibilityRole="button"
                   accessibilityLabel={t("home.removeFromCart", {
-                    name: item.name,
+                    name: entry.name,
                   })}
                   hitSlop={8}
                 >
@@ -90,9 +133,9 @@ const ReorderList = ({ items }: ReorderListProps) => {
                 <Pressable
                   className="gd-stepper-btn"
                   style={pressSmall}
-                  onPress={() => add(item)}
+                  onPress={addOne}
                   accessibilityRole="button"
-                  accessibilityLabel={t("home.addToCart", { name: item.name })}
+                  accessibilityLabel={t("home.addToCart", { name: entry.name })}
                   hitSlop={8}
                 >
                   <MaterialCommunityIcons

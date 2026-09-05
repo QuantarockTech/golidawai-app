@@ -1,5 +1,5 @@
 import { useSignIn } from "@clerk/clerk-expo";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import { useRouter, type Href } from "expo-router";
 import { styled } from "nativewind";
 import { usePostHog } from "posthog-react-native";

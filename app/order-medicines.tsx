@@ -1,5 +1,6 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import clsx from "clsx";
+import { clsx } from "clsx";
+import { useRouter } from "expo-router";
 import { styled } from "nativewind";
 import { useMemo, useState } from "react";
 import {
@@ -16,17 +17,15 @@ import ScreenHeader from "@/components/ScreenHeader";
 import {
   MEDICINE_CATEGORIES,
   MEDICINES,
-  PHARMACY,
   PHARMACY_PHONE,
-  WHATSAPP_NUMBER,
 } from "@/constants/data";
 import { colors } from "@/constants/theme";
 import { useCart } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useOrderDraft } from "@/contexts/OrderDraftContext";
 import "@/global.css";
 import type { TranslationKey } from "@/lib/i18n/translations";
 import { pressRow, pressSmall } from "@/lib/press";
-import { formatRupees } from "@/lib/utils";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
@@ -42,17 +41,19 @@ const CATEGORY_KEYS: Record<MedicineCategory, TranslationKey> = {
 /** Order Medicines — concept board frame 06. */
 export default function OrderMedicines() {
   const { t } = useLanguage();
-  const { quantityOf, add, remove, itemCount, total } = useCart();
-
+  const router = useRouter();
+  const { quantityOf, add, remove, itemCount } = useCart();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<MedicineCategory | null>(null);
   /*
-   * Medicines the customer typed that the catalogue doesn't stock. Kept out of
-   * the cart on purpose: a cart line needs a price, and nothing here has been
-   * matched to stock, so these travel to the pharmacist over WhatsApp instead
-   * of through a checkout that would have to invent a total.
+   * Medicines the customer typed that the catalogue doesn't stock.
+   *
+   * Still kept out of the cart's priced lines — a cart line needs a price, and
+   * nothing here has been matched to stock — but held in the shared draft so
+   * they ride along in the same message as everything else.
    */
-  const [customItems, setCustomItems] = useState<string[]>([]);
+  const { typedItems: customItems, setTypedItems: setCustomItems } =
+    useOrderDraft();
   /** Index of the typed row being corrected, or -1 when none is. */
   const [editIndex, setEditIndex] = useState(-1);
   const [editText, setEditText] = useState("");
@@ -68,18 +69,38 @@ export default function OrderMedicines() {
 
   const typed = query.trim();
   const alreadyTyped = customItems.some(
-    (name) => name.toLowerCase() === typed.toLowerCase(),
+    (item) => item.name.toLowerCase() === typed.toLowerCase(),
   );
 
   const addTyped = () => {
-    setCustomItems((current) => [...current, typed]);
+    setCustomItems((current) => [...current, { name: typed, quantity: 1 }]);
     // Clearing the box puts the freshly added name in view above.
     setQuery("");
   };
 
+  /**
+   * Nudges a typed row's count, and removes the row at zero.
+   *
+   * Same stepper the catalogue rows carry, for the same reason: "Dolo 650" and
+   * "Dolo 650 × 3" are different orders, and without this the pharmacy has to
+   * ring up to find out which one was meant.
+   */
+  const stepTyped = (index: number, by: number) => {
+    setCustomItems((current) =>
+      current.flatMap((item, i) => {
+        if (i !== index) return [item];
+        const quantity = item.quantity + by;
+        return quantity > 0 ? [{ ...item, quantity }] : [];
+      }),
+    );
+
+    // The row below would otherwise inherit an open editor when one is removed.
+    if (by < 0) setEditIndex(-1);
+  };
+
   const startEdit = (index: number) => {
     setEditIndex(index);
-    setEditText(customItems[index]);
+    setEditText(customItems[index].name);
   };
 
   /**
@@ -92,39 +113,31 @@ export default function OrderMedicines() {
 
     setCustomItems((current) => {
       const clashes = current.some(
-        (name, index) =>
-          index !== editIndex && name.toLowerCase() === next.toLowerCase(),
+        (item, index) =>
+          index !== editIndex && item.name.toLowerCase() === next.toLowerCase(),
       );
       if (!next || clashes) return current;
 
-      return current.map((name, index) => (index === editIndex ? next : name));
+      return current.map((item, index) =>
+        index === editIndex ? { ...item, name: next } : item,
+      );
     });
 
     setEditIndex(-1);
     setEditText("");
   };
 
-  const removeTyped = (index: number) => {
-    setCustomItems((current) => current.filter((_, i) => i !== index));
-    // The row under it would otherwise inherit the open editor.
-    setEditIndex(-1);
-  };
-
   /**
-   * WhatsApp is the one route that reaches the pharmacist today, so the typed
-   * list goes out as plain text they can read and price by hand.
+   * Takes the typed list to the cart, which is where orders leave from.
+   *
+   * The names are already in the shared draft — they went there as they were
+   * typed — so this only has to close the editor and move the customer along.
+   * It used to send a message of its own, which is exactly how one delivery
+   * became three WhatsApp threads.
    */
-  const sendCustomList = () => {
-    const lines = [
-      t("order.customTitle"),
-      ...customItems.map((name, index) => `${index + 1}. ${name}`),
-      "",
-      `${t("rx.deliverTo")}: ${PHARMACY.addressLines.join(", ")}`,
-    ];
-
-    void Linking.openURL(
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`,
-    );
+  const reviewOrder = () => {
+    setEditIndex(-1);
+    router.push("/cart");
   };
 
   return (
@@ -226,8 +239,9 @@ export default function OrderMedicines() {
               </Text>
 
               <View className="gd-med-card">
-                {customItems.map((name, index) => {
+                {customItems.map((item, index) => {
                   const editing = index === editIndex;
+                  const name = item.name;
 
                   return (
                     <View
@@ -282,6 +296,50 @@ export default function OrderMedicines() {
                             </Text>
                           </View>
 
+                          <View className="gd-stepper">
+                            <Pressable
+                              className="gd-stepper-btn"
+                              style={pressSmall}
+                              onPress={() => stepTyped(index, -1)}
+                              accessibilityRole="button"
+                              accessibilityLabel={
+                                item.quantity === 1
+                                  ? t("order.customRemove", { name })
+                                  : t("order.customLess", { name })
+                              }
+                              hitSlop={8}
+                            >
+                              <MaterialCommunityIcons
+                                name={
+                                  item.quantity === 1
+                                    ? "trash-can-outline"
+                                    : "minus"
+                                }
+                                size={16}
+                                color={colors.brandDark}
+                              />
+                            </Pressable>
+                            <Text className="gd-stepper-count">
+                              {item.quantity}
+                            </Text>
+                            <Pressable
+                              className="gd-stepper-btn"
+                              style={pressSmall}
+                              onPress={() => stepTyped(index, 1)}
+                              accessibilityRole="button"
+                              accessibilityLabel={t("order.customMore", {
+                                name,
+                              })}
+                              hitSlop={8}
+                            >
+                              <MaterialCommunityIcons
+                                name="plus"
+                                size={16}
+                                color={colors.brandDark}
+                              />
+                            </Pressable>
+                          </View>
+
                           <View className="gd-custom-actions">
                             <Pressable
                               className="gd-custom-action"
@@ -299,23 +357,6 @@ export default function OrderMedicines() {
                                 color={colors.brandDark}
                               />
                             </Pressable>
-
-                            <Pressable
-                              className="gd-custom-action"
-                              style={pressSmall}
-                              onPress={() => removeTyped(index)}
-                              accessibilityRole="button"
-                              accessibilityLabel={t("order.customRemove", {
-                                name,
-                              })}
-                              hitSlop={8}
-                            >
-                              <MaterialCommunityIcons
-                                name="trash-can-outline"
-                                size={16}
-                                color={colors.brandDark}
-                              />
-                            </Pressable>
                           </View>
                         </>
                       )}
@@ -327,19 +368,12 @@ export default function OrderMedicines() {
               <Text className="gd-custom-note">{t("order.customNote")}</Text>
 
               <Pressable
-                className="gd-btn-whatsapp mt-3"
+                className="gd-btn mt-3"
                 style={pressRow}
-                onPress={sendCustomList}
+                onPress={reviewOrder}
                 accessibilityRole="button"
               >
-                <MaterialCommunityIcons
-                  name="whatsapp"
-                  size={20}
-                  color="#ffffff"
-                />
-                <Text className="gd-btn-whatsapp-text">
-                  {t("order.customSend")}
-                </Text>
+                <Text className="gd-btn-text">{t("order.customReview")}</Text>
               </Pressable>
             </>
           ) : null}
@@ -420,9 +454,15 @@ export default function OrderMedicines() {
                       ) : null}
                     </View>
 
-                    <Text className="gd-med-price">
-                      {formatRupees(item.price)}
-                    </Text>
+                    {/*
+                      No price on this row.
+
+                      The catalogue price is an estimate the app never checked
+                      against stock or today's MRP, and the pharmacy quotes the
+                      real one in the WhatsApp reply. Showing it while someone
+                      is choosing invites them to treat it as the price, which
+                      is the one thing it is not.
+                    */}
 
                     {quantity === 0 ? (
                       <Pressable
@@ -514,16 +554,22 @@ export default function OrderMedicines() {
         </ScrollView>
 
         {/*
-         * Board frame 06 docks the cart to the bottom. There is no checkout
-         * screen yet (frame 08), so it reports the running total rather than
-         * offering a way through that would dead-end.
-         */}
+          Board frame 06 docks the cart to the bottom. It carries a count and
+          no total: a running rupee figure on a screen that prices nothing
+          would leave the customer no way to tell where the number came from.
+          The cart adds it up, and says there that it is an estimate.
+        */}
         {itemCount > 0 ? (
-          <View className="gd-cart-dock">
+          <Pressable
+            className="gd-cart-dock"
+            style={pressRow}
+            onPress={() => router.push("/cart")}
+            accessibilityRole="button"
+          >
             <Text className="gd-cart-dock-text">
-              {t("home.inCart", { count: itemCount })} · {formatRupees(total)}
+              {t("home.inCart", { count: itemCount })}
             </Text>
-          </View>
+          </Pressable>
         ) : null}
       </SafeAreaView>
     </View>

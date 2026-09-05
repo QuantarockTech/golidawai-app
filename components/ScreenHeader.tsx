@@ -1,5 +1,5 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import { Pressable, Text, View } from "react-native";
 
 import WebNav from "@/components/WebNav";

@@ -1,5 +1,5 @@
 import { useSSO, useSignIn } from "@clerk/clerk-expo";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import * as AuthSession from "expo-auth-session";
 import { useRouter, type Href } from "expo-router";
 import * as WebBrowser from "expo-web-browser";

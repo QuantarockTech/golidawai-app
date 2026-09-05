@@ -2,24 +2,16 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { styled } from "nativewind";
-import { useState } from "react";
-import {
-  Linking,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 import ScreenHeader from "@/components/ScreenHeader";
-import { PHARMACY, WHATSAPP_NUMBER } from "@/constants/data";
 import { colors } from "@/constants/theme";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useOrderDraft } from "@/contexts/OrderDraftContext";
 import "@/global.css";
 import { notify } from "@/lib/dialog";
-import { useGoBack } from "@/lib/nav";
+import { LINK_LIFETIME_DAYS } from "@/lib/imgbb";
 import { pressRow, pressSmall } from "@/lib/press";
 
 const SafeAreaView = styled(RNSafeAreaView);
@@ -51,10 +43,7 @@ const loadPicker = (): Picker | null => {
 export default function UploadPrescription() {
   const { t } = useLanguage();
   const router = useRouter();
-  const goBack = useGoBack();
-
-  const [photos, setPhotos] = useState<string[]>([]);
-  const [notes, setNotes] = useState("");
+  const { photos, setPhotos, notes, setNotes } = useOrderDraft();
 
   const pick = async (fromCamera: boolean) => {
     if (photos.length >= MAX_FILES) {
@@ -78,23 +67,30 @@ export default function UploadPrescription() {
         return;
       }
 
+      // base64 is requested up front rather than read back from the file later:
+      // the picker is the one place that can hand it over the same way on every
+      // platform. Quality stays at 0.7 — a prescription has to stay legible.
       const result = fromCamera
         ? await ImagePicker.launchCameraAsync({
             mediaTypes: ["images"],
             quality: 0.7,
+            base64: true,
           })
         : await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ["images"],
             quality: 0.7,
+            base64: true,
             allowsMultipleSelection: true,
             selectionLimit: MAX_FILES - photos.length,
           });
 
       if (result.canceled) return;
 
-      setPhotos((current) =>
-        [...current, ...result.assets.map((a) => a.uri)].slice(0, MAX_FILES),
-      );
+      const picked = result.assets
+        .filter((asset) => Boolean(asset.base64))
+        .map((asset) => ({ uri: asset.uri, base64: asset.base64 as string }));
+
+      setPhotos((current) => [...current, ...picked].slice(0, MAX_FILES));
     } catch {
       // Thrown when the native module is missing from this build.
       notify(t("rx.title"), t("rx.pickerUnavailable"), t("common.ok"));
@@ -102,33 +98,20 @@ export default function UploadPrescription() {
   };
 
   /**
-   * The board runs upload, WhatsApp and phone into one pharmacist queue. With
-   * no backend yet, WhatsApp is the route that genuinely delivers today, so
-   * "submit" hands the order over there with the notes already written out.
+   * Takes the prescription to the cart, which is where orders leave from.
+   *
+   * The photos are already in the shared draft, so this screen no longer sends
+   * or uploads anything — the cart does both, once, for the whole order. That
+   * also means nothing is uploaded for a prescription the customer photographs
+   * and then thinks better of.
    */
-  const submit = () => {
+  const review = () => {
     if (photos.length === 0) {
       notify(t("rx.title"), t("rx.needOne"), t("common.ok"));
       return;
     }
-    notify(
-      t("rx.sentTitle"),
-      t("rx.sentBody", { phone: PHARMACY.phoneDisplay }),
-      t("common.ok"),
-    );
-    goBack();
-  };
 
-  const sendViaWhatsApp = () => {
-    const lines = [
-      t("rx.title"),
-      notes.trim() ? `${t("rx.notes")}: ${notes.trim()}` : "",
-      `${t("rx.deliverTo")}: ${PHARMACY.addressLines.join(", ")}`,
-    ].filter(Boolean);
-
-    void Linking.openURL(
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`,
-    );
+    router.push("/cart");
   };
 
   return (
@@ -162,10 +145,10 @@ export default function UploadPrescription() {
 
           {photos.length > 0 ? (
             <View className="gd-rx-thumbs">
-              {photos.map((uri, index) => (
-                <View key={uri} className="gd-rx-thumb">
+              {photos.map((photo, index) => (
+                <View key={photo.uri} className="gd-rx-thumb">
                   <Image
-                    source={{ uri }}
+                    source={{ uri: photo.uri }}
                     style={{ flex: 1 }}
                     contentFit="cover"
                   />
@@ -173,7 +156,7 @@ export default function UploadPrescription() {
                     className="gd-rx-thumb-remove"
                     style={pressSmall}
                     onPress={() =>
-                      setPhotos((c) => c.filter((p) => p !== uri))
+                      setPhotos((c) => c.filter((p) => p.uri !== photo.uri))
                     }
                     accessibilityRole="button"
                     accessibilityLabel={t("rx.remove", { index: index + 1 })}
@@ -206,16 +189,6 @@ export default function UploadPrescription() {
             </View>
           ) : null}
 
-          <Pressable
-            className="gd-btn-whatsapp mt-4"
-            style={pressRow}
-            onPress={sendViaWhatsApp}
-            accessibilityRole="button"
-          >
-            <MaterialCommunityIcons name="whatsapp" size={20} color="#ffffff" />
-            <Text className="gd-btn-whatsapp-text">{t("rx.viaWhatsApp")}</Text>
-          </Pressable>
-
           <Text className="gd-section-title">{t("rx.notes")}</Text>
           <TextInput
             className="gd-textarea"
@@ -227,26 +200,18 @@ export default function UploadPrescription() {
             textAlignVertical="top"
           />
 
-          <Text className="gd-section-title">{t("rx.deliverTo")}</Text>
-          <View className="gd-address">
-            <MaterialCommunityIcons
-              name="map-marker-outline"
-              size={20}
-              color={colors.brandDark}
-            />
-            <Text className="gd-address-text">
-              {PHARMACY.addressLines.join(", ")}
-            </Text>
-          </View>
-
           <Pressable
             className="gd-btn mt-5"
             style={pressRow}
-            onPress={submit}
+            onPress={review}
             accessibilityRole="button"
           >
-            <Text className="gd-btn-text">{t("rx.submit")}</Text>
+            <Text className="gd-btn-text">{t("rx.review")}</Text>
           </Pressable>
+
+          <Text className="gd-send-note">
+            {t("rx.linkNote", { days: LINK_LIFETIME_DAYS })}
+          </Text>
 
           <Pressable
             className="gd-link-row"

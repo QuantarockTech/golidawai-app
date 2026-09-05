@@ -1,5 +1,5 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import { usePathname, useRouter, type Href } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 

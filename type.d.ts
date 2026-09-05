@@ -94,7 +94,13 @@ declare global {
     rxRequired: boolean;
   }
 
-  /** Ambulance Booking — concept board frame 07. */
+  /**
+   * Ambulance Booking — concept board frame 07.
+   *
+   * `price` is data the screen no longer shows: the fare belongs to whoever
+   * dispatches the vehicle, not to an app that only places the call. Kept so
+   * the decision is reversible, in step with `Medicine.price`.
+   */
   interface AmbulanceType {
     id: string;
     /** Minutes to arrival, as quoted on the board. */
@@ -108,26 +114,100 @@ declare global {
    */
   type ServiceKey = "doctorConsult" | "labTests" | "insurance";
 
-  /** Checkout & Tracking — concept board frame 08. */
-  type OrderStatus = "placed" | "verified" | "packed" | "outForDelivery";
+  /**
+   * Where an order is going.
+   *
+   * `text` is what a human reads — either typed by the customer or resolved
+   * from GPS. The coordinates ride alongside when the device supplied them,
+   * because a map pin locates a house in a way an Indore address rarely does.
+   */
+  interface DeliveryAddress {
+    text: string;
+    latitude?: number;
+    longitude?: number;
+    /** Metres of GPS uncertainty, when the device reported it. */
+    accuracy?: number;
+    /**
+     * How the coordinates were arrived at. `map` outranks `gps`: the device
+     * only ever guesses, whereas a customer who dragged the pin onto their own
+     * roof was looking at the answer.
+     */
+    source: "gps" | "manual" | "map";
+    savedAt: string;
+  }
 
+  /**
+   * How the customer wants an order handled.
+   *
+   * Cash and UPI only. A neighbourhood pharmacy's rider carries a wallet and a
+   * QR code, not a card machine — add "card" here and to PAYMENT_LABELS in
+   * lib/whatsapp.ts if that stops being true.
+   */
+  type PaymentMethod = "cash" | "upi";
+
+  interface OrderPrefs {
+    /** Whether an equivalent generic may be sent when the brand is out. */
+    allowSubstitution: boolean;
+    payment: PaymentMethod;
+    /** True only for the order being sent right now; never persisted. */
+    urgent: boolean;
+  }
+
+  /**
+   * A medicine and how much of it, with no money attached.
+   *
+   * The app quotes nothing. Catalogue prices were never checked against stock
+   * or the day's MRP, so every figure it could print would be a guess the
+   * customer reads as a promise — and the pharmacy has to correct it in the
+   * reply anyway. `Medicine.price` still exists in the catalogue data, unread,
+   * so this is a decision that can be undone rather than a deletion.
+   */
   interface OrderLine {
     id: string;
     name: string;
     quantity: number;
-    /** Line total, not unit price. */
-    price: number;
   }
 
-  interface Order {
-    /** Display id, e.g. "GD1042". */
+  /**
+   * A medicine the customer typed because the catalogue doesn't stock it.
+   *
+   * Carries a quantity for the same reason a catalogue line does: "Dolo 650"
+   * and "Dolo 650 × 3" are different orders, and a pharmacy reading the first
+   * has to ring up to find out which was meant.
+   */
+  interface TypedItem {
+    name: string;
+    quantity: number;
+  }
+
+  /**
+   * What an order is made of — they read differently in the history.
+   *
+   * `mixed` covers a basket holding more than one of catalogue items, typed
+   * medicines and prescriptions, which is the normal case once all three go in
+   * a single message. Derive it with `orderKindOf` rather than by hand.
+   */
+  type OrderKind = "cart" | "typedList" | "prescription" | "mixed";
+
+  /**
+   * A record of what was handed to WhatsApp.
+   *
+   * Not an order in any system sense: nothing here was placed, priced or
+   * accepted, and no server has a copy. It exists so the customer can see what
+   * they asked for and when, which is the whole of what the app can honestly
+   * claim once WhatsApp takes over.
+   */
+  interface SentOrder {
+    /** Display id, e.g. "GD1042", quoted in the WhatsApp message. */
     id: string;
-    placedAt: string;
-    status: OrderStatus;
+    sentAt: string;
+    kind: OrderKind;
     lines: OrderLine[];
-    deliveryFee: number;
-    total: number;
-    /** Set when any line needed a prescription, so it shows the review step. */
+    /** Free-text medicines the customer typed rather than picked. */
+    typedItems: TypedItem[];
+    prescriptionCount: number;
+    /** Flattened at send time; the saved address can change afterwards. */
+    deliveryText: string;
     needsPharmacistReview: boolean;
   }
 }

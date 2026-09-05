@@ -9,17 +9,38 @@ import { colors } from "@/constants/theme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useOrders } from "@/contexts/OrdersContext";
 import "@/global.css";
-import { STATUS_LABEL_KEYS } from "@/lib/orderStatus";
+import { KIND_LABELS } from "@/lib/orderKind";
 import { pressRow } from "@/lib/press";
-import { formatRupees } from "@/lib/utils";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
-/** Orders list — the entry point to board frame 08. */
+/**
+ * What this phone has sent to the pharmacy.
+ *
+ * A record, not a tracker. The order lives in a WhatsApp thread once it leaves,
+ * and nothing here can know whether it was packed or delivered — so the screen
+ * shows what was asked for and when, and points at WhatsApp for the rest.
+ */
 export default function Orders() {
   const { t } = useLanguage();
   const router = useRouter();
   const { orders } = useOrders();
+
+  const summarise = (order: SentOrder): string => {
+    const parts: string[] = [];
+
+    if (order.lines.length > 0) {
+      parts.push(t("orders.itemCount", { count: order.lines.length }));
+    }
+    if (order.typedItems.length > 0) {
+      parts.push(t("orders.typedCount", { count: order.typedItems.length }));
+    }
+    if (order.prescriptionCount > 0) {
+      parts.push(t("orders.rxCount", { count: order.prescriptionCount }));
+    }
+
+    return parts.join(" · ");
+  };
 
   return (
     <View className="gd-screen">
@@ -50,6 +71,8 @@ export default function Orders() {
             showsVerticalScrollIndicator={false}
             contentContainerClassName="gd-scroll-content"
           >
+            <Text className="gd-custom-note mt-0">{t("orders.localNote")}</Text>
+
             {orders.map((order) => (
               <Pressable
                 key={order.id}
@@ -61,20 +84,17 @@ export default function Orders() {
                 <View className="min-w-0 flex-1">
                   <Text className="gd-order-id">#{order.id}</Text>
                   <Text className="gd-order-meta">
-                    {t("orders.placedOn", {
-                      date: dayjs(order.placedAt).format("D MMM, h:mm A"),
+                    {t("orders.sentOn", {
+                      date: dayjs(order.sentAt).format("D MMM, h:mm A"),
                     })}
                   </Text>
-                  <Text className="gd-order-meta">
-                    {t("orders.itemCount", { count: order.lines.length })} ·{" "}
-                    {formatRupees(order.total)}
-                  </Text>
+                  <Text className="gd-order-meta">{summarise(order)}</Text>
                 </View>
 
                 <View className="items-end gap-1">
                   <View className="gd-order-status">
                     <Text className="gd-order-status-text">
-                      {t(STATUS_LABEL_KEYS[order.status])}
+                      {t(KIND_LABELS[order.kind])}
                     </Text>
                   </View>
                   <MaterialCommunityIcons

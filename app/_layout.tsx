@@ -16,6 +16,9 @@ import { useEffect, useRef } from "react";
 
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { DeliveryProvider } from "@/contexts/DeliveryContext";
+import { OrderDraftProvider } from "@/contexts/OrderDraftContext";
+import { OrderPrefsProvider } from "@/contexts/OrderPrefsContext";
 import { OrdersProvider } from "@/contexts/OrdersContext";
 import { posthog } from "@/lib/posthog";
 
@@ -98,9 +101,15 @@ export default function RootLayout() {
   const content = (
     <LanguageProvider>
       <CartProvider>
-        <OrdersProvider>
-          <RootLayoutContent />
-        </OrdersProvider>
+        <DeliveryProvider>
+          <OrderPrefsProvider>
+            <OrderDraftProvider>
+              <OrdersProvider>
+                <RootLayoutContent />
+              </OrdersProvider>
+            </OrderDraftProvider>
+          </OrderPrefsProvider>
+        </DeliveryProvider>
       </CartProvider>
     </LanguageProvider>
   );

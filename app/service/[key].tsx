@@ -24,6 +24,11 @@ import type { TranslationKey } from "@/lib/i18n/translations";
 import { notify } from "@/lib/dialog";
 import { useGoBack } from "@/lib/nav";
 import { pressRow } from "@/lib/press";
+import { useCustomer } from "@/lib/useCustomer";
+import {
+  buildServiceRequestMessage,
+  openWhatsAppWith,
+} from "@/lib/whatsapp";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
@@ -62,6 +67,7 @@ export default function ServiceRequest() {
   const { key } = useLocalSearchParams<{ key: string }>();
   const { t } = useLanguage();
   const goBack = useGoBack();
+  const customer = useCustomer();
 
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
@@ -72,16 +78,33 @@ export default function ServiceRequest() {
 
   const copy = SERVICE_COPY[key];
 
-  const submit = () => {
+  /*
+   * Goes to WhatsApp rather than nowhere.
+   *
+   * This button used to promise a callback and send nothing — there was no
+   * backend to receive it. WhatsApp is the back office now, so the request
+   * reaches a person who can actually ring back.
+   */
+  const submit = async () => {
     if (!isPhoneLike(phone)) {
       notify(t(copy.title), t("service.needNumber"), t("common.ok"));
       return;
     }
-    notify(
-      t("service.sentTitle"),
-      t("service.sentBody", { phone: toE164(phone) }),
-      t("common.ok"),
+
+    const opened = await openWhatsAppWith(
+      buildServiceRequestMessage({
+        service: t(copy.title),
+        name: customer.name,
+        phone: toE164(phone),
+        note,
+      }),
     );
+
+    if (!opened) {
+      notify(t(copy.title), t("whatsapp.openFailed"), t("common.ok"));
+      return;
+    }
+
     goBack();
   };
 
@@ -151,7 +174,7 @@ export default function ServiceRequest() {
             <Pressable
               className="gd-btn mt-5"
               style={pressRow}
-              onPress={submit}
+              onPress={() => void submit()}
               accessibilityRole="button"
             >
               <Text className="gd-btn-text">{t("service.submit")}</Text>

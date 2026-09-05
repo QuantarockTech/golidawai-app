@@ -20,7 +20,6 @@ type CartValue = {
   remove: (id: string) => void;
   clear: () => void;
   itemCount: number;
-  total: number;
   /** True when any line needs a prescription, which gates checkout messaging. */
   needsPharmacistReview: boolean;
 };
@@ -70,10 +69,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const value = useMemo<CartValue>(() => {
     const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
-    const total = lines.reduce(
-      (sum, line) => sum + line.item.price * line.quantity,
-      0,
-    );
     const needsPharmacistReview = lines.some(
       (line) => "rxRequired" in line.item && line.item.rxRequired,
     );
@@ -84,7 +79,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       remove,
       clear,
       itemCount,
-      total,
       needsPharmacistReview,
     };
   }, [add, clear, lines, quantityOf, remove]);

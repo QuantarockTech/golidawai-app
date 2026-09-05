@@ -1079,6 +1079,152 @@
   @apply flex-1 text-[14px] font-body text-ink;
 }
 
+.gd-address-empty {
+  @apply flex-1 text-[14px] font-body text-ink-faint;
+}
+
+/* Delivery address — the "use my current location" row */
+.gd-locate {
+  @apply flex-row items-center gap-3 rounded-2xl border border-brand/30 bg-brand/8 px-4 py-3.5;
+}
+
+.gd-locate-title {
+  @apply text-[15px] font-ui-semibold text-brand-dark;
+}
+
+.gd-locate-hint {
+  @apply mt-0.5 text-[12px] font-body text-ink-muted;
+}
+
+/*
+ * Delivery address — "search for area, street name", above everything else.
+ *
+ * The box itself reuses .gd-search and .gd-search-input from the catalogue
+ * screens, brand focus ring included; only the margin differs, because the
+ * results hang directly beneath this one rather than a list starting below it.
+ */
+.gd-addr-search {
+  @apply mb-0;
+}
+
+.gd-search-results {
+  @apply mt-2 overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+}
+
+.gd-search-result {
+  @apply flex-row items-center gap-3 px-4 py-3;
+}
+
+/*
+ * Every row but the first. A `:last-child` rule would read better, but that
+ * pseudo-class does not survive the trip to native, and the last row would keep
+ * a stray line under it inside a rounded card.
+ */
+.gd-search-result-divided {
+  @apply border-t border-hairline-soft;
+}
+
+.gd-search-result-title {
+  @apply text-[14.5px] font-ui-semibold text-ink;
+}
+
+.gd-search-result-sub {
+  @apply mt-0.5 text-[12px] font-body text-ink-muted;
+}
+
+.gd-search-empty {
+  @apply mt-2 px-1 text-[13px] font-body text-ink-muted;
+}
+
+/* Separates the search box from the fallback below it. */
+.gd-search-or {
+  @apply mt-4 mb-2 text-center text-[12px] font-body text-ink-faint;
+}
+
+/*
+ * Delivery address — the map the customer nudges onto their own building.
+ *
+ * Not `.gd-map`: the ambulance screen already owns that name for its static
+ * placeholder, and being defined later that rule would win here.
+ */
+.gd-pickmap {
+  @apply mt-2.5 h-56 overflow-hidden rounded-2xl border border-hairline-soft bg-mist;
+}
+
+/*
+ * The pin sits still in the middle and the map slides under it, which is the
+ * gesture people already know from ride and delivery apps — and it spares a
+ * thumb the job of hitting a marker it is covering.
+ */
+.gd-map-pin {
+  /* Above Leaflet's tile panes, which claim z-index 400 on the web build. */
+  @apply absolute inset-0 z-[500] items-center justify-center;
+}
+
+/* Lifts the pin so its point, not its middle, marks the centre of the map. */
+.gd-map-pin-inner {
+  @apply -mt-5;
+}
+
+.gd-map-hint {
+  @apply mt-1.5 text-center text-[12px] font-body text-ink-muted;
+}
+
+/* Handling — substitution, urgency and payment, on every ordering screen. */
+.gd-prefs {
+  @apply overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+}
+
+.gd-pref-row {
+  @apply flex-row items-center gap-3 px-4 py-3;
+}
+
+.gd-pref-block {
+  @apply px-4 py-3;
+}
+
+.gd-pref-divider {
+  @apply border-t border-hairline-soft;
+}
+
+.gd-pref-label {
+  @apply text-[14.5px] font-ui-semibold text-ink;
+}
+
+.gd-pref-hint {
+  @apply mt-0.5 text-[12px] font-body text-ink-muted;
+}
+
+.gd-pay {
+  @apply flex-1 flex-row items-center justify-center gap-2 rounded-xl border border-hairline-soft bg-mist px-3 py-2.5;
+}
+
+.gd-pay-active {
+  @apply border-brand/40 bg-brand/10;
+}
+
+.gd-pay-text {
+  @apply text-[13.5px] font-body text-ink-muted;
+}
+
+.gd-pay-text-active {
+  @apply font-ui-semibold text-brand-dark;
+}
+
+/* Sits under a send button to say what pressing it actually does. */
+.gd-send-note {
+  @apply mt-2 text-center text-[11.5px] font-body text-ink-muted;
+}
+
+/* Sent-order header — replaces the tracker on the order detail screen. */
+.gd-sent-banner {
+  @apply flex-row items-center gap-3 rounded-2xl border border-brand/25 bg-brand/8 px-4 py-3.5;
+}
+
+.gd-sent-title {
+  @apply text-[15px] font-ui-semibold text-brand-dark;
+}
+
 .gd-link-row {
   @apply mt-3 items-center;
 }
@@ -1130,40 +1276,49 @@
 }
 
 /* Ambulance — frame 07 */
-.gd-map {
-  @apply h-32 items-center justify-center rounded-2xl bg-brand/15;
+
+/* Said in red, because a vague pickup on this screen is not a small problem. */
+.gd-amb-warn {
+  @apply mt-1.5 text-[12.5px] font-ui-semibold text-emergency;
 }
 
+/*
+ * The pin's coordinates, spelled out to be read down a phone line. Tabular
+ * figures so the digits do not shift about while the map is being dragged.
+ */
+.gd-amb-coords {
+  @apply mt-1.5 text-center text-[12.5px] font-body tabular-nums text-ink-muted;
+}
+
+/* "What to tell them" — the checklist that replaced a selector doing nothing. */
+.gd-tell {
+  @apply mt-1 overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+}
+
+.gd-tell-row {
+  @apply flex-row items-start gap-3 px-4 py-3;
+}
+
+.gd-tell-divider {
+  @apply border-t border-hairline-soft;
+}
+
+.gd-tell-num {
+  @apply size-6 shrink-0 items-center justify-center rounded-full bg-emergency/10;
+}
+
+.gd-tell-num-text {
+  @apply text-[12px] font-ui-semibold text-emergency;
+}
+
+.gd-tell-text {
+  @apply flex-1 text-[14px] font-body text-ink;
+}
+
+/* Kept for the service screen's phone line; the ambulance placeholder that
+ * used to sit above it is gone, replaced by a map of where the caller is. */
 .gd-map-note {
   @apply mt-2 text-center text-[11px] font-body text-ink-muted;
-}
-
-.gd-amb-type {
-  @apply mt-2 flex-row items-center gap-3 rounded-2xl border-[1.4px] border-hairline-soft bg-white px-3 py-3;
-}
-
-.gd-amb-type-selected {
-  @apply border-emergency bg-emergency/8;
-}
-
-.gd-amb-icon {
-  @apply size-10 items-center justify-center rounded-xl bg-emergency/10;
-}
-
-.gd-amb-name {
-  @apply text-[14px] font-ui-semibold text-ink;
-}
-
-.gd-amb-body {
-  @apply text-[12px] font-body text-ink-muted;
-}
-
-.gd-amb-eta {
-  @apply text-right text-[13px] font-ui-semibold text-brand-dark;
-}
-
-.gd-amb-price {
-  @apply text-right text-[12px] font-body text-ink-muted;
 }
 
 .gd-btn-emergency {

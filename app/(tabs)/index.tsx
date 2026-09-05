@@ -19,7 +19,7 @@ import LanguageToggle from "@/components/LanguageToggle";
 import QuickActionTile from "@/components/QuickActionTile";
 import ReorderList from "@/components/ReorderList";
 import WhatsAppFab from "@/components/WhatsAppFab";
-import { QUICK_ACTIONS, REORDER_ITEMS } from "@/constants/data";
+import { QUICK_ACTIONS } from "@/constants/data";
 import { colors } from "@/constants/theme";
 import { useCart } from "@/contexts/CartContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -27,7 +27,7 @@ import "@/global.css";
 import type { TranslationKey } from "@/lib/i18n/translations";
 import { notify } from "@/lib/dialog";
 import { pressRow, pressSmall } from "@/lib/press";
-import { formatRupees } from "@/lib/utils";
+import { useReorder } from "@/lib/useReorder";
 
 // NativeWind only auto-handles React Native's own components; third-party ones
 // need styled() or their className is dropped on native.
@@ -56,17 +56,19 @@ const greetingKey = (hour: number): TranslationKey => {
 export default function Home() {
   const { user } = useUser();
   const { t } = useLanguage();
-  const { itemCount, total } = useCart();
+  const { itemCount } = useCart();
   const router = useRouter();
   const [query, setQuery] = useState("");
 
+  const { entries, fromHistory } = useReorder();
+
   const results = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    if (!needle) return REORDER_ITEMS;
-    return REORDER_ITEMS.filter((item) =>
-      item.name.toLowerCase().includes(needle),
+    if (!needle) return entries;
+    return entries.filter((entry) =>
+      entry.name.toLowerCase().includes(needle),
     );
-  }, [query]);
+  }, [entries, query]);
 
   /** Anything with no screen of its own yet, e.g. notifications. */
   const comingSoon = (feature: string) => {
@@ -203,9 +205,16 @@ export default function Home() {
           <Text className="gd-section-title">{t("home.preferNotApp")}</Text>
           <CallToOrderBanner />
 
-          <Text className="gd-section-title">{t("home.reorder")}</Text>
+          {/*
+            The heading has to match where the list came from. Calling the
+            static fallback "order again" would tell a first-time customer they
+            had ordered six things they have never seen.
+          */}
+          <Text className="gd-section-title">
+            {t(fromHistory ? "home.reorder" : "home.popular")}
+          </Text>
           {results.length > 0 ? (
-            <ReorderList items={results} />
+            <ReorderList entries={results} />
           ) : (
             <View className="gd-empty">
               <Text className="gd-empty-text">
@@ -222,17 +231,22 @@ export default function Home() {
           )}
 
           {/*
-           * Only appears once something is in the cart, so the screen doesn't
-           * carry an empty total. There is no checkout yet, so this reports
-           * state rather than pretending to be a way through to payment.
-           */}
+            Only appears once something is in the cart. A count and no total:
+            the app quotes nothing, so a rupee figure here would be a guess
+            the customer reads as their bill.
+          */}
           {itemCount > 0 ? (
-            <View className="gd-cart-bar">
+            <Pressable
+              className="gd-cart-bar"
+              style={pressRow}
+              onPress={() => router.push("/cart")}
+              accessibilityRole="button"
+            >
               <Text className="gd-cart-count">
                 {t("home.inCart", { count: itemCount })}
               </Text>
-              <Text className="gd-cart-total">{formatRupees(total)}</Text>
-            </View>
+              <Text className="gd-cart-total">{t("home.viewCart")}</Text>
+            </Pressable>
           ) : null}
         </ScrollView>
       </SafeAreaView>
