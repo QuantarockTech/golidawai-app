@@ -1,7 +1,7 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useLocalSearchParams } from "expo-router";
 import { styled } from "nativewind";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Linking,
@@ -87,9 +87,27 @@ export default function ServiceRequest() {
   const goBack = useGoBack();
   const customer = useCustomer();
 
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(customer.phone);
   const [reason, setReason] = useState("");
   const [note, setNote] = useState("");
+
+  /*
+   * The number the customer already gave, filled in for them.
+   *
+   * It is stored on the Clerk user, which arrives a beat after this screen
+   * does, so the field seeds itself when the number turns up rather than at
+   * first render — but once only, or it would snatch back a different number
+   * the customer had started typing for this particular callback.
+   *
+   * Kept above the early return below: hooks cannot run conditionally.
+   */
+  const seeded = useRef(false);
+
+  useEffect(() => {
+    if (seeded.current || !customer.phone) return;
+    seeded.current = true;
+    setPhone(customer.phone);
+  }, [customer.phone]);
 
   if (!key || !isServiceKey(key)) {
     return null;
