@@ -1340,6 +1340,11 @@
   @apply text-center text-[14px] leading-[20px] font-body text-ink-muted;
 }
 
+/* Sits above .gd-service-body on a screen that is holding a feature back. */
+.gd-soon-title {
+  @apply mt-1 text-center text-[17px] font-ui-semibold text-ink;
+}
+
 .gd-contact-row {
   @apply mt-3 flex-row gap-2.5;
 }

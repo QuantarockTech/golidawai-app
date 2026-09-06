@@ -316,6 +316,9 @@ const en = {
   "order.customEdit": "Edit {name}",
   "order.customSave": "Save name",
   "amb.title": "Ambulance",
+  "amb.soonTitle": "Coming soon",
+  "amb.soonBody":
+    "We’re still setting this up, so it isn’t available in the app yet. For a medical emergency right now, dial 108 — the free government ambulance line.",
   "amb.pickup": "Pickup",
   "amb.pickupPlaceholder": "House / area / landmark, or tap the crosshair",
   "amb.pickupHint":
@@ -681,6 +684,9 @@ const hi: Record<TranslationKey, string> = {
   "order.customEdit": "{name} \u092e\u0947\u0902 \u092c\u0926\u0932\u093e\u0935 \u0915\u0930\u0947\u0902",
   "order.customSave": "\u0928\u093e\u092e \u0938\u0939\u0947\u091c\u0947\u0902",
   "amb.title": "\u090f\u092e\u094d\u092c\u0941\u0932\u0947\u0902\u0938",
+  "amb.soonTitle": "\u091c\u0932\u094d\u0926 \u0906 \u0930\u0939\u093e \u0939\u0948",
+  "amb.soonBody":
+    "\u0939\u092e \u0907\u0938\u0947 \u0905\u092d\u0940 \u0924\u0948\u092f\u093e\u0930 \u0915\u0930 \u0930\u0939\u0947 \u0939\u0948\u0902, \u0907\u0938\u0932\u093f\u090f \u092f\u0939 \u0910\u092a \u092e\u0947\u0902 \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u0939\u0940\u0902 \u0939\u0948\u0964 \u0905\u092d\u0940 \u092e\u0947\u0921\u093f\u0915\u0932 \u0907\u092e\u0930\u091c\u0947\u0902\u0938\u0940 \u0939\u094b \u0924\u094b 108 \u0921\u093e\u092f\u0932 \u0915\u0930\u0947\u0902 \u2014 \u092f\u0939 \u092e\u0941\u092b\u093c\u094d\u0924 \u0938\u0930\u0915\u093e\u0930\u0940 \u090f\u092e\u094d\u092c\u0941\u0932\u0947\u0902\u0938 \u0932\u093e\u0907\u0928 \u0939\u0948\u0964",
   "amb.pickup": "\u092a\u093f\u0915\u0905\u092a",
   "amb.pickupPlaceholder": "\u092e\u0915\u093e\u0928 / \u0907\u0932\u093e\u0915\u093c\u093e / \u0932\u0948\u0902\u0921\u092e\u093e\u0930\u094d\u0915, \u092f\u093e \u0928\u093f\u0936\u093e\u0928 \u0926\u092c\u093e\u090f\u0901",
   "amb.pickupHint":
