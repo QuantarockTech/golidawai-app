@@ -32,24 +32,42 @@ import {
 
 const SafeAreaView = styled(RNSafeAreaView);
 
+/*
+ * The reason field is labelled per service rather than once for all three.
+ * "Reason for the consult" is the wrong question to ask someone booking a blood
+ * test, and a vague label is what produces the vague answers that make a
+ * callback pointless.
+ */
 const SERVICE_COPY: Record<
   ServiceKey,
-  { title: TranslationKey; body: TranslationKey; icon: string }
+  {
+    title: TranslationKey;
+    body: TranslationKey;
+    icon: string;
+    reason: TranslationKey;
+    reasonPlaceholder: TranslationKey;
+  }
 > = {
   doctorConsult: {
     title: "service.doctorConsult",
     body: "service.doctorConsultBody",
     icon: "heart-pulse",
+    reason: "service.reasonConsult",
+    reasonPlaceholder: "service.reasonConsultPlaceholder",
   },
   labTests: {
     title: "service.labTests",
     body: "service.labTestsBody",
     icon: "file-document-outline",
+    reason: "service.reasonLab",
+    reasonPlaceholder: "service.reasonLabPlaceholder",
   },
   insurance: {
     title: "service.insurance",
     body: "service.insuranceBody",
     icon: "shield-check-outline",
+    reason: "service.reasonInsurance",
+    reasonPlaceholder: "service.reasonInsurancePlaceholder",
   },
 };
 
@@ -70,6 +88,7 @@ export default function ServiceRequest() {
   const customer = useCustomer();
 
   const [phone, setPhone] = useState("");
+  const [reason, setReason] = useState("");
   const [note, setNote] = useState("");
 
   if (!key || !isServiceKey(key)) {
@@ -85,19 +104,33 @@ export default function ServiceRequest() {
    * backend to receive it. WhatsApp is the back office now, so the request
    * reaches a person who can actually ring back.
    */
+  /** Everything the form holds, in the shape the message builder wants. */
+  const details = () => ({
+    service: t(copy.title),
+    name: customer.name,
+    phone: toE164(phone),
+    reason,
+    note,
+  });
+
   const submit = async () => {
     if (!isPhoneLike(phone)) {
       notify(t(copy.title), t("service.needNumber"), t("common.ok"));
       return;
     }
 
+    /*
+     * Required, unlike the notes below it. A callback carrying only a number
+     * makes someone ring back to ask the question the form could have asked,
+     * and the customer has to explain themselves twice.
+     */
+    if (!reason.trim()) {
+      notify(t(copy.title), t("service.needReason"), t("common.ok"));
+      return;
+    }
+
     const opened = await openWhatsAppWith(
-      buildServiceRequestMessage({
-        service: t(copy.title),
-        name: customer.name,
-        phone: toE164(phone),
-        note,
-      }),
+      buildServiceRequestMessage(details()),
     );
 
     if (!opened) {
@@ -108,8 +141,20 @@ export default function ServiceRequest() {
     goBack();
   };
 
+  /*
+   * The same message as the button above, whenever the form has enough to build
+   * one. This used to send the service name and nothing else, so a customer who
+   * had filled the form and then tapped here arrived in WhatsApp with their own
+   * details missing and had to type them again.
+   */
   const whatsapp = () => {
-    const text = [t(copy.title), note.trim()].filter(Boolean).join(" — ");
+    const text =
+      isPhoneLike(phone) && reason.trim()
+        ? buildServiceRequestMessage(details())
+        : [t(copy.title), reason.trim(), note.trim()]
+            .filter(Boolean)
+            .join(" — ");
+
     void Linking.openURL(
       `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`,
     );
@@ -159,6 +204,17 @@ export default function ServiceRequest() {
                 autoComplete="tel"
               />
             </View>
+
+            <Text className="gd-section-title">{t(copy.reason)}</Text>
+            <TextInput
+              className="gd-textarea"
+              value={reason}
+              onChangeText={setReason}
+              placeholder={t(copy.reasonPlaceholder)}
+              placeholderTextColor={colors.inkFaint}
+              multiline
+              textAlignVertical="top"
+            />
 
             <Text className="gd-section-title">{t("service.note")}</Text>
             <TextInput

@@ -206,6 +206,8 @@ export const buildServiceRequestMessage = (request: {
   service: string;
   name: string;
   phone: string;
+  /** Why they want the call — the one thing that makes it a useful one. */
+  reason?: string;
   note?: string;
 }): string => {
   const blocks = [
@@ -217,6 +219,15 @@ export const buildServiceRequestMessage = (request: {
       request.name || "Name not given",
     ].join("\n"),
   ];
+
+  /*
+   * Above the notes, because whoever picks this up reads top-down and this is
+   * what tells them who to put on the call. A pharmacist and an insurance desk
+   * are different people.
+   */
+  if (request.reason?.trim()) {
+    blocks.push([bold("Reason"), request.reason.trim()].join("\n"));
+  }
 
   if (request.note?.trim()) {
     blocks.push([bold("Notes"), request.note.trim()].join("\n"));

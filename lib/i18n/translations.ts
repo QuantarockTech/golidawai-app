@@ -343,11 +343,20 @@ const en = {
   "service.requestTitle": "Request a callback",
   "service.requestBody": "Leave your number and we\u2019ll call you back. Or reach us now:",
   "service.yourNumber": "Your mobile number",
-  "service.note": "Anything we should know?",
+  "service.reasonConsult": "Reason for the consult",
+  "service.reasonConsultPlaceholder":
+    "e.g. fever for three days, or a follow-up on a report",
+  "service.reasonLab": "Which test do you need?",
+  "service.reasonLabPlaceholder": "e.g. CBC, thyroid, or a test the doctor wrote",
+  "service.reasonInsurance": "What do you need help with?",
+  "service.reasonInsurancePlaceholder":
+    "e.g. choosing a policy, or claiming on one you have",
+  "service.note": "Anything else we should know?",
   "service.submit": "Request callback on WhatsApp",
   "service.callUs": "Call us",
   "service.whatsappUs": "WhatsApp",
   "service.needNumber": "Enter a valid mobile number.",
+  "service.needReason": "Tell us briefly what the call is about.",
 
   // Home
   "home.balance": "Balance",
@@ -711,11 +720,20 @@ const hi: Record<TranslationKey, string> = {
   "service.requestTitle": "\u0915\u0949\u0932\u092c\u0948\u0915 \u092e\u093e\u0902\u0917\u0947\u0902",
   "service.requestBody": "\u0905\u092a\u0928\u093e \u0928\u0902\u092c\u0930 \u0926\u0947\u0902, \u0939\u092e \u0915\u0949\u0932 \u0915\u0930\u0947\u0902\u0917\u0947\u0964 \u092f\u093e \u0905\u092d\u0940 \u0938\u0902\u092a\u0930\u094d\u0915 \u0915\u0930\u0947\u0902:",
   "service.yourNumber": "\u0906\u092a\u0915\u093e \u092e\u094b\u092c\u093e\u0907\u0932 \u0928\u0902\u092c\u0930",
-  "service.note": "\u0915\u0941\u091b \u092c\u0924\u093e\u0928\u093e \u091a\u093e\u0939\u0947\u0902\u0917\u0947?",
+  "service.reasonConsult": "\u0938\u0932\u093e\u0939 \u0915\u093f\u0938 \u092c\u093e\u0930\u0947 \u092e\u0947\u0902 \u091a\u093e\u0939\u093f\u090f?",
+  "service.reasonConsultPlaceholder":
+    "\u091c\u0948\u0938\u0947 \u0924\u0940\u0928 \u0926\u093f\u0928 \u0938\u0947 \u092c\u0941\u0916\u093c\u093e\u0930, \u092f\u093e \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u0926\u093f\u0916\u093e\u0928\u0940 \u0939\u0948",
+  "service.reasonLab": "\u0915\u094c\u0928 \u0938\u093e \u091f\u0947\u0938\u094d\u091f \u0915\u0930\u093e\u0928\u093e \u0939\u0948?",
+  "service.reasonLabPlaceholder": "\u091c\u0948\u0938\u0947 CBC, \u0925\u093e\u092f\u0930\u0949\u0907\u0921, \u092f\u093e \u0921\u0949\u0915\u094d\u091f\u0930 \u0915\u093e \u0932\u093f\u0916\u093e \u091f\u0947\u0938\u094d\u091f",
+  "service.reasonInsurance": "\u0915\u093f\u0938 \u091a\u0940\u091c\u093c \u092e\u0947\u0902 \u092e\u0926\u0926 \u091a\u093e\u0939\u093f\u090f?",
+  "service.reasonInsurancePlaceholder":
+    "\u091c\u0948\u0938\u0947 \u092a\u0949\u0932\u093f\u0938\u0940 \u091a\u0941\u0928\u0928\u0940 \u0939\u0948, \u092f\u093e \u0915\u094d\u0932\u0947\u092e \u0915\u0930\u0928\u093e \u0939\u0948",
+  "service.note": "\u0914\u0930 \u0915\u0941\u091b \u092c\u0924\u093e\u0928\u093e \u091a\u093e\u0939\u0947\u0902\u0917\u0947?",
   "service.submit": "\u0935\u094d\u0939\u093e\u091f\u094d\u0938\u0910\u092a \u092a\u0930 \u0915\u0949\u0932\u092c\u0948\u0915 \u092e\u093e\u0901\u0917\u0947\u0902",
   "service.callUs": "\u0915\u0949\u0932 \u0915\u0930\u0947\u0902",
   "service.whatsappUs": "\u0935\u094d\u0939\u093e\u091f\u094d\u0938\u0910\u092a",
   "service.needNumber": "\u0938\u0939\u0940 \u092e\u094b\u092c\u093e\u0907\u0932 \u0928\u0902\u092c\u0930 \u0921\u093e\u0932\u0947\u0902\u0964",
+  "service.needReason": "\u0925\u094b\u0921\u093c\u093e \u092c\u0924\u093e \u0926\u0947\u0902 \u0915\u093f \u0915\u0949\u0932 \u0915\u093f\u0938 \u092c\u093e\u0930\u0947 \u092e\u0947\u0902 \u0939\u0948\u0964",
 
   // Home
   "home.balance": "बैलेंस",
