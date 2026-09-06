@@ -20,6 +20,16 @@ type DeliveryContextValue = {
 
 const DeliveryContext = createContext<DeliveryContextValue | null>(null);
 
+/**
+ * What an earlier build wrote for a pin the customer dragged onto a map.
+ *
+ * That map is gone — Google's embed cannot be read back out of, so nothing is
+ * placed by hand any more. The coordinates it saved are still good, so a stored
+ * address carrying it is read as the closest thing that remains: a point the
+ * customer chose rather than one a radio guessed.
+ */
+const LEGACY_PLACED = "map";
+
 const isAddress = (value: unknown): value is DeliveryAddress => {
   if (typeof value !== "object" || value === null) return false;
   const candidate = value as Partial<DeliveryAddress>;
@@ -27,9 +37,15 @@ const isAddress = (value: unknown): value is DeliveryAddress => {
     typeof candidate.text === "string" &&
     (candidate.source === "gps" ||
       candidate.source === "manual" ||
-      candidate.source === "map")
+      candidate.source === "search" ||
+      (candidate.source as string | undefined) === LEGACY_PLACED)
   );
 };
+
+const migrate = (address: DeliveryAddress): DeliveryAddress =>
+  (address.source as string) === LEGACY_PLACED
+    ? { ...address, source: "search" }
+    : address;
 
 /**
  * The one delivery address, kept on this device and nowhere else.
@@ -53,7 +69,7 @@ export function DeliveryProvider({ children }: React.PropsWithChildren) {
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed: unknown = JSON.parse(raw);
-          if (isAddress(parsed)) stored = parsed;
+          if (isAddress(parsed)) stored = migrate(parsed);
         }
       } catch {
         // Unreadable or corrupt: start empty rather than block the screen.

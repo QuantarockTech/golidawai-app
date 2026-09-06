@@ -1142,28 +1142,26 @@
 }
 
 /*
- * Delivery address — the map the customer nudges onto their own building.
+ * Delivery address — Google's own map of where the order is going.
  *
  * Not `.gd-map`: the ambulance screen already owns that name for its static
  * placeholder, and being defined later that rule would win here.
+ *
+ * Height lives in MapPreview.types.ts rather than here, because the iframe and
+ * the WebView both need it as a number and a Tailwind class cannot give them
+ * one. This rule only draws the frame around it.
  */
-.gd-pickmap {
-  @apply mt-2.5 h-56 overflow-hidden rounded-2xl border border-hairline-soft bg-mist;
+.gd-mapview {
+  @apply mt-2.5 overflow-hidden rounded-2xl border border-hairline-soft bg-mist;
 }
 
-/*
- * The pin sits still in the middle and the map slides under it, which is the
- * gesture people already know from ride and delivery apps — and it spares a
- * thumb the job of hitting a marker it is covering.
- */
-.gd-map-pin {
-  /* Above Leaflet's tile panes, which claim z-index 400 on the web build. */
-  @apply absolute inset-0 z-[500] items-center justify-center;
+/* The "open in Google Maps" line under the map, which is the whole card's tap. */
+.gd-map-open {
+  @apply mt-1.5 flex-row items-center justify-center gap-1.5;
 }
 
-/* Lifts the pin so its point, not its middle, marks the centre of the map. */
-.gd-map-pin-inner {
-  @apply -mt-5;
+.gd-map-open-text {
+  @apply text-[12px] font-ui-semibold text-brand-dark;
 }
 
 .gd-map-hint {

@@ -46,7 +46,7 @@ export default function DeliveryCard() {
           {address ? (
             <>
               <Text className="gd-address-text">{line}</Text>
-              {address.source === "map" ? (
+              {address.source === "search" ? (
                 <Text className="gd-locate-hint">{t("address.fromMap")}</Text>
               ) : address.source === "gps" ? (
                 <Text className="gd-locate-hint">{t("address.fromGps")}</Text>

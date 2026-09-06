@@ -11,7 +11,6 @@ import {
   SEARCH_DEBOUNCE_MS,
   resolvePlace,
   searchPlaces,
-  startPlaceSession,
   type PlaceSuggestion,
 } from "@/lib/placeSearch";
 
@@ -46,10 +45,7 @@ export default function AddressSearch({ onPick }: AddressSearchProps) {
 
   const inFlight = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    startPlaceSession();
-    return () => inFlight.current?.abort();
-  }, []);
+  useEffect(() => () => inFlight.current?.abort(), []);
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -95,7 +91,6 @@ export default function AddressSearch({ onPick }: AddressSearchProps) {
     setQuery("");
     setResults([]);
     setSearched(false);
-    startPlaceSession();
 
     onPick(place);
   };

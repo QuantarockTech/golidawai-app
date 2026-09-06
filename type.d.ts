@@ -128,11 +128,11 @@ declare global {
     /** Metres of GPS uncertainty, when the device reported it. */
     accuracy?: number;
     /**
-     * How the coordinates were arrived at. `map` outranks `gps`: the device
-     * only ever guesses, whereas a customer who dragged the pin onto their own
-     * roof was looking at the answer.
+     * How the coordinates were arrived at. `search` outranks `gps`: the device
+     * only ever guesses, whereas a customer who picked their own colony out of
+     * a list was naming the answer.
      */
-    source: "gps" | "manual" | "map";
+    source: "gps" | "manual" | "search";
     savedAt: string;
   }
 

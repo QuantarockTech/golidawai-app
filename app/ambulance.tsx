@@ -1,6 +1,6 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { styled } from "nativewind";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Linking,
@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
-import MapPicker from "@/components/MapPicker";
+import MapPreview from "@/components/MapPreview";
 import ScreenHeader from "@/components/ScreenHeader";
 import { AMBULANCE_PHONE } from "@/constants/data";
 import { colors } from "@/constants/theme";
@@ -22,8 +22,6 @@ import "@/global.css";
 import { confirm, notify } from "@/lib/dialog";
 import type { TranslationKey } from "@/lib/i18n/translations";
 import {
-  DEFAULT_CENTRE,
-  describeCoordinates,
   isCoarseFix,
   locateCurrentAddress,
   type LocateFailure,
@@ -82,10 +80,6 @@ export default function Ambulance() {
   const edited = useRef(false);
   const seeded = useRef(false);
 
-  /* The point waiting to be named, and the timer that will name it. */
-  const pending = useRef<{ latitude: number; longitude: number } | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   useEffect(() => {
     if (seeded.current || !address) return;
     seeded.current = true;
@@ -95,13 +89,6 @@ export default function Ambulance() {
       setPin({ latitude: address.latitude, longitude: address.longitude });
     }
   }, [address]);
-
-  useEffect(
-    () => () => {
-      if (timer.current) clearTimeout(timer.current);
-    },
-    [],
-  );
 
   const failureMessage = (reason: LocateFailure): string => {
     if (reason === "denied") return t("address.permissionDenied");
@@ -127,43 +114,14 @@ export default function Ambulance() {
 
     setCoarse(wide);
     setPin({ latitude, longitude });
-    pending.current = null;
 
     /*
      * A wide fix does not get to name the place. "Indore City" is a district
      * nobody can drive to, and putting it in the box invites the caller to
-     * read it out. Left blank, the map below is the obvious next move.
+     * read it out. Left blank, the box below is the obvious next move.
      */
     if (!edited.current) setPickup(wide ? "" : text);
   };
-
-  /**
-   * Takes the pin where the customer put it.
-   *
-   * A hand-placed pin carries no GPS doubt, so the warning goes with it. The
-   * address lookup is rate-limited, so the naming waits until dragging stops.
-   */
-  const onMapMove = useCallback((latitude: number, longitude: number) => {
-    setPin({ latitude, longitude });
-    setCoarse(false);
-
-    pending.current = { latitude, longitude };
-    if (timer.current) clearTimeout(timer.current);
-
-    timer.current = setTimeout(() => {
-      const target = pending.current;
-      if (!target) return;
-
-      void describeCoordinates(target.latitude, target.longitude).then(
-        (label) => {
-          // A later drag has already moved on, so this answer describes
-          // somewhere the pin has left. And never overwrite what was typed.
-          if (pending.current !== target || !label || edited.current) return;
-          setPickup(label);
-        },
-      );
-    }, 1200);
-  }, []);
 
   const callDispatch = () => {
     confirm({
@@ -240,22 +198,29 @@ export default function Ambulance() {
             knows the first and cannot know the second. That distinction is the
             whole reason the old box was blank, and drawing the caller's own
             position claims nothing the app cannot back.
-          */}
-          <MapPicker
-            latitude={pin?.latitude ?? DEFAULT_CENTRE.latitude}
-            longitude={pin?.longitude ?? DEFAULT_CENTRE.longitude}
-            onMove={onMapMove}
-          />
-          <Text className="gd-map-hint">{t("amb.mapHint")}</Text>
 
-          {/* Selectable, so the digits can be copied rather than transcribed. */}
+            Only once a fix exists. On a call to 108 the caller reads their
+            location out loud, so a map of the middle of Indore shown before
+            anything has been found is worse than no map: it is a wrong answer
+            in the right place on the screen.
+          */}
           {pin ? (
-            <Text className="gd-amb-coords" selectable>
-              {t("amb.coords", {
-                lat: pin.latitude.toFixed(5),
-                lng: pin.longitude.toFixed(5),
-              })}
-            </Text>
+            <>
+              <MapPreview
+                latitude={pin.latitude}
+                longitude={pin.longitude}
+                label={pickup || undefined}
+              />
+              <Text className="gd-map-hint">{t("amb.mapHint")}</Text>
+
+              {/* Selectable, so the digits can be read out or copied. */}
+              <Text className="gd-amb-coords" selectable>
+                {t("amb.coords", {
+                  lat: pin.latitude.toFixed(5),
+                  lng: pin.longitude.toFixed(5),
+                })}
+              </Text>
+            </>
           ) : null}
 
           <Text className="gd-section-title">{t("amb.tellThem")}</Text>

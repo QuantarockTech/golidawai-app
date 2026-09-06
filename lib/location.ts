@@ -52,17 +52,38 @@ export const COARSE_FIX_METRES = 150;
 export const isCoarseFix = (accuracy?: number): boolean =>
   accuracy != null && accuracy > COARSE_FIX_METRES;
 
-/**
- * Indore, near Rajwada. Where a map opens when nothing better is known yet.
- *
- * Every order this app takes is a local one, so starting the customer in the
- * middle of their own city is a shorter drag than starting them nowhere.
- */
-export const DEFAULT_CENTRE = { latitude: 22.7196, longitude: 75.8577 };
-
 /** A Google Maps pin the pharmacy can open straight from the WhatsApp message. */
 export const mapsLink = (latitude: number, longitude: number): string =>
   `https://www.google.com/maps/search/?api=1&query=${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+
+/**
+ * How close the embedded map sits. A block, roughly.
+ *
+ * Tight enough that the surrounding roads are named, wide enough that a fix a
+ * hundred metres out is still on screen rather than off the edge of it.
+ */
+const EMBED_ZOOM = 16;
+
+/**
+ * The same pin, as a map that can be shown inside the app.
+ *
+ * `output=embed` is the one Google Maps view that frames without an API key:
+ * it redirects to `/maps/embed` and answers with no `X-Frame-Options` and no
+ * `frame-ancestors`, where the documented Maps Embed API returns 401 without a
+ * key. That is the whole reason this app needs no mapping account.
+ *
+ * What it buys is Google's own labelling. The geocoders below can rarely name
+ * a point in Indore better than its colony, but the customer looking at this
+ * map can read the road names straight off it and confirm the pin is right —
+ * which is the question actually being asked, and it needs no text answer.
+ *
+ * Display only. It is a cross-origin frame with no message channel, so nothing
+ * can be read back out of it: the coordinates must already be known before it
+ * is worth showing. See `mapsLink` for the version a rider taps to navigate.
+ */
+export const mapsEmbedUrl = (latitude: number, longitude: number): string =>
+  `https://www.google.com/maps?q=${latitude.toFixed(6)},${longitude.toFixed(6)}` +
+  `&z=${EMBED_ZOOM}&output=embed`;
 
 /**
  * Joins address fields, widest last, into one readable line.
@@ -208,155 +229,6 @@ const describeOverHttp = async (
   }
 };
 
-const OLA_KEY = process.env.EXPO_PUBLIC_OLA_MAPS_KEY;
-
-/**
- * Reverse geocoding through Ola Maps, when a key is configured.
- *
- * Tried ahead of Google for two reasons. It is built in India off Ola's own
- * fleet traces, so it names the colonies and unnumbered roads that Indore is
- * actually made of — the same gap that leaves OpenStreetMap returning nothing
- * but "Indore City" here. And its free allowance is 100,000 calls a month with
- * no card on file, where Google refuses every request until a Cloud project has
- * billing enabled.
- *
- * `api.olamaps.io` answers with `access-control-allow-origin: *`, so this runs
- * from the browser as well as from a phone.
- *
- * The response is shaped after Google's — `results[]` carrying
- * `formatted_address` — but the status field is not: Ola spells success `ok`
- * where Google spells it `OK`. Both are accepted below rather than guessed at,
- * and a payload that matches neither simply falls through to the next route.
- */
-const describeViaOla = async (
-  latitude: number,
-  longitude: number,
-): Promise<string> => {
-  const url =
-    "https://api.olamaps.io/places/v1/reverse-geocode" +
-    `?latlng=${latitude},${longitude}&api_key=${OLA_KEY}`;
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), NOMINATIM_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: { Accept: "application/json" },
-    });
-
-    /*
-     * Loud for the same reason the Google path is: a key that is present and
-     * refused (401 for a bad key, 429 once the free allowance is spent) lands
-     * in exactly the same silent fallback as no key at all, and the screen
-     * cannot tell the developer which of the two just happened.
-     */
-    if (!response.ok) {
-      if (__DEV__) {
-        console.warn(
-          `[location] Ola Maps refused: HTTP ${response.status}. ` +
-            "Falling back to the next geocoder.",
-        );
-      }
-      return "";
-    }
-
-    const body = (await response.json()) as {
-      status?: string;
-      results?: { formatted_address?: string }[];
-    };
-
-    if (body.status && body.status.toLowerCase() !== "ok") return "";
-
-    const line = body.results?.find(
-      (result) => result.formatted_address,
-    )?.formatted_address;
-
-    // Country dropped, pincode kept — every order here is an Indore one, so
-    // "India" is a word to read past, but the six digits genuinely help a rider.
-    return line ? line.replace(/,\s*India$/, "") : "";
-  } finally {
-    clearTimeout(timer);
-  }
-};
-
-const GOOGLE_KEY = process.env.EXPO_PUBLIC_GOOGLE_PLACES_KEY;
-
-/**
- * Reverse geocoding through Google, when a key is configured.
- *
- * Worth the key for one reason: Google has named the roads OpenStreetMap has
- * not. A pin on a real Indore street can come back from OSM as nothing but the
- * district, because the road is drawn but never labelled — the geometry is
- * there, the name never was. Google has both.
- *
- * `maps.googleapis.com` answers with `access-control-allow-origin: *`, so this
- * runs from the browser as well as from a phone.
- */
-const describeViaGoogle = async (
-  latitude: number,
-  longitude: number,
-): Promise<string> => {
-  const url =
-    "https://maps.googleapis.com/maps/api/geocode/json" +
-    `?latlng=${latitude},${longitude}&language=en&key=${GOOGLE_KEY}`;
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), NOMINATIM_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(url, { signal: controller.signal });
-    if (!response.ok) return "";
-
-    const body = (await response.json()) as {
-      status?: string;
-      error_message?: string;
-      results?: { formatted_address?: string; types?: string[] }[];
-    };
-
-    /*
-     * A rejected key is the one failure that has to be loud.
-     *
-     * Every other route in this file degrades quietly on purpose, and that is
-     * right in front of a customer. But a key that is present and refused —
-     * Geocoding API not enabled, or an HTTP referrer restriction that does not
-     * cover this origin — produces REQUEST_DENIED, which lands in exactly the
-     * same silent fallback as having configured no key at all. The two are
-     * indistinguishable from the screen, so the developer who just added the
-     * key has no way to tell whether it took effect.
-     */
-    if (body.status !== "OK") {
-      if (__DEV__) {
-        console.warn(
-          `[location] Google geocoding refused: ${body.status}` +
-            `${body.error_message ? ` — ${body.error_message}` : ""}. ` +
-            "Falling back to OpenStreetMap, which does not name most Indore " +
-            "roads. Check that the Geocoding API is enabled and that the key's " +
-            "referrer restrictions allow this origin.",
-        );
-      }
-      return "";
-    }
-
-    /*
-     * Results run most specific first, so the head of the list is usually the
-     * street address. Usually — where Google has no street address for a point
-     * it leads with a Plus Code instead, and "6MPQ+2C Indore" is a worse thing
-     * to read down a phone line than the landmark fallback below. Skip those
-     * and take the first result that names somewhere a person could say aloud.
-     */
-    const usable = body.results?.find(
-      (result) =>
-        result.formatted_address && !result.types?.includes("plus_code"),
-    );
-
-    const line = usable?.formatted_address;
-    return line ? line.replace(/,\s*India$/, "") : "";
-  } finally {
-    clearTimeout(timer);
-  }
-};
-
 /** Roughly a two-minute walk — close enough that "near" is still true. */
 const LANDMARK_RADIUS_M = 250;
 
@@ -468,42 +340,25 @@ const isTooBroad = (line: string): boolean =>
 /**
  * Names the place at a set of coordinates, by whatever route works.
  *
- * In order of how much it can tell you: Ola Maps then Google, each if a key is
- * configured, the device's own geocoder on a phone, then OpenStreetMap. If the
- * best of those still only manages the city, the last step stops trying to name
- * the point and names its neighbour instead.
+ * The device's own geocoder on a phone, then OpenStreetMap in the browser. If
+ * the best of those still only manages the city, the last step stops trying to
+ * name the point and names its neighbour instead.
  *
- * Ola leads because it is the one route that is both free without a card and
- * built on Indian address data. Every keyless service in this chain reads the
- * same OpenStreetMap that leaves most of Indore's roads unnamed, which is why
- * an unconfigured app falls all the way through to a landmark.
+ * Every route here is keyless, and every one of them reads OpenStreetMap in the
+ * end — which across most of Indore draws the roads without naming them. So
+ * this often falls all the way through to a landmark, and that is fine: the
+ * text is a sanity check for the customer, not the thing the rider navigates
+ * by. `mapsEmbedUrl` shows them Google's labels and `mapsLink` sends the rider
+ * to the exact point, so nothing here is load-bearing for a delivery arriving.
  *
- * Callers that geocode repeatedly, such as a map the customer is dragging, must
- * space their calls out: the free services allow about one request a second.
+ * Callers must space repeated calls out: the free services allow about one
+ * request a second.
  */
 export const describeCoordinates = async (
   latitude: number,
   longitude: number,
 ): Promise<string> => {
   const Location = loadLocation();
-
-  if (OLA_KEY) {
-    try {
-      const ola = await describeViaOla(latitude, longitude);
-      if (ola) return ola;
-    } catch {
-      // Quota, a bad key, a network that went away. The routes below remain.
-    }
-  }
-
-  if (GOOGLE_KEY) {
-    try {
-      const google = await describeViaGoogle(latitude, longitude);
-      if (google) return google;
-    } catch {
-      // Billing, quota, a bad key. The free routes below still work.
-    }
-  }
 
   let best = "";
 

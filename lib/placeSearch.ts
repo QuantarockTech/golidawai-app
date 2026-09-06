@@ -7,37 +7,29 @@
  * search box: type "vijay nag", pick "Vijay Nagar, Indore", and the pin lands
  * there. Locating yourself is the secondary button.
  *
- * Two backends behind one interface. Google Places is what the food apps use
- * and what knows Indian apartment blocks and shop names by name; OpenStreetMap
- * is the fallback that needs no key, no billing and no account, so the feature
- * works the day it ships and improves when a key appears.
+ * OpenStreetMap is the whole of it: no key, no billing, no account. It does not
+ * know Indore's apartment blocks by name the way Google Places does, so a
+ * search often lands on the colony rather than the building — which is why the
+ * screen pairs it with a map to confirm on and a box to write the flat number
+ * in. Between them that gap is closed without anyone holding an API key.
  */
-import { DEFAULT_CENTRE } from "@/lib/location";
-
-const GOOGLE_KEY = process.env.EXPO_PUBLIC_GOOGLE_PLACES_KEY;
-
-/** Whether the good backend is configured. Everything still runs without it. */
-export const usingGooglePlaces = Boolean(GOOGLE_KEY);
-
 /**
  * How long to wait after the last keystroke.
  *
- * Google bills a session rather than a keystroke, so it can afford to feel
- * immediate. Nominatim's usage policy allows one request a second, and a search
- * box is the easiest way in the world to breach that.
+ * Nominatim's usage policy allows one request a second, and a search box is the
+ * easiest way in the world to breach that.
  */
-export const SEARCH_DEBOUNCE_MS = usingGooglePlaces ? 300 : 1100;
+export const SEARCH_DEBOUNCE_MS = 1100;
 
 /** Enough of a query to be worth asking about. */
 export const MIN_QUERY_LENGTH = 3;
 
 /*
- * Roughly the distance a rider would go. Results are biased to it rather than
+ * Roughly the area a rider would cover. Results are biased to it rather than
  * restricted — a customer whose building sits just outside the box should still
  * find it, they just should not have to scroll past Indore in the United States
  * to do so.
  */
-const BIAS_RADIUS_M = 40_000;
 const BIAS_BOX = { west: 75.6, north: 22.9, east: 76.1, south: 22.5 };
 
 /** The city every one of these searches is implicitly about. */
@@ -59,129 +51,6 @@ export interface ResolvedPlace {
   longitude: number;
   text: string;
 }
-
-/*
- * Google prices a burst of keystrokes plus the lookup that follows as one
- * session, but only when they share a token. Without one, every keystroke is
- * billed on its own — the difference between a rounding error and a real bill.
- *
- * It does not need to be unguessable, only unique, so this avoids pulling in a
- * crypto module for it.
- */
-let sessionToken = "";
-
-const newToken = () =>
-  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
-
-/** Call when a search box opens, and again after a suggestion is taken. */
-export const startPlaceSession = () => {
-  sessionToken = newToken();
-};
-
-const googleSearch = async (
-  query: string,
-  signal: AbortSignal,
-): Promise<PlaceSuggestion[]> => {
-  if (!sessionToken) startPlaceSession();
-
-  const response = await fetch(
-    "https://places.googleapis.com/v1/places:autocomplete",
-    {
-      method: "POST",
-      signal,
-      headers: {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": GOOGLE_KEY as string,
-      },
-      body: JSON.stringify({
-        input: query,
-        sessionToken,
-        includedRegionCodes: ["in"],
-        locationBias: {
-          circle: {
-            center: {
-              latitude: DEFAULT_CENTRE.latitude,
-              longitude: DEFAULT_CENTRE.longitude,
-            },
-            radius: BIAS_RADIUS_M,
-          },
-        },
-      }),
-    },
-  );
-
-  if (!response.ok) return [];
-
-  const body = (await response.json()) as {
-    suggestions?: {
-      placePrediction?: {
-        placeId?: string;
-        text?: { text?: string };
-        structuredFormat?: {
-          mainText?: { text?: string };
-          secondaryText?: { text?: string };
-        };
-      };
-    }[];
-  };
-
-  return (body.suggestions ?? [])
-    .map((entry) => entry.placePrediction)
-    .filter((prediction) => prediction?.placeId)
-    .map((prediction) => ({
-      id: prediction!.placeId!,
-      title:
-        prediction!.structuredFormat?.mainText?.text ??
-        prediction!.text?.text ??
-        "",
-      subtitle: prediction!.structuredFormat?.secondaryText?.text ?? "",
-    }))
-    .filter((suggestion) => suggestion.title);
-};
-
-/**
- * Turns a Google suggestion into coordinates.
- *
- * Autocomplete deliberately withholds them — the place has to be asked for by
- * id, and that request is what closes the billing session the keystrokes opened.
- */
-const googleResolve = async (
-  suggestion: PlaceSuggestion,
-  signal?: AbortSignal,
-): Promise<ResolvedPlace | null> => {
-  const url =
-    `https://places.googleapis.com/v1/places/${encodeURIComponent(suggestion.id)}` +
-    `?sessionToken=${encodeURIComponent(sessionToken)}`;
-
-  const response = await fetch(url, {
-    signal,
-    headers: {
-      "X-Goog-Api-Key": GOOGLE_KEY as string,
-      "X-Goog-FieldMask": "location,formattedAddress",
-    },
-  });
-
-  // Spent or not, the session is over the moment a place is chosen.
-  startPlaceSession();
-
-  if (!response.ok) return null;
-
-  const body = (await response.json()) as {
-    location?: { latitude?: number; longitude?: number };
-    formattedAddress?: string;
-  };
-
-  const { latitude, longitude } = body.location ?? {};
-  if (latitude == null || longitude == null) return null;
-
-  return {
-    latitude,
-    longitude,
-    // "India" is the one word every result here ends with, and none of them
-    // needs. The pharmacy is in Indore; so is the customer.
-    text: (body.formattedAddress ?? suggestion.title).replace(/,\s*India$/, ""),
-  };
-};
 
 const nominatimQuery = async (
   query: string,
@@ -281,9 +150,7 @@ export const searchPlaces = async (
   if (trimmed.length < MIN_QUERY_LENGTH) return [];
 
   try {
-    return usingGooglePlaces
-      ? await googleSearch(trimmed, signal)
-      : await nominatimSearch(trimmed, signal);
+    return await nominatimSearch(trimmed, signal);
   } catch {
     // Aborted by the next keystroke, or the network gave out. Either way the
     // box should stay usable and the customer can still type an address.
@@ -291,22 +158,22 @@ export const searchPlaces = async (
   }
 };
 
-/** Coordinates for a chosen suggestion. Never throws. */
+/**
+ * Coordinates for a chosen suggestion.
+ *
+ * Nominatim returns a point with every result, so this never has to go back out
+ * to the network — it is a synchronous unpacking wearing an async signature,
+ * kept that way because a geocoder that needs a second lookup is the normal
+ * shape and this may not always be the only backend.
+ */
 export const resolvePlace = async (
   suggestion: PlaceSuggestion,
-  signal?: AbortSignal,
 ): Promise<ResolvedPlace | null> => {
-  if (suggestion.latitude != null && suggestion.longitude != null) {
-    return {
-      latitude: suggestion.latitude,
-      longitude: suggestion.longitude,
-      text: [suggestion.title, suggestion.subtitle].filter(Boolean).join(", "),
-    };
-  }
+  if (suggestion.latitude == null || suggestion.longitude == null) return null;
 
-  try {
-    return await googleResolve(suggestion, signal);
-  } catch {
-    return null;
-  }
+  return {
+    latitude: suggestion.latitude,
+    longitude: suggestion.longitude,
+    text: [suggestion.title, suggestion.subtitle].filter(Boolean).join(", "),
+  };
 };

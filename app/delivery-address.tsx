@@ -12,7 +12,7 @@ import {
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 import AddressSearch from "@/components/AddressSearch";
-import MapPicker from "@/components/MapPicker";
+import MapPreview from "@/components/MapPreview";
 import ScreenHeader from "@/components/ScreenHeader";
 import { colors } from "@/constants/theme";
 import { useDelivery } from "@/contexts/DeliveryContext";
@@ -20,8 +20,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import "@/global.css";
 import { notify } from "@/lib/dialog";
 import {
-  DEFAULT_CENTRE,
-  describeCoordinates,
   isCoarseFix,
   locateCurrentAddress,
   type LocateFailure,
@@ -36,11 +34,16 @@ const SafeAreaView = styled(RNSafeAreaView);
 /**
  * Where the order goes.
  *
- * Two routes to the same answer, because neither works on its own: GPS gets a
- * rider to the right building far better than an Indore street address does,
- * but it cannot know the flat number, and it is useless indoors on a bad fix.
- * So the pin and the typed line coexist — the customer can take the pin and
- * still write "2nd floor, above the bakery" underneath it.
+ * Three routes to the same answer, because none works on its own: search knows
+ * the colony but not the building, GPS gets a rider closer than an Indore street
+ * address does but is useless indoors on a bad fix, and neither can ever know
+ * the flat number. So a point and a typed line coexist — take the point from
+ * whichever route worked, then write "2nd floor, above the bakery" underneath.
+ *
+ * The map here confirms rather than collects. It is Google's own embed, which
+ * cannot be read back out of (see `mapsEmbedUrl`), so it answers "is this
+ * roughly right?" — a question the customer can settle by reading the road
+ * names off it — and the flat number below answers the rest.
  */
 export default function DeliveryAddressScreen() {
   const { t } = useLanguage();
@@ -56,8 +59,8 @@ export default function DeliveryAddressScreen() {
     accuracy?: number;
     /** What the coordinates resolved to, so the row reads as a place. */
     label?: string;
-    /** Set once the customer has moved the map themselves. */
-    placed?: boolean;
+    /** Set when the customer named the place rather than a radio guessing it. */
+    chosen?: boolean;
   } | null>(
     address?.latitude != null && address?.longitude != null
       ? {
@@ -69,7 +72,7 @@ export default function DeliveryAddressScreen() {
           ...(address.source !== "manual" && address.text
             ? { label: address.text }
             : {}),
-          ...(address.source === "map" ? { placed: true } : {}),
+          ...(address.source === "search" ? { chosen: true } : {}),
         }
       : null,
   );
@@ -89,78 +92,21 @@ export default function DeliveryAddressScreen() {
     setPhone(savedPhone);
   }, [savedPhone]);
 
-  /*
-   * The point the map is waiting to have named, and the timer that will do it.
-   *
-   * Dragging a map emits a settled position every time a finger lifts, and the
-   * address lookup is allowed one request a second. So a move parks the
-   * coordinates here and the naming happens once the customer stops fiddling.
-   */
-  const pendingLabel = useRef<{ latitude: number; longitude: number } | null>(
-    null,
-  );
-  const labelTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(
-    () => () => {
-      if (labelTimer.current) clearTimeout(labelTimer.current);
-    },
-    [],
-  );
-
-  /**
-   * Takes the pin where the customer put it.
-   *
-   * The GPS accuracy is dropped on purpose: it described how sure the device
-   * was, and the device is no longer the one answering. A pin placed by someone
-   * looking at their own roof is not uncertain, so the "rough area" warning has
-   * to go with it.
-   */
-  const onMapMove = useCallback((latitude: number, longitude: number) => {
-    setPin({ latitude, longitude, placed: true });
-
-    pendingLabel.current = { latitude, longitude };
-    if (labelTimer.current) clearTimeout(labelTimer.current);
-
-    labelTimer.current = setTimeout(() => {
-      const target = pendingLabel.current;
-      if (!target) return;
-
-      void describeCoordinates(target.latitude, target.longitude).then(
-        (label) => {
-          // Another drag may have landed while the lookup was in flight. Late
-          // answers describe somewhere the pin has already left.
-          if (pendingLabel.current !== target || !label) return;
-
-          setPin((current) =>
-            current &&
-            current.latitude === target.latitude &&
-            current.longitude === target.longitude
-              ? { ...current, label }
-              : current,
-          );
-        },
-      );
-    }, 1200);
-  }, []);
-
   /**
    * A place taken from the search results.
    *
-   * Counts as `placed`, the same as a map drag, because it is: the customer
-   * named somewhere rather than letting a radio guess. That drops the accuracy
-   * reading and the "rough area" warning along with it, which is right — the
-   * doubt those describe belonged to the device.
+   * Counts as `chosen`, because it is: the customer named somewhere rather than
+   * letting a radio guess. That drops the accuracy reading and the "rough area"
+   * warning along with it, which is right — the doubt those describe belonged
+   * to the device, and the device is no longer the one answering.
    */
   const onSearchPick = useCallback(
     (place: { latitude: number; longitude: number; text: string }) => {
-      pendingLabel.current = null;
-
       setPin({
         latitude: place.latitude,
         longitude: place.longitude,
         label: place.text,
-        placed: true,
+        chosen: true,
       });
 
       // Same rule as the locate button: never write over what was typed. A
@@ -191,10 +137,6 @@ export default function DeliveryAddressScreen() {
     }
 
     const { latitude, longitude, accuracy, text: resolved } = result.address;
-
-    // A lookup left over from a map drag would otherwise land on top of this
-    // one and re-label a pin that has since moved somewhere else entirely.
-    pendingLabel.current = null;
 
     setPin({
       latitude,
@@ -253,7 +195,7 @@ export default function DeliveryAddressScreen() {
             ...(pin.accuracy != null ? { accuracy: pin.accuracy } : {}),
           }
         : {}),
-      source: pin ? (pin.placed ? "map" : "gps") : "manual",
+      source: pin ? (pin.chosen ? "search" : "gps") : "manual",
       savedAt: new Date().toISOString(),
     });
 
@@ -373,21 +315,22 @@ export default function DeliveryAddressScreen() {
           ) : null}
 
           {/*
-            Always on screen, pin or no pin. Search cannot name every house in
-            Indore and the device cannot find one indoors, so the map is the
-            one route to an address that never fails — which makes hiding it
-            until something else succeeded exactly backwards. With nothing
-            found yet it opens on the middle of the city, and one drag is the
-            whole interaction.
+            Only once there is a point to show. An empty map centred on the
+            middle of Indore used to be worth drawing because the customer
+            could drag it; this one cannot be dragged, so with nothing found
+            yet it would be a picture of Rajwada above a form about somewhere
+            else — decoration that reads as an answer.
           */}
-          <MapPicker
-            latitude={pin?.latitude ?? DEFAULT_CENTRE.latitude}
-            longitude={pin?.longitude ?? DEFAULT_CENTRE.longitude}
-            onMove={onMapMove}
-          />
-          <Text className="gd-map-hint">
-            {pin ? t("address.mapHint") : t("address.mapHintEmpty")}
-          </Text>
+          {pin ? (
+            <>
+              <MapPreview
+                latitude={pin.latitude}
+                longitude={pin.longitude}
+                label={pin.label}
+              />
+              <Text className="gd-map-hint">{t("address.mapHint")}</Text>
+            </>
+          ) : null}
 
           <Text className="gd-section-title">{t("address.manual")}</Text>
           <TextInput

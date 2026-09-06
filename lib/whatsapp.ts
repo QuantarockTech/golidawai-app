@@ -77,11 +77,12 @@ const formatDelivery = (delivery: DeliveryAddress | null): string[] => {
     lines.push(mapsLink(delivery.latitude, delivery.longitude));
 
     // Worth saying out loud: a 500 m fix is a neighbourhood, not a doorstep,
-    // and the person packing should know to ring before setting off. A pin the
-    // customer placed by hand carries no such doubt, and saying so tells the
-    // rider to follow the pin rather than second-guess it from the address.
-    if (delivery.source === "map") {
-      lines.push("(Pin placed by the customer on the map)");
+    // and the person packing should know to ring before setting off. A place
+    // the customer picked out of the search carries no such doubt, and saying
+    // so tells the rider to follow the link rather than second-guess it from
+    // the address line above.
+    if (delivery.source === "search") {
+      lines.push("(Location the customer searched for)");
     } else if (delivery.source === "gps") {
       lines.push(
         delivery.accuracy != null
