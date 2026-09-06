@@ -635,20 +635,32 @@
   @apply text-[13px] font-body text-ink-faint;
 }
 
-.ga-social-row {
-  @apply flex-row gap-2.5;
+/*
+ * Google, as the way in rather than an afterthought.
+ *
+ * It used to sit below the password form behind an "or continue with" rule, at
+ * the size of a footnote, which is exactly where nobody looks. Most customers
+ * here have a Google account on the phone already and no wish to invent another
+ * password, so it now opens the screen.
+ *
+ * White rather than brand-filled, and it stays that way: Google's branding
+ * terms allow their mark on white, blue or black only, so painting this in the
+ * teal would put their G on a colour it is not licensed for. The lift comes
+ * from position, height and shadow instead of fill.
+ */
+.ga-google-btn {
+  @apply w-full flex-row items-center justify-center gap-2.5 rounded-2xl border border-hairline bg-white py-4;
+  box-shadow: 0 1px 3px rgba(15, 60, 61, 0.1);
 }
 
-.ga-social-btn {
-  @apply flex-1 flex-row items-center justify-center gap-2 rounded-2xl border border-hairline bg-white py-3.5;
+.ga-google-text {
+  @apply text-[16px] font-ui-semibold text-ink;
 }
 
+/* Shared with .ga-google-btn; the row of small social buttons it was written
+ * for is gone, now that Google is the only provider and leads the screen. */
 .ga-social-btn-disabled {
   @apply opacity-50;
-}
-
-.ga-social-text {
-  @apply text-[14px] font-ui text-ink;
 }
 
 /*

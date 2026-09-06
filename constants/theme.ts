@@ -24,6 +24,8 @@ export const colors = {
   inkFaint: "#8fa3a1",
   emergency: "#df1529",
   whatsapp: "#25d366",
+  /* Google's own red, so the G on the sign-in button reads as theirs. */
+  google: "#ea4335",
   hairlineSoft: "rgba(15, 60, 61, 0.08)",
   white: "#ffffff",
 } as const;

@@ -1,4 +1,5 @@
 import { useSSO, useSignIn } from "@clerk/clerk-expo";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { clsx } from "clsx";
 import * as AuthSession from "expo-auth-session";
 import { useRouter, type Href } from "expo-router";
@@ -20,6 +21,7 @@ import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 import AuthToggle from "@/components/AuthToggle";
 import BrandMark from "@/components/BrandMark";
 import LanguageToggle from "@/components/LanguageToggle";
+import { colors } from "@/constants/theme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useKeyboardVisible } from "@/lib/useKeyboardVisible";
 import { isEmailLike, readErrorMessage } from "@/lib/auth";
@@ -202,6 +204,39 @@ const SignIn = () => {
           showsVerticalScrollIndicator={false}
         >
           <View className="ga-content">
+            {/*
+              First on the screen, ahead of the email fields.
+
+              Most customers already have a Google account on the phone, and
+              the alternative is inventing a password for a pharmacy app they
+              may use twice a month. This used to sit under the form behind an
+              "or continue with" rule, where it read as a fallback.
+            */}
+            <Pressable
+              className={clsx(
+                "ga-google-btn",
+                isSubmitting && "ga-social-btn-disabled",
+              )}
+              onPress={handleGoogleSignIn}
+              disabled={isSubmitting}
+              accessibilityRole="button"
+              accessibilityLabel={t("signIn.google")}
+              accessibilityState={{ disabled: isSubmitting }}
+            >
+              <MaterialCommunityIcons
+                name="google"
+                size={20}
+                color={colors.google}
+              />
+              <Text className="ga-google-text">{t("signIn.google")}</Text>
+            </Pressable>
+
+            <View className="ga-divider-row">
+              <View className="ga-divider-line" />
+              <Text className="ga-divider-text">{t("signIn.orWithEmail")}</Text>
+              <View className="ga-divider-line" />
+            </View>
+
             <View className="ga-field">
               <Text className="ga-label">{t("auth.email")}</Text>
               <TextInput
@@ -258,22 +293,6 @@ const SignIn = () => {
                 {isSubmitting ? t("signIn.submitting") : t("auth.signIn")}
               </Text>
             </Pressable>
-
-            <View className="ga-divider-row">
-              <View className="ga-divider-line" />
-              <Text className="ga-divider-text">{t("signIn.orContinueWith")}</Text>
-              <View className="ga-divider-line" />
-            </View>
-
-            <View className="ga-social-row">
-              <Pressable
-                className={`ga-social-btn ${isSubmitting ? "ga-social-btn-disabled" : ""}`}
-                onPress={handleGoogleSignIn}
-                disabled={isSubmitting}
-              >
-                <Text className="ga-social-text">{t("signIn.google")}</Text>
-              </Pressable>
-            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
