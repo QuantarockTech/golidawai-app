@@ -323,18 +323,6 @@ export default function Cart() {
                 </>
               ) : null}
 
-              {/* Flagged before payment, not after — board frame 06's Rx tags. */}
-              {needsPharmacistReview ? (
-                <View className="gd-notice mt-3">
-                  <MaterialCommunityIcons
-                    name="information-outline"
-                    size={18}
-                    color={colors.emergency}
-                  />
-                  <Text className="gd-notice-text">{t("cart.rxNotice")}</Text>
-                </View>
-              ) : null}
-
               {/*
                 No totals. Every figure the app could put here came from a
                 catalogue price nothing had checked against stock or the day's

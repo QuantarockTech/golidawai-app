@@ -1471,14 +1471,6 @@
   @apply text-[10px] font-ui-semibold text-white;
 }
 
-.gd-notice {
-  @apply flex-row items-start gap-2 rounded-2xl border border-emergency/25 bg-emergency/8 px-4 py-3;
-}
-
-.gd-notice-text {
-  @apply flex-1 text-[12px] leading-[17px] font-body text-ink;
-}
-
 .gd-totals {
   @apply mt-4 gap-2 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
 }
