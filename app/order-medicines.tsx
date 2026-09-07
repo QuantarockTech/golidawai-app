@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { styled } from "nativewind";
 import { useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   Linking,
   Pressable,
   ScrollView,
@@ -14,13 +15,10 @@ import {
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 import ScreenHeader from "@/components/ScreenHeader";
-import {
-  MEDICINE_CATEGORIES,
-  MEDICINES,
-  PHARMACY_PHONE,
-} from "@/constants/data";
+import { PHARMACY_PHONE } from "@/constants/data";
 import { colors } from "@/constants/theme";
 import { useCart } from "@/contexts/CartContext";
+import { useCatalogue } from "@/contexts/CatalogueContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useOrderDraft } from "@/contexts/OrderDraftContext";
 import "@/global.css";
@@ -29,7 +27,15 @@ import { pressRow, pressSmall } from "@/lib/press";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
-const CATEGORY_KEYS: Record<MedicineCategory, TranslationKey> = {
+/**
+ * Translations for the categories we already had words for.
+ *
+ * The sheet decides which categories exist, so this is a lookup rather than the
+ * list itself: a category found here shows in the customer's language, and one
+ * the pharmacy invents shows exactly as they typed it. That way a new category
+ * works the moment it is added, without waiting for a translation.
+ */
+const CATEGORY_KEYS: Record<string, TranslationKey> = {
   fever: "order.cat.fever",
   diabetes: "order.cat.diabetes",
   skin: "order.cat.skin",
@@ -38,13 +44,25 @@ const CATEGORY_KEYS: Record<MedicineCategory, TranslationKey> = {
   vitamins: "order.cat.vitamins",
 };
 
+/**
+ * How many rows to draw at once.
+ *
+ * The catalogue is seven hundred products and this list is a plain mapped
+ * ScrollView, so drawing all of them builds seven hundred rows before the
+ * screen appears. Nobody scrolls that far to find a medicine anyway — the
+ * search box is the way in — so this shows the first slice and says how many
+ * more there are.
+ */
+const VISIBLE_LIMIT = 60;
+
 /** Order Medicines — concept board frame 06. */
 export default function OrderMedicines() {
   const { t } = useLanguage();
   const router = useRouter();
   const { quantityOf, add, remove, itemCount } = useCart();
+  const { medicines, categories, isLoading, failed, refresh } = useCatalogue();
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<MedicineCategory | null>(null);
+  const [category, setCategory] = useState<string | null>(null);
   /*
    * Medicines the customer typed that the catalogue doesn't stock.
    *
@@ -60,12 +78,21 @@ export default function OrderMedicines() {
 
   const results = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return MEDICINES.filter((med) => {
+    return medicines.filter((med) => {
       const matchesCategory = !category || med.category === category;
-      const matchesQuery = !needle || med.name.toLowerCase().includes(needle);
+      // Company counts as a match: a customer who knows their tablet is the
+      // Cipla one should be able to find it that way.
+      const matchesQuery =
+        !needle ||
+        med.name.toLowerCase().includes(needle) ||
+        (med.company ?? "").toLowerCase().includes(needle);
       return matchesCategory && matchesQuery;
     });
-  }, [category, query]);
+  }, [category, query, medicines]);
+
+  /** What is drawn, and how much was left out — see VISIBLE_LIMIT. */
+  const visible = results.slice(0, VISIBLE_LIMIT);
+  const hidden = results.length - visible.length;
 
   const typed = query.trim();
   const alreadyTyped = customItems.some(
@@ -183,49 +210,58 @@ export default function OrderMedicines() {
             ) : null}
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="gd-chips"
-          >
-            <Pressable
-              className={clsx("gd-chip", !category && "gd-chip-active")}
-              style={pressSmall}
-              onPress={() => setCategory(null)}
-              accessibilityRole="button"
+          {/*
+            Only when the sheet says so. The pharmacy's Category column is what
+            fills these, so an empty row of chips would otherwise sit above the
+            list doing nothing until that column exists.
+          */}
+          {categories.length > 0 ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerClassName="gd-chips"
             >
-              <Text
-                className={clsx(
-                  "gd-chip-text",
-                  !category && "gd-chip-text-active",
-                )}
+              <Pressable
+                className={clsx("gd-chip", !category && "gd-chip-active")}
+                style={pressSmall}
+                onPress={() => setCategory(null)}
+                accessibilityRole="button"
               >
-                {t("order.all")}
-              </Text>
-            </Pressable>
-
-            {MEDICINE_CATEGORIES.map((key) => {
-              const active = category === key;
-              return (
-                <Pressable
-                  key={key}
-                  className={clsx("gd-chip", active && "gd-chip-active")}
-                  style={pressSmall}
-                  onPress={() => setCategory(active ? null : key)}
-                  accessibilityRole="button"
+                <Text
+                  className={clsx(
+                    "gd-chip-text",
+                    !category && "gd-chip-text-active",
+                  )}
                 >
-                  <Text
-                    className={clsx(
-                      "gd-chip-text",
-                      active && "gd-chip-text-active",
-                    )}
+                  {t("order.all")}
+                </Text>
+              </Pressable>
+
+              {categories.map((key) => {
+                const active = category === key;
+                const label = CATEGORY_KEYS[key];
+
+                return (
+                  <Pressable
+                    key={key}
+                    className={clsx("gd-chip", active && "gd-chip-active")}
+                    style={pressSmall}
+                    onPress={() => setCategory(active ? null : key)}
+                    accessibilityRole="button"
                   >
-                    {t(CATEGORY_KEYS[key])}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+                    <Text
+                      className={clsx(
+                        "gd-chip-text",
+                        active && "gd-chip-text-active",
+                      )}
+                    >
+                      {label ? t(label) : key}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          ) : null}
 
           {/*
            * Sits above the catalogue: these are the medicines the customer
@@ -384,7 +420,35 @@ export default function OrderMedicines() {
               : t("order.allMedicines")}
           </Text>
 
-          {results.length === 0 ? (
+          {/*
+            Three states before the list itself. Loading only shows when there
+            is nothing cached to show instead; the failure only shows when a
+            dead network left the screen with nothing, since a stale catalogue
+            beats an error message.
+          */}
+          {isLoading && medicines.length === 0 ? (
+            <View className="gd-empty">
+              <ActivityIndicator size="small" color={colors.brandDark} />
+              <Text className="gd-empty-text mt-2">{t("order.loading")}</Text>
+            </View>
+          ) : failed && medicines.length === 0 ? (
+            <View className="gd-empty">
+              <Text className="gd-empty-text">{t("order.loadFailed")}</Text>
+              <Pressable
+                className="gd-empty-add"
+                style={pressSmall}
+                onPress={refresh}
+                accessibilityRole="button"
+              >
+                <MaterialCommunityIcons
+                  name="refresh"
+                  size={16}
+                  color={colors.brandDark}
+                />
+                <Text className="gd-empty-action">{t("order.retry")}</Text>
+              </Pressable>
+            </View>
+          ) : results.length === 0 ? (
             <View className="gd-empty">
               <Text className="gd-empty-text">{t("order.empty")}</Text>
 
@@ -414,7 +478,7 @@ export default function OrderMedicines() {
             </View>
           ) : (
             <View className="gd-med-card">
-              {results.map((item, index) => {
+              {visible.map((item, index) => {
                 const quantity = quantityOf(item.id);
 
                 return (
@@ -434,21 +498,28 @@ export default function OrderMedicines() {
                     </View>
 
                     <View className="min-w-0 flex-1">
-                      <Text className="gd-med-name" numberOfLines={1}>
+                      <Text className="gd-med-name" numberOfLines={2}>
                         {item.name}
                       </Text>
-                      <Text className="gd-med-sub" numberOfLines={1}>
-                        {t("home.strip", { count: item.tabletsPerStrip })}
-                      </Text>
+
                       {/*
-                       * Flagged here so it is known before checkout, where it
-                       * routes into the same pharmacist review as an uploaded
-                       * prescription.
-                       */}
-                      {item.rxRequired ? (
-                        <View className="gd-rx-tag">
-                          <Text className="gd-rx-tag-text">
-                            {t("order.rxRequired")}
+                        Pack size and maker, in the pharmacy's own words. Either
+                        can be blank in the sheet — about half the rows have no
+                        pack size — so this joins whatever is there rather than
+                        printing a gap or the word "undefined".
+                      */}
+                      {item.packSize || item.company ? (
+                        <Text className="gd-med-sub" numberOfLines={1}>
+                          {[item.packSize, item.company]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </Text>
+                      ) : null}
+
+                      {item.discount != null ? (
+                        <View className="gd-discount-tag">
+                          <Text className="gd-discount-tag-text">
+                            {t("order.discount", { percent: item.discount })}
                           </Text>
                         </View>
                       ) : null}
@@ -525,6 +596,13 @@ export default function OrderMedicines() {
               })}
             </View>
           )}
+
+          {/* Says what was left out, so a capped list never reads as all of it. */}
+          {hidden > 0 ? (
+            <Text className="gd-custom-note">
+              {t("order.moreResults", { count: hidden })}
+            </Text>
+          ) : null}
 
           {/* Anything the catalogue can't cover falls back to a phone call. */}
           <Pressable

@@ -82,11 +82,18 @@ const ReorderList = ({ entries }: ReorderListProps) => {
               <Text className="gd-med-name" numberOfLines={1}>
                 {entry.name}
               </Text>
-              <Text className="gd-med-sub" numberOfLines={1}>
-                {entry.kind === "catalogue"
-                  ? t("home.strip", { count: entry.item.tabletsPerStrip })
-                  : t("home.typedItem")}
-              </Text>
+              {/*
+                Pack size when the sheet gives one — about half the catalogue
+                leaves it blank — and nothing at all rather than an empty line
+                when it does not.
+              */}
+              {entry.kind === "typed" || entry.item.packSize ? (
+                <Text className="gd-med-sub" numberOfLines={1}>
+                  {entry.kind === "catalogue"
+                    ? entry.item.packSize
+                    : t("home.typedItem")}
+                </Text>
+              ) : null}
             </View>
 
             {/*

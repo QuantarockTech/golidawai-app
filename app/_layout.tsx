@@ -16,6 +16,7 @@ import { useEffect, useRef } from "react";
 
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { CatalogueProvider } from "@/contexts/CatalogueContext";
 import { DeliveryProvider } from "@/contexts/DeliveryContext";
 import { OrderDraftProvider } from "@/contexts/OrderDraftContext";
 import { OrderPrefsProvider } from "@/contexts/OrderPrefsContext";
@@ -100,17 +101,23 @@ function RootLayoutContent() {
 export default function RootLayout() {
   const content = (
     <LanguageProvider>
-      <CartProvider>
-        <DeliveryProvider>
-          <OrderPrefsProvider>
-            <OrderDraftProvider>
-              <OrdersProvider>
-                <RootLayoutContent />
-              </OrdersProvider>
-            </OrderDraftProvider>
-          </OrderPrefsProvider>
-        </DeliveryProvider>
-      </CartProvider>
+      {/*
+        Above the cart and the order history, because both name catalogue items
+        and the reorder list has to look them up by id to offer them again.
+      */}
+      <CatalogueProvider>
+        <CartProvider>
+          <DeliveryProvider>
+            <OrderPrefsProvider>
+              <OrderDraftProvider>
+                <OrdersProvider>
+                  <RootLayoutContent />
+                </OrdersProvider>
+              </OrderDraftProvider>
+            </OrderPrefsProvider>
+          </DeliveryProvider>
+        </CartProvider>
+      </CatalogueProvider>
     </LanguageProvider>
   );
 

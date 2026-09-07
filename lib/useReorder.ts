@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 
-import { MEDICINES, REORDER_ITEMS } from "@/constants/data";
+import { REORDER_ITEMS } from "@/constants/data";
+import { useCatalogue } from "@/contexts/CatalogueContext";
 import { useOrders } from "@/contexts/OrdersContext";
 
 /**
@@ -18,9 +19,6 @@ export type ReorderEntry =
 /** How many past medicines are worth offering before the list becomes a list. */
 const MAX_ENTRIES = 6;
 
-const catalogue = new Map<string, ReorderItem>(
-  [...MEDICINES, ...REORDER_ITEMS].map((item) => [item.id, item]),
-);
 
 /**
  * What this customer has actually ordered, newest first.
@@ -39,8 +37,18 @@ export const useReorder = (): {
   fromHistory: boolean;
 } => {
   const { orders } = useOrders();
+  const { medicines } = useCatalogue();
 
   return useMemo(() => {
+    /*
+     * Rebuilt whenever the sheet lands, rather than once at module load as it
+     * was when the catalogue was a constant. A past order holds an id, and only
+     * the catalogue can turn that back into something the cart will accept.
+     */
+    const catalogue = new Map<string, ReorderItem>(
+      [...medicines, ...REORDER_ITEMS].map((item) => [item.id, item]),
+    );
+
     const entries: ReorderEntry[] = [];
     const seen = new Set<string>();
 
@@ -86,5 +94,5 @@ export const useReorder = (): {
       })),
       fromHistory: false,
     };
-  }, [orders]);
+  }, [orders, medicines]);
 };

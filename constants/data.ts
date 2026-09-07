@@ -17,44 +17,23 @@ export const QUICK_ACTIONS: QuickAction[] = [
   { key: "insurance", icon: "shield-check-outline", tone: "brand" },
 ];
 
+/**
+ * What the home screen offers a customer who has never ordered.
+ *
+ * Six common medicines, kept in code on purpose. The real catalogue now comes
+ * from the pharmacy's spreadsheet over the network (see lib/catalogue.ts), and
+ * a first-time customer on a cold start would otherwise be shown an empty
+ * reorder list while that loads. These are a suggestion, not history — the
+ * heading above them says so — and they are matched to the sheet by name once
+ * it arrives, so tapping one adds the pharmacy's own row to the cart.
+ */
 export const REORDER_ITEMS: ReorderItem[] = [
-  { id: "dolo-650", name: "Dolo 650", tabletsPerStrip: 15, price: 32 },
-  { id: "shelcal-500", name: "Shelcal 500", tabletsPerStrip: 15, price: 118 },
-  { id: "pan-40", name: "Pan 40", tabletsPerStrip: 15, price: 145 },
-  { id: "azithral-500", name: "Azithral 500", tabletsPerStrip: 5, price: 98 },
-  { id: "ecosprin-75", name: "Ecosprin 75", tabletsPerStrip: 14, price: 12 },
-  { id: "thyronorm-50", name: "Thyronorm 50mcg", tabletsPerStrip: 30, price: 165 },
-];
-
-/** Catalogue behind Order Medicines — concept board frame 06. */
-export const MEDICINES: Medicine[] = [
-  { id: "dolo-650", name: "Dolo 650", tabletsPerStrip: 15, price: 32, category: "fever", rxRequired: false },
-  { id: "calpol-500", name: "Calpol 500", tabletsPerStrip: 15, price: 28, category: "fever", rxRequired: false },
-  { id: "azithral-500", name: "Azithral 500", tabletsPerStrip: 5, price: 98, category: "fever", rxRequired: true },
-  { id: "augmentin-625", name: "Augmentin 625", tabletsPerStrip: 10, price: 214, category: "fever", rxRequired: true },
-  { id: "metformin-500", name: "Metformin 500", tabletsPerStrip: 20, price: 46, category: "diabetes", rxRequired: true },
-  { id: "glycomet-gp1", name: "Glycomet GP1", tabletsPerStrip: 15, price: 89, category: "diabetes", rxRequired: true },
-  { id: "januvia-50", name: "Januvia 50", tabletsPerStrip: 14, price: 412, category: "diabetes", rxRequired: true },
-  { id: "candid-cream", name: "Candid Cream 20g", tabletsPerStrip: 1, price: 92, category: "skin", rxRequired: false },
-  { id: "betnovate-n", name: "Betnovate-N 20g", tabletsPerStrip: 1, price: 58, category: "skin", rxRequired: true },
-  { id: "ecosprin-75", name: "Ecosprin 75", tabletsPerStrip: 14, price: 12, category: "heart", rxRequired: false },
-  { id: "atorva-10", name: "Atorva 10", tabletsPerStrip: 15, price: 105, category: "heart", rxRequired: true },
-  { id: "telma-40", name: "Telma 40", tabletsPerStrip: 15, price: 138, category: "heart", rxRequired: true },
-  { id: "pan-40", name: "Pan 40", tabletsPerStrip: 15, price: 145, category: "stomach", rxRequired: false },
-  { id: "digene-gel", name: "Digene Gel 200ml", tabletsPerStrip: 1, price: 132, category: "stomach", rxRequired: false },
-  { id: "shelcal-500", name: "Shelcal 500", tabletsPerStrip: 15, price: 118, category: "vitamins", rxRequired: false },
-  { id: "thyronorm-50", name: "Thyronorm 50mcg", tabletsPerStrip: 30, price: 165, category: "vitamins", rxRequired: true },
-  { id: "zincovit", name: "Zincovit", tabletsPerStrip: 15, price: 108, category: "vitamins", rxRequired: false },
-];
-
-/** Chip order for the category filter; "All" is prepended in the screen. */
-export const MEDICINE_CATEGORIES: MedicineCategory[] = [
-  "fever",
-  "diabetes",
-  "skin",
-  "heart",
-  "stomach",
-  "vitamins",
+  { id: "dolo-650", name: "DOLO 650MG TAB", packSize: "15'S" },
+  { id: "pan-40", name: "PAN 40 MG TAB", packSize: "15'S" },
+  { id: "zincovit", name: "ZINCOVIT TAB" },
+  { id: "combiflam", name: "COMBIFLAM TAB", packSize: "15'S" },
+  { id: "becosules", name: "BECOSULES CAPSULES", packSize: "20'S" },
+  { id: "digene", name: "DIGENE ORANGE SYP", packSize: "200ML" },
 ];
 
 /** Ambulance tiers — concept board frame 07. */

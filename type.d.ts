@@ -74,23 +74,41 @@ declare global {
   interface ReorderItem {
     id: string;
     name: string;
-    /** Tablets per strip; the label itself is translated, not stored. */
-    tabletsPerStrip: number;
-    price: number;
+    /**
+     * How it is sold, in the pharmacy's own words — "15'S", "200ML", "30GM".
+     *
+     * A string rather than a tablet count, because half of what a pharmacy
+     * sells is not tablets, and because this is transcribed from their sheet
+     * rather than interpreted. Roughly half the rows leave it blank.
+     */
+    packSize?: string;
   }
 
-  /** Order Medicines — concept board frame 06. */
-  type MedicineCategory =
-    | "fever"
-    | "diabetes"
-    | "skin"
-    | "heart"
-    | "stomach"
-    | "vitamins";
-
+  /**
+   * Order Medicines — read from the pharmacy's spreadsheet, not from code.
+   *
+   * Every field but the name and id is optional, because the sheet is edited by
+   * hand and a half-filled row is still a product someone can order. See
+   * lib/catalogue.ts for how a row becomes one of these.
+   */
   interface Medicine extends ReorderItem {
-    category: MedicineCategory;
-    /** Routes the item into the pharmacist-review queue at checkout. */
+    /**
+     * Whatever the sheet's Category column says, lowercased. Absent until that
+     * column exists, which is what makes the filter chips appear on their own.
+     */
+    category?: string;
+    /** Percentage off, when the sheet gives one. 18 means "18% OFF". */
+    discount?: number;
+    /** Who makes it — "Cipla", "Sun Pharmaceutical Industries". */
+    company?: string;
+    /**
+     * Always true for a catalogue item.
+     *
+     * The sheet carries no prescription flag, and the client chose to route
+     * every catalogue order past a pharmacist rather than have the app guess
+     * which of seven hundred products is over the counter. Kept as a field
+     * rather than assumed, so a Rx column in the sheet can drive it later.
+     */
     rxRequired: boolean;
   }
 
