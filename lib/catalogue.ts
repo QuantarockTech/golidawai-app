@@ -93,24 +93,20 @@ export const parseCsv = (text: string): string[][] => {
   return rows;
 };
 
-/** "18%" and " 18 " both mean 18. Anything unreadable means no discount. */
-const readDiscount = (raw: string): number | undefined => {
-  const value = Number(raw.replace("%", "").trim());
-  return Number.isFinite(value) && value > 0 ? value : undefined;
-};
-
 /**
- * A stable id for a row.
+ * A stable id for a row, built from the name alone.
  *
- * Name alone is not enough: the sheet lists CANDID POWDER at 60GM and 120GM,
- * and ELECTRAL ORANGE at two sizes, as separate products that a customer picks
- * between. Including the pack size keeps them apart in the cart, where two
- * lines sharing an id would silently merge into one.
+ * The sheet's Pack Size and Discount columns are read by the pharmacy, not by
+ * the app — the client asked for neither on screen — so a product is only ever
+ * identified by what a customer can actually see. That has a consequence worth
+ * knowing: the sheet lists a handful of products at two sizes (CANDID POWDER at
+ * 60GM and 120GM, TELMA 40 TAB at 15'S and 30'S), and with the size hidden
+ * those would be two rows a customer cannot tell apart. The first of each wins
+ * and the rest are dropped, which is the honest reading of a list that cannot
+ * show the thing that distinguishes them.
  */
-const idFor = (name: string, packSize: string): string =>
-  [name, packSize]
-    .filter(Boolean)
-    .join("-")
+const idFor = (name: string): string =>
+  name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
@@ -141,25 +137,20 @@ export const parseCatalogue = (csv: string): Medicine[] => {
     // A row with no name is a spacer or a half-finished edit, not a product.
     if (!name) continue;
 
-    const packSize = at(row, "pack size");
-    const id = idFor(name, packSize);
+    const id = idFor(name);
 
-    // The sheet holds a handful of exact repeats. First wins, so the cart never
-    // ends up with two rows it cannot tell apart.
+    // First wins — see idFor for why two rows can share a name here.
     if (seen.has(id)) continue;
     seen.add(id);
 
     const category = at(row, "category").toLowerCase();
     const company = at(row, "company name");
-    const discount = readDiscount(at(row, "discount %"));
 
     medicines.push({
       id,
       name,
-      ...(packSize ? { packSize } : {}),
       ...(company ? { company } : {}),
       ...(category ? { category } : {}),
-      ...(discount != null ? { discount } : {}),
       /*
        * Every catalogue item is treated as needing a pharmacist's eye. The
        * sheet carries no prescription flag, and the client chose review-all

@@ -74,14 +74,6 @@ declare global {
   interface ReorderItem {
     id: string;
     name: string;
-    /**
-     * How it is sold, in the pharmacy's own words — "15'S", "200ML", "30GM".
-     *
-     * A string rather than a tablet count, because half of what a pharmacy
-     * sells is not tablets, and because this is transcribed from their sheet
-     * rather than interpreted. Roughly half the rows leave it blank.
-     */
-    packSize?: string;
   }
 
   /**
@@ -97,8 +89,6 @@ declare global {
      * column exists, which is what makes the filter chips appear on their own.
      */
     category?: string;
-    /** Percentage off, when the sheet gives one. 18 means "18% OFF". */
-    discount?: number;
     /** Who makes it — "Cipla", "Sun Pharmaceutical Industries". */
     company?: string;
     /**

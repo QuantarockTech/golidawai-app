@@ -28,12 +28,12 @@ export const QUICK_ACTIONS: QuickAction[] = [
  * it arrives, so tapping one adds the pharmacy's own row to the cart.
  */
 export const REORDER_ITEMS: ReorderItem[] = [
-  { id: "dolo-650", name: "DOLO 650MG TAB", packSize: "15'S" },
-  { id: "pan-40", name: "PAN 40 MG TAB", packSize: "15'S" },
-  { id: "zincovit", name: "ZINCOVIT TAB" },
-  { id: "combiflam", name: "COMBIFLAM TAB", packSize: "15'S" },
-  { id: "becosules", name: "BECOSULES CAPSULES", packSize: "20'S" },
-  { id: "digene", name: "DIGENE ORANGE SYP", packSize: "200ML" },
+  { id: "dolo-650mg-tab", name: "DOLO 650MG TAB" },
+  { id: "pan-40-mg-tab", name: "PAN 40 MG TAB" },
+  { id: "zincovit-tab", name: "ZINCOVIT TAB" },
+  { id: "combiflam-tab", name: "COMBIFLAM TAB" },
+  { id: "becosules-capsules", name: "BECOSULES CAPSULES" },
+  { id: "digene-orange-syp", name: "DIGENE ORANGE SYP" },
 ];
 
 /** Ambulance tiers — concept board frame 07. */

@@ -83,15 +83,13 @@ const ReorderList = ({ entries }: ReorderListProps) => {
                 {entry.name}
               </Text>
               {/*
-                Pack size when the sheet gives one — about half the catalogue
-                leaves it blank — and nothing at all rather than an empty line
-                when it does not.
+                Only the typed rows carry a second line now. A catalogue row
+                has nothing left to say under the name: pack size and discount
+                are both deliberately off screen.
               */}
-              {entry.kind === "typed" || entry.item.packSize ? (
+              {entry.kind === "typed" ? (
                 <Text className="gd-med-sub" numberOfLines={1}>
-                  {entry.kind === "catalogue"
-                    ? entry.item.packSize
-                    : t("home.typedItem")}
+                  {t("home.typedItem")}
                 </Text>
               ) : null}
             </View>
