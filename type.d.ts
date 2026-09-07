@@ -139,8 +139,41 @@ declare global {
    * from GPS. The coordinates ride alongside when the device supplied them,
    * because a map pin locates a house in a way an Indore address rarely does.
    */
+  /**
+   * House, office or somewhere else.
+   *
+   * One address is saved at a time, so this is a note for the rider rather than
+   * a way of choosing between several — "Office" tells them not to come at
+   * 9pm. Supporting a list of saved addresses would build on this.
+   */
+  type AddressLabel = "house" | "office" | "other";
+
+  /**
+   * Where an order goes, split the way a delivery app has to split it.
+   *
+   * Three fields rather than one box, because they have different owners. The
+   * app owns `area` — it is whatever GPS or the search box last resolved, and
+   * it is replaced whenever the customer moves the pin. The customer owns
+   * `flat` and `landmark`, and nothing the app learns about their coordinates
+   * may ever overwrite those.
+   *
+   * That division is the whole point. A single box could not be refreshed when
+   * the location changed without wiping the flat number, and could not be left
+   * alone without going stale — the exact bug this replaced.
+   */
   interface DeliveryAddress {
+    /** The composed line, for the WhatsApp message and the order history. */
     text: string;
+    /** The colony or road, from GPS or search. Replaced, never merged. */
+    area?: string;
+    /** Flat, house number, floor. Typed, and never written over. */
+    flat?: string;
+    /** Building name or street. Typed, optional, never written over. */
+    building?: string;
+    /** What kind of place this is, for the rider's benefit. */
+    label?: AddressLabel;
+    /** A landmark or directions for the rider. Typed, and never written over. */
+    landmark?: string;
     latitude?: number;
     longitude?: number;
     /** Metres of GPS uncertainty, when the device reported it. */

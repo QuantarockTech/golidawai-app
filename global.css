@@ -1083,6 +1083,45 @@
   @apply h-24 rounded-2xl border border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
 }
 
+/*
+ * One-line sibling of .gd-textarea, for the address fields that are a line
+ * rather than a paragraph — the area and the flat number. Same border, same
+ * type; only the height differs, so a three-field address form reads as one
+ * thing rather than three.
+ */
+.gd-input-line {
+  @apply rounded-2xl border border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
+}
+
+/*
+ * The chosen locality on the details step — stated, not editable.
+ *
+ * Muted on purpose. It reads as settled context for the fields underneath
+ * rather than another box to fill in, which is the whole reason the location
+ * moved to a step of its own. "Change" goes back to the map.
+ */
+.gd-locality {
+  @apply flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-mist px-4 py-3;
+}
+
+.gd-locality-text {
+  @apply text-[14px] leading-[19px] font-body text-ink-muted;
+}
+
+.gd-locality-change {
+  @apply flex-row items-center gap-1 rounded-full border border-brand/40 bg-white px-3 py-1.5;
+}
+
+.gd-locality-change-text {
+  @apply text-[12px] font-ui-semibold text-brand-dark;
+}
+
+/* House / Office / Other. Wraps rather than scrolls — there are only three. */
+.gd-chips-row {
+  @apply mt-1 flex-row flex-wrap gap-2;
+}
+
+
 .gd-address {
   @apply flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
 }
@@ -1249,7 +1288,9 @@
 }
 
 .gd-chip {
-  @apply rounded-full border border-hairline bg-mist px-3.5 py-1.5;
+  /* Row + gap so a chip can carry an icon; the category chips have none and
+   * are unaffected by either. */
+  @apply flex-row items-center gap-1.5 rounded-full border border-hairline bg-mist px-3.5 py-1.5;
 }
 
 .gd-chip-active {
@@ -1550,6 +1591,23 @@
 
 .gd-list-label {
   @apply flex-1 text-[14px] font-ui text-ink;
+}
+
+/*
+ * A row that has something to say beneath its label — the saved delivery
+ * address under "Addresses". The label loses its own `flex-1` inside this,
+ * or the two lines fight each other for the row's width.
+ */
+.gd-list-body {
+  @apply min-w-0 flex-1;
+}
+
+.gd-list-body .gd-list-label {
+  @apply flex-none;
+}
+
+.gd-list-sub {
+  @apply mt-0.5 text-[12px] font-body text-ink-muted;
 }
 
 .gd-list-label-danger {

@@ -1,4 +1,5 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { clsx } from "clsx";
 import { styled } from "nativewind";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -19,6 +20,7 @@ import { useDelivery } from "@/contexts/DeliveryContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import "@/global.css";
 import { notify } from "@/lib/dialog";
+import type { TranslationKey } from "@/lib/i18n/translations";
 import {
   isCoarseFix,
   locateCurrentAddress,
@@ -30,6 +32,16 @@ import { isPhoneLike } from "@/lib/auth";
 import { useCustomer } from "@/lib/useCustomer";
 
 const SafeAreaView = styled(RNSafeAreaView);
+
+const ADDRESS_LABELS: {
+  key: AddressLabel;
+  icon: string;
+  labelKey: TranslationKey;
+}[] = [
+  { key: "house", icon: "home-outline", labelKey: "address.labelHouse" },
+  { key: "office", icon: "briefcase-outline", labelKey: "address.labelOffice" },
+  { key: "other", icon: "map-marker-outline", labelKey: "address.labelOther" },
+];
 
 /**
  * Where the order goes.
@@ -48,11 +60,39 @@ const SafeAreaView = styled(RNSafeAreaView);
 export default function DeliveryAddressScreen() {
   const { t } = useLanguage();
   const goBack = useGoBack();
-  const { address, save } = useDelivery();
+  const { address, save, isLoaded } = useDelivery();
   const { phone: savedPhone, savePhone } = useCustomer();
 
   const [phone, setPhone] = useState(savedPhone);
-  const [text, setText] = useState(address?.text ?? "");
+  /*
+   * Split three ways, by who owns each part.
+   *
+   * `area` belongs to the app and is replaced every time the location changes.
+   * `flat` and `landmark` belong to the customer and are never written over.
+   * An older address saved before this split carries only `text`, so it seeds
+   * whichever field it actually came from — see the migration in
+   * DeliveryContext for the same reasoning.
+   */
+  const [area, setArea] = useState(address?.area ?? "");
+  const [flat, setFlat] = useState(address?.flat ?? "");
+  const [building, setBuilding] = useState(address?.building ?? "");
+  const [landmark, setLandmark] = useState(address?.landmark ?? "");
+  const [label, setLabel] = useState<AddressLabel>(address?.label ?? "house");
+
+  /*
+   * Two steps, the way every delivery app in India does it.
+   *
+   * Choosing where you are and describing your door are different jobs, and a
+   * single scrolling form asked the customer to do both at once — which is how
+   * a locality string ended up looking like something to correct by hand. The
+   * location is settled first, and the details form then treats it as given
+   * with a "Change" button rather than an editable field.
+   *
+   * Opens on the details step when an address is already saved: someone who
+   * came here to fix a flat number should not have to re-confirm a location
+   * that was right all along.
+   */
+  const [step, setStep] = useState<"location" | "details">("location");
   const [pin, setPin] = useState<{
     latitude: number;
     longitude: number;
@@ -79,6 +119,9 @@ export default function DeliveryAddressScreen() {
   const [locating, setLocating] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  /** The two things a rider cannot arrive without. Mirrors the check in onSave. */
+  const canSave = Boolean(flat.trim()) && isPhoneLike(phone) && !saving;
+
   /*
    * Clerk's user arrives a beat after the screen does, so the field seeds
    * itself when the number turns up — but once only, or it would snatch back
@@ -91,6 +134,49 @@ export default function DeliveryAddressScreen() {
     seeded.current = true;
     setPhone(savedPhone);
   }, [savedPhone]);
+
+  /**
+   * Fills the form from the address already saved on this device.
+   *
+   * The state above is seeded from `address` at first render, and at first
+   * render there is no address to seed from: DeliveryProvider reads it out of
+   * storage asynchronously, so the first pass always sees null. The effect is
+   * what actually loads a saved address — without it the screen opened blank
+   * every time and quietly offered to replace what was there with nothing.
+   *
+   * Runs on `isLoaded` rather than on `address`, so a customer with no saved
+   * address is settled too, and only once, so nothing typed here is undone by
+   * a later write.
+   */
+  const filled = useRef(false);
+
+  useEffect(() => {
+    if (filled.current || !isLoaded) return;
+    filled.current = true;
+
+    if (!address) return;
+
+    setArea(address.area ?? "");
+    setFlat(address.flat ?? "");
+    setBuilding(address.building ?? "");
+    setLandmark(address.landmark ?? "");
+    if (address.label) setLabel(address.label);
+
+    // Straight to the details for an address that already has a location.
+    if (address.area) setStep("details");
+
+    if (address.latitude != null && address.longitude != null) {
+      setPin({
+        latitude: address.latitude,
+        longitude: address.longitude,
+        ...(address.accuracy != null ? { accuracy: address.accuracy } : {}),
+        ...(address.source !== "manual" && address.text
+          ? { label: address.text }
+          : {}),
+        ...(address.source === "search" ? { chosen: true } : {}),
+      });
+    }
+  }, [isLoaded, address]);
 
   /**
    * A place taken from the search results.
@@ -109,10 +195,10 @@ export default function DeliveryAddressScreen() {
         chosen: true,
       });
 
-      // Same rule as the locate button: never write over what was typed. A
-      // colony name is a starting point, and the flat number is the part only
-      // the customer has.
-      setText((current) => (current.trim() ? current : place.text));
+      // Replaced outright, not merged. The customer just named somewhere else,
+      // so the previous area is wrong — and their flat number, which sits in
+      // its own field now, is untouched by this.
+      setArea(place.text);
     },
     [],
   );
@@ -145,20 +231,49 @@ export default function DeliveryAddressScreen() {
       ...(resolved ? { label: resolved } : {}),
     });
 
-    // Only fill the box if it's empty. Overwriting would wipe the flat number
-    // and landmark the customer typed, which geocoding can never recover.
-    //
-    // A wide fix is left out of it entirely. "Indore City, Madhya Pradesh" in
-    // the address box looks like an answered question, and the customer stops
-    // typing at exactly the point where the useful half was about to go in.
-    if (resolved && !isCoarseFix(accuracy) && !text.trim()) setText(resolved);
+    /*
+     * The area is now this button's to set, so it is set — every time.
+     *
+     * It used to fill the box only when empty, which is what left a customer
+     * looking at their old address above a map of where they actually were.
+     * Overwriting is safe here precisely because the flat number and landmark
+     * live in their own fields below and this cannot touch them.
+     *
+     * A wide fix is still left out. "Indore City, Madhya Pradesh" reads like an
+     * answered question, and the customer stops typing at exactly the point
+     * where the useful half was about to go in.
+     */
+    if (resolved && !isCoarseFix(accuracy)) setArea(resolved);
   };
 
   const onSave = async () => {
-    const trimmed = text.trim();
+    const parts = {
+      area: area.trim(),
+      flat: flat.trim(),
+      building: building.trim(),
+      landmark: landmark.trim(),
+    };
+
+    /*
+     * One line for the message and the order history, narrowest first — the
+     * order a person reads an address in, and the order a rider needs it.
+     */
+    const trimmed = [parts.flat, parts.building, parts.area, parts.landmark]
+      .filter(Boolean)
+      .join(", ");
 
     if (!trimmed && !pin) {
       notify(t("address.title"), t("address.needSomething"), t("common.ok"));
+      return;
+    }
+
+    /*
+     * The one field the geocoder can never supply, so the one this screen has
+     * to insist on. A rider with a locality and no flat number is standing in
+     * the right colony ringing the customer to ask which building.
+     */
+    if (!parts.flat) {
+      notify(t("address.title"), t("address.flatNeeded"), t("common.ok"));
       return;
     }
 
@@ -188,6 +303,11 @@ export default function DeliveryAddressScreen() {
 
     save({
       text: trimmed,
+      ...(parts.area ? { area: parts.area } : {}),
+      ...(parts.flat ? { flat: parts.flat } : {}),
+      ...(parts.building ? { building: parts.building } : {}),
+      ...(parts.landmark ? { landmark: parts.landmark } : {}),
+      label,
       ...(pin
         ? {
             latitude: pin.latitude,
@@ -212,33 +332,9 @@ export default function DeliveryAddressScreen() {
           contentContainerClassName="gd-scroll-content"
           keyboardShouldPersistTaps="handled"
         >
-          {/*
-            First on the screen, ahead of the address it belongs to. It is the
-            one field here that is never optional, it takes ten keystrokes
-            rather than a map drag, and a customer sent back to this screen for
-            a missing number should not have to scroll past a map to find it.
-          */}
-          <Text className="gd-section-title mt-0">{t("address.phone")}</Text>
-          <View className="gd-search gd-addr-search">
-            <MaterialCommunityIcons
-              name="phone-outline"
-              size={20}
-              color={colors.inkFaint}
-            />
-            <TextInput
-              className="gd-search-input"
-              value={phone}
-              onChangeText={setPhone}
-              placeholder={t("address.phonePlaceholder")}
-              placeholderTextColor={colors.inkFaint}
-              keyboardType="phone-pad"
-              autoComplete="tel"
-              textContentType="telephoneNumber"
-            />
-          </View>
-          <Text className="gd-custom-note">{t("address.phoneHint")}</Text>
-
-          <Text className="gd-section-title">{t("address.where")}</Text>
+          {step === "location" ? (
+          <>
+          <Text className="gd-section-title mt-0">{t("address.where")}</Text>
 
           <AddressSearch onPick={onSearchPick} />
 
@@ -332,25 +428,161 @@ export default function DeliveryAddressScreen() {
             </>
           ) : null}
 
-          <Text className="gd-section-title">{t("address.manual")}</Text>
+          {/*
+            Ends the location step rather than saving. Nothing here is enough
+            to deliver to on its own — the flat number is still missing — so
+            this reads as "carry on", not "done".
+          */}
+          <Pressable
+            className={clsx("gd-btn mt-5", !area.trim() && "gd-btn-disabled")}
+            style={pressRow}
+            onPress={() => setStep("details")}
+            disabled={!area.trim()}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: !area.trim() }}
+          >
+            <Text className="gd-btn-text">{t("address.confirmLocation")}</Text>
+          </Pressable>
+          </>
+          ) : (
+          <>
+          {/*
+            The chosen location, stated rather than offered for editing.
+
+            This is the Swiggy shape and it is the right one: the string comes
+            from a geocoder and belongs to the map, so the way to correct it is
+            to pick a different point — not to retype it and leave the
+            coordinates pointing somewhere else.
+          */}
+          <Text className="gd-section-title mt-0">{t("address.area")}</Text>
+          <View className="gd-locality">
+            <View className="min-w-0 flex-1">
+              <Text className="gd-locality-text">
+                {area || t("address.areaUnknown")}
+              </Text>
+            </View>
+            <Pressable
+              className="gd-locality-change"
+              style={pressRow}
+              onPress={() => setStep("location")}
+              accessibilityRole="button"
+            >
+              <MaterialCommunityIcons
+                name="map-marker-outline"
+                size={16}
+                color={colors.brandDark}
+              />
+              <Text className="gd-locality-change-text">
+                {t("address.change")}
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* What kind of place this is. A note for the rider, not a chooser. */}
+          <Text className="gd-section-title">{t("address.labelTitle")}</Text>
+          <View className="gd-chips-row">
+            {ADDRESS_LABELS.map((option) => {
+              const active = label === option.key;
+              return (
+                <Pressable
+                  key={option.key}
+                  className={clsx("gd-chip", active && "gd-chip-active")}
+                  style={pressRow}
+                  onPress={() => setLabel(option.key)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                >
+                  <MaterialCommunityIcons
+                    name={option.icon as never}
+                    size={15}
+                    color={active ? colors.brandInk : colors.inkMuted}
+                  />
+                  <Text
+                    className={clsx(
+                      "gd-chip-text",
+                      active && "gd-chip-text-active",
+                    )}
+                  >
+                    {t(option.labelKey)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          {/*
+            The parts only the customer has. Nothing the app learns about their
+            coordinates may touch these, which is what lets the locality above
+            be replaced freely by picking a different point.
+          */}
+          <Text className="gd-section-title">{t("address.flat")}</Text>
+          <TextInput
+            className="gd-input-line"
+            value={flat}
+            onChangeText={setFlat}
+            placeholder={t("address.flatPlaceholder")}
+            placeholderTextColor={colors.inkFaint}
+          />
+
+          <Text className="gd-section-title">{t("address.building")}</Text>
+          <TextInput
+            className="gd-input-line"
+            value={building}
+            onChangeText={setBuilding}
+            placeholder={t("address.buildingPlaceholder")}
+            placeholderTextColor={colors.inkFaint}
+          />
+
+          {/*
+            Kept on this step rather than the first one. It belongs to the
+            customer, like the two fields above, and a number asked for before
+            the address is a question about something else entirely.
+          */}
+          <Text className="gd-section-title">{t("address.phone")}</Text>
+          <View className="gd-search gd-addr-search">
+            <MaterialCommunityIcons
+              name="phone-outline"
+              size={20}
+              color={colors.inkFaint}
+            />
+            <TextInput
+              className="gd-search-input"
+              value={phone}
+              onChangeText={setPhone}
+              placeholder={t("address.phonePlaceholder")}
+              placeholderTextColor={colors.inkFaint}
+              keyboardType="phone-pad"
+              autoComplete="tel"
+              textContentType="telephoneNumber"
+            />
+          </View>
+          <Text className="gd-custom-note">{t("address.phoneHint")}</Text>
+
+          <Text className="gd-section-title">{t("address.landmark")}</Text>
           <TextInput
             className="gd-textarea"
-            value={text}
-            onChangeText={setText}
-            placeholder={t("address.manualPlaceholder")}
+            value={landmark}
+            onChangeText={setLandmark}
+            placeholder={t("address.landmarkPlaceholder")}
             placeholderTextColor={colors.inkFaint}
             multiline
             textAlignVertical="top"
           />
           <Text className="gd-custom-note">{t("address.manualHint")}</Text>
 
+          {/*
+            Greyed until the address could actually be delivered to, the way
+            Swiggy's is. The flat number and a number to ring are the two
+            things a rider cannot do without, and letting someone save without
+            them only moves the failure to the doorstep.
+          */}
           <Pressable
-            className="gd-btn mt-5"
+            className={clsx("gd-btn mt-5", !canSave && "gd-btn-disabled")}
             style={pressRow}
             onPress={() => void onSave()}
-            disabled={saving}
+            disabled={!canSave}
             accessibilityRole="button"
-            accessibilityState={{ disabled: saving, busy: saving }}
+            accessibilityState={{ disabled: !canSave, busy: saving }}
           >
             {saving ? (
               <ActivityIndicator size="small" color={colors.mist} />
@@ -358,6 +590,8 @@ export default function DeliveryAddressScreen() {
               <Text className="gd-btn-text">{t("address.save")}</Text>
             )}
           </Pressable>
+          </>
+          )}
         </ScrollView>
       </SafeAreaView>
     </View>

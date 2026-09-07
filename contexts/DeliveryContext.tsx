@@ -42,10 +42,37 @@ const isAddress = (value: unknown): value is DeliveryAddress => {
   );
 };
 
-const migrate = (address: DeliveryAddress): DeliveryAddress =>
-  (address.source as string) === LEGACY_PLACED
-    ? { ...address, source: "search" }
-    : address;
+/**
+ * Brings an address saved before the fields were split up to date.
+ *
+ * Two changes have happened to this record. `source: "map"` named a pin the
+ * customer dragged, and there is no dragging any more. And the address itself
+ * used to be one free-text box, which is now `area` for what the app resolved
+ * and `flat`/`landmark` for what only the customer knows.
+ *
+ * The old box goes to whichever field it actually came from: a `manual` address
+ * was typed by hand, so it becomes the flat line; anything else was written by
+ * the geocoder, so it becomes the area. Guessing either way would be wrong for
+ * the other, and dropping it would lose the only address the customer has.
+ */
+const migrate = (address: DeliveryAddress): DeliveryAddress => {
+  const source =
+    (address.source as string) === LEGACY_PLACED ? "search" : address.source;
+
+  // Already split — nothing to move.
+  if (address.area || address.flat || address.landmark) {
+    return { ...address, source };
+  }
+
+  const text = address.text?.trim();
+  if (!text) return { ...address, source };
+
+  return {
+    ...address,
+    source,
+    ...(address.source === "manual" ? { flat: text } : { area: text }),
+  };
+};
 
 /**
  * The one delivery address, kept on this device and nowhere else.

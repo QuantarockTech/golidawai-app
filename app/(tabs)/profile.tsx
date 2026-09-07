@@ -8,6 +8,7 @@ import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 import LanguageToggle from "@/components/LanguageToggle";
 import { colors } from "@/constants/theme";
+import { describeAddress, useDelivery } from "@/contexts/DeliveryContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import "@/global.css";
 import type { TranslationKey } from "@/lib/i18n/translations";
@@ -35,7 +36,15 @@ const HEALTH_ROWS: Row[] = [
 ];
 
 const ACCOUNT_ROWS: Row[] = [
-  { key: "addresses", icon: "map-marker-outline", labelKey: "profile.addresses" },
+  {
+    key: "addresses",
+    icon: "map-marker-outline",
+    labelKey: "profile.addresses",
+    // Had no href, so this row answered "Coming soon" for a screen that has
+    // existed since the delivery address landed. The only way in was from the
+    // cart, which meant the address could not be corrected before ordering.
+    href: "/delivery-address",
+  },
   { key: "payments", icon: "wallet-outline", labelKey: "profile.payments" },
   {
     key: "insurance",
@@ -51,6 +60,11 @@ export default function Profile() {
   const { signOut } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
+  const { address } = useDelivery();
+
+  /** What a row has saved, or "" for one that has nothing to show yet. */
+  const subtitleFor = (key: string): string =>
+    key === "addresses" ? describeAddress(address) : "";
 
   const displayName =
     user?.fullName || user?.firstName || user?.emailAddresses[0]?.emailAddress || "";
@@ -105,7 +119,22 @@ export default function Profile() {
           color={colors.brandDark}
         />
       </View>
-      <Text className="gd-list-label">{t(row.labelKey)}</Text>
+      {/*
+        Rows that hold something say what it is, so the customer can see
+        whether it needs changing without opening the screen to find out.
+        A row with nothing saved yet is a label and nothing more.
+      */}
+      {subtitleFor(row.key) ? (
+        <View className="gd-list-body">
+          <Text className="gd-list-label">{t(row.labelKey)}</Text>
+          <Text className="gd-list-sub" numberOfLines={1}>
+            {subtitleFor(row.key)}
+          </Text>
+        </View>
+      ) : (
+        <Text className="gd-list-label">{t(row.labelKey)}</Text>
+      )}
+
       <MaterialCommunityIcons
         name="chevron-right"
         size={20}
