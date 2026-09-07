@@ -45,6 +45,10 @@ const en = {
   "signIn.google": "Continue with Google",
   "signIn.failed": "Unable to sign in",
   "signIn.incomplete": "Couldn't finish signing in. Please try again.",
+  "signIn.verifyTitle": "One more step",
+  "signIn.verifySubtitle":
+    "This is a new device, so we’ve emailed a 6-digit code to {email}. Enter it to finish signing in.",
+  "signIn.verifyBack": "Use a different account",
   "signIn.googleFailed": "Unable to continue with Google",
   "signIn.googleNeedsMore":
     "Google signed you in, but this account still needs: {fields}. Create an account with your email first, then sign in with Google.",
@@ -429,6 +433,10 @@ const hi: Record<TranslationKey, string> = {
   "signIn.google": "Google से जारी रखें",
   "signIn.failed": "साइन इन नहीं हो सका",
   "signIn.incomplete": "साइन इन पूरा नहीं हो सका। कृपया दोबारा कोशिश करें।",
+  "signIn.verifyTitle": "एक आख़िरी क़दम",
+  "signIn.verifySubtitle":
+    "यह नया डिवाइस है, इसलिए {email} पर 6 अंकों का कोड भेजा है। साइन इन पूरा करने के लिए वह डालें।",
+  "signIn.verifyBack": "दूसरे खाते से करें",
   "signIn.googleFailed": "Google से जारी नहीं रखा जा सका",
   "signIn.googleNeedsMore":
     "गूगल से लॉगिन हुआ, पर खाते में यह बाकी है: {fields}। पहले ईमेल से खाता बनाएँ।",

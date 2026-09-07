@@ -21,6 +21,7 @@ import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 import AuthToggle from "@/components/AuthToggle";
 import BrandMark from "@/components/BrandMark";
 import LanguageToggle from "@/components/LanguageToggle";
+import VerifyCodeStep from "@/components/VerifyCodeStep";
 import { colors } from "@/constants/theme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useKeyboardVisible } from "@/lib/useKeyboardVisible";
@@ -51,6 +52,18 @@ const SignIn = () => {
 
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
+
+  /*
+   * The second step Device Trust asks for on a device Clerk has not seen.
+   *
+   * The instance has Device Trust switched on, which means a correct password
+   * from a new phone or a fresh browser is accepted and then held at
+   * `needs_second_factor` until a code sent to the customer's inbox is entered.
+   * Until this existed the screen dead-ended there and said "couldn't finish
+   * signing in", which read as a wrong password on an account that was fine.
+   */
+  const [awaitingCode, setAwaitingCode] = useState(false);
+  const [code, setCode] = useState("");
 
   // Warm the in-app browser so the Google sheet opens instantly.
   // Android-only API — it throws on web and is a no-op on iOS.
@@ -94,15 +107,96 @@ const SignIn = () => {
         return;
       }
 
-      // No second factor is enabled on this Clerk instance (authenticator,
-      // backup code and phone are all off), so a complete sign-in is the only
-      // success path. If MFA is turned on later, handle it here.
+      if (result.status === "needs_second_factor") {
+        await sendCode();
+        return;
+      }
+
+      // Every other status means Clerk wants something this screen does not
+      // collect — a password reset, an identifier it did not get. Rare enough
+      // to say so plainly rather than guess at a step.
       setErrorMessage(t("signIn.incomplete"));
     } catch (error) {
       setErrorMessage(readErrorMessage(error, t("signIn.failed")));
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  /**
+   * Asks Clerk to email the code, and shows the screen that takes it.
+   *
+   * The email factor is looked up rather than assumed: Device Trust falls back
+   * to whatever second factors the instance allows, and on one configured for
+   * SMS this would otherwise ask for a code that never arrives.
+   */
+  const sendCode = async () => {
+    if (!signIn) return;
+
+    const emailFactor = signIn.supportedSecondFactors?.find(
+      (factor) => factor.strategy === "email_code",
+    );
+
+    if (!emailFactor) {
+      setErrorMessage(t("signIn.incomplete"));
+      return;
+    }
+
+    await signIn.prepareSecondFactor({ strategy: "email_code" });
+    setCode("");
+    setErrorMessage("");
+    setAwaitingCode(true);
+  };
+
+  const handleVerifyCode = async () => {
+    if (!isLoaded || !signIn || code.length !== 6 || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setErrorMessage("");
+    try {
+      const result = await signIn.attemptSecondFactor({
+        strategy: "email_code",
+        code,
+      });
+
+      if (result.status === "complete" && result.createdSessionId) {
+        await completeSignIn(result.createdSessionId, "password");
+        return;
+      }
+
+      setErrorMessage(t("signIn.incomplete"));
+    } catch (error) {
+      setErrorMessage(readErrorMessage(error, t("verify.badCode")));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resendCode = async () => {
+    if (!signIn || isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await sendCode();
+    } catch (error) {
+      setErrorMessage(readErrorMessage(error, t("signIn.failed")));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  /*
+   * Back to the form, and back to the start of the sign-in.
+   *
+   * The password is cleared with it. A half-finished attempt is still open on
+   * Clerk's side, and leaving the field filled invites the customer to press
+   * the same button again rather than start the attempt cleanly.
+   */
+  const cancelCode = () => {
+    setAwaitingCode(false);
+    setCode("");
+    setPassword("");
+    setErrorMessage("");
   };
 
 
@@ -154,6 +248,30 @@ const SignIn = () => {
   };
 
   if (!isLoaded || !signIn) return null;
+
+  /*
+   * Replaces the whole screen rather than sitting under the form, the same way
+   * sign-up does it. Half a sign-in behind a code box is not something to keep
+   * looking at, and the two flows should not feel like different apps.
+   */
+  if (awaitingCode) {
+    return (
+      <VerifyCodeStep
+        title={t("signIn.verifyTitle")}
+        subtitle={t("signIn.verifySubtitle", {
+          email: email.trim().toLowerCase(),
+        })}
+        code={code}
+        onChangeCode={setCode}
+        onVerify={() => void handleVerifyCode()}
+        onResend={() => void resendCode()}
+        onBack={cancelCode}
+        isSubmitting={isSubmitting}
+        errorMessage={errorMessage}
+        backLabel={t("signIn.verifyBack")}
+      />
+    );
+  }
 
 
   return (
