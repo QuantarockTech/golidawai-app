@@ -800,6 +800,15 @@
   @apply w-full max-w-[440px] self-center px-5 pb-28 pt-1 md:max-w-[1120px] md:px-8 md:pb-16 md:pt-6;
 }
 
+/*
+ * The same column, for a screen that holds still rather than scrolling: the
+ * one scroller on it is a box further down, so the page has to stay the height
+ * of the window.
+ */
+.gd-page-column {
+  @apply w-full max-w-[440px] min-h-0 flex-1 self-center px-5 pb-4 pt-1 md:max-w-[1120px] md:px-8 md:pt-6;
+}
+
 /* Greeting row */
 .gd-greet-row {
   @apply flex-row items-center gap-3 pb-4 pt-1;
@@ -914,6 +923,38 @@
 
 .gd-med-divider {
   @apply border-t border-hairline-soft;
+}
+
+/*
+ * The catalogue's own viewport, on a page that does not scroll itself. It
+ * takes whatever height the pinned rows above it leave over and scrolls
+ * inside that, so the list can be seven hundred medicines long without the
+ * screen being seven hundred rows tall.
+ *
+ * min-h-0 is what lets it shrink: without it a flex child sizes to its
+ * content, and the box grows past the screen instead of scrolling.
+ */
+.gd-med-box {
+  @apply min-h-0 flex-1 overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+}
+
+/* Loading, failed and no-match, drawn inside the box that already has a card. */
+.gd-med-box-empty {
+  @apply items-center gap-2 px-4 py-8;
+}
+
+/*
+ * The typed list is however much the customer wrote, so it gets a ceiling of
+ * its own and scrolls past it. Without one, a long enough list pushes the
+ * catalogue box off the bottom of the screen.
+ */
+.gd-typed-box {
+  @apply max-h-[240px] grow-0 rounded-2xl border border-hairline-soft bg-white;
+}
+
+/* A horizontal scroller in a column would otherwise grow into the box's height. */
+.gd-chip-row {
+  @apply grow-0;
 }
 
 .gd-med-thumb {

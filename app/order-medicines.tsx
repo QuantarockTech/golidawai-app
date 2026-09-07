@@ -5,6 +5,7 @@ import { styled } from "nativewind";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  FlatList,
   Linking,
   Pressable,
   ScrollView,
@@ -45,15 +46,15 @@ const CATEGORY_KEYS: Record<string, TranslationKey> = {
 };
 
 /**
- * How many rows to draw at once.
+ * How many rows to build before the screen is allowed to appear.
  *
- * The catalogue is seven hundred products and this list is a plain mapped
- * ScrollView, so drawing all of them builds seven hundred rows before the
- * screen appears. Nobody scrolls that far to find a medicine anyway — the
- * search box is the way in — so this shows the first slice and says how many
- * more there are.
+ * The whole catalogue is on this list — seven hundred products — but a phone
+ * shows about eight rows at a time, so FlatList only ever builds a window of
+ * them and recycles as you scroll. This is the size of the first window: big
+ * enough to fill a tall screen without leaving a gap under the fold, small
+ * enough that opening the screen is not seven hundred rows of work.
  */
-const VISIBLE_LIMIT = 60;
+const INITIAL_ROWS = 12;
 
 /** Order Medicines — concept board frame 06. */
 export default function OrderMedicines() {
@@ -89,10 +90,6 @@ export default function OrderMedicines() {
       return matchesCategory && matchesQuery;
     });
   }, [category, query, medicines]);
-
-  /** What is drawn, and how much was left out — see VISIBLE_LIMIT. */
-  const visible = results.slice(0, VISIBLE_LIMIT);
-  const hidden = results.length - visible.length;
 
   const typed = query.trim();
   const alreadyTyped = customItems.some(
@@ -172,11 +169,13 @@ export default function OrderMedicines() {
       <SafeAreaView className="flex-1" edges={["top"]}>
         <ScreenHeader title={t("order.title")} />
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerClassName="gd-scroll-content"
-          keyboardShouldPersistTaps="handled"
-        >
+        {/*
+          The page itself holds still. Search and the chips stay put, and the
+          catalogue scrolls in a box of its own below them. As one long page,
+          seven hundred medicines put the phone number at the bottom further
+          away with every row the pharmacy added to the sheet.
+        */}
+        <View className="gd-page-column">
           <View className="gd-search">
             <MaterialCommunityIcons
               name="magnify"
@@ -211,13 +210,14 @@ export default function OrderMedicines() {
           </View>
 
           {/*
-            Only when the sheet says so. The pharmacy's Category column is what
-            fills these, so an empty row of chips would otherwise sit above the
-            list doing nothing until that column exists.
+            Only when the sheet says so. The pharmacy's Category column is
+            what fills these, so an empty row of chips would otherwise sit
+            above the list doing nothing until that column exists.
           */}
           {categories.length > 0 ? (
             <ScrollView
               horizontal
+              className="gd-chip-row"
               showsHorizontalScrollIndicator={false}
               contentContainerClassName="gd-chips"
             >
@@ -274,7 +274,11 @@ export default function OrderMedicines() {
                 {t("order.customTitle")}
               </Text>
 
-              <View className="gd-med-card">
+              <ScrollView
+                className="gd-typed-box"
+                contentContainerClassName="px-4"
+                keyboardShouldPersistTaps="handled"
+              >
                 {customItems.map((item, index) => {
                   const editing = index === editIndex;
                   const name = item.name;
@@ -399,9 +403,11 @@ export default function OrderMedicines() {
                     </View>
                   );
                 })}
-              </View>
+              </ScrollView>
 
-              <Text className="gd-custom-note">{t("order.customNote")}</Text>
+              <Text className="gd-custom-note">
+                {t("order.customNote")}
+              </Text>
 
               <Pressable
                 className="gd-btn mt-3"
@@ -409,7 +415,9 @@ export default function OrderMedicines() {
                 onPress={reviewOrder}
                 accessibilityRole="button"
               >
-                <Text className="gd-btn-text">{t("order.customReview")}</Text>
+                <Text className="gd-btn-text">
+                  {t("order.customReview")}
+                </Text>
               </Pressable>
             </>
           ) : null}
@@ -421,69 +429,25 @@ export default function OrderMedicines() {
           </Text>
 
           {/*
-            Three states before the list itself. Loading only shows when there
-            is nothing cached to show instead; the failure only shows when a
-            dead network left the screen with nothing, since a stale catalogue
-            beats an error message.
+            The catalogue's own viewport: it takes whatever height is left over
+            and scrolls inside it. FlatList still builds only the rows in view,
+            so the whole sheet costs no more to show than a screenful of it.
           */}
-          {isLoading && medicines.length === 0 ? (
-            <View className="gd-empty">
-              <ActivityIndicator size="small" color={colors.brandDark} />
-              <Text className="gd-empty-text mt-2">{t("order.loading")}</Text>
-            </View>
-          ) : failed && medicines.length === 0 ? (
-            <View className="gd-empty">
-              <Text className="gd-empty-text">{t("order.loadFailed")}</Text>
-              <Pressable
-                className="gd-empty-add"
-                style={pressSmall}
-                onPress={refresh}
-                accessibilityRole="button"
-              >
-                <MaterialCommunityIcons
-                  name="refresh"
-                  size={16}
-                  color={colors.brandDark}
-                />
-                <Text className="gd-empty-action">{t("order.retry")}</Text>
-              </Pressable>
-            </View>
-          ) : results.length === 0 ? (
-            <View className="gd-empty">
-              <Text className="gd-empty-text">{t("order.empty")}</Text>
-
-              {/*
-               * The catalogue is small, so "no results" is the common case for
-               * a real prescription. Rather than dead-end, it takes the name
-               * exactly as typed.
-               */}
-              {typed && !alreadyTyped ? (
-                <Pressable
-                  className="gd-empty-add"
-                  style={pressSmall}
-                  onPress={addTyped}
-                  accessibilityRole="button"
-                  accessibilityLabel={t("order.addTyped", { name: typed })}
-                >
-                  <MaterialCommunityIcons
-                    name="plus"
-                    size={16}
-                    color={colors.brandDark}
-                  />
-                  <Text className="gd-empty-action" numberOfLines={1}>
-                    {t("order.addTyped", { name: typed })}
-                  </Text>
-                </Pressable>
-              ) : null}
-            </View>
-          ) : (
-            <View className="gd-med-card">
-              {visible.map((item, index) => {
+          <View className="gd-med-box">
+            <FlatList
+              data={results}
+              keyExtractor={(item) => item.id}
+              contentContainerClassName="px-4"
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+              initialNumToRender={INITIAL_ROWS}
+              maxToRenderPerBatch={INITIAL_ROWS}
+              windowSize={9}
+              renderItem={({ item, index }) => {
                 const quantity = quantityOf(item.id);
 
                 return (
                   <View
-                    key={item.id}
                     className={clsx(
                       "gd-med-row",
                       index > 0 && "gd-med-divider",
@@ -503,36 +467,27 @@ export default function OrderMedicines() {
                       </Text>
 
                       {/*
-                        Pack size and maker, in the pharmacy's own words. Either
-                        can be blank in the sheet — about half the rows have no
-                        pack size — so this joins whatever is there rather than
-                        printing a gap or the word "undefined".
+                        The maker, and nothing else. Pack size and discount
+                        are in the sheet but deliberately not on screen — the
+                        client does not want either shown — and about forty
+                        rows have no company either, so this draws nothing
+                        rather than an empty line.
                       */}
-                      {item.packSize || item.company ? (
+                      {item.company ? (
                         <Text className="gd-med-sub" numberOfLines={1}>
-                          {[item.packSize, item.company]
-                            .filter(Boolean)
-                            .join(" · ")}
+                          {item.company}
                         </Text>
-                      ) : null}
-
-                      {item.discount != null ? (
-                        <View className="gd-discount-tag">
-                          <Text className="gd-discount-tag-text">
-                            {t("order.discount", { percent: item.discount })}
-                          </Text>
-                        </View>
                       ) : null}
                     </View>
 
                     {/*
                       No price on this row.
 
-                      The catalogue price is an estimate the app never checked
-                      against stock or today's MRP, and the pharmacy quotes the
-                      real one in the WhatsApp reply. Showing it while someone
-                      is choosing invites them to treat it as the price, which
-                      is the one thing it is not.
+                      The catalogue price is an estimate the app never
+                      checked against stock or today's MRP, and the pharmacy
+                      quotes the real one in the WhatsApp reply. Showing it
+                      while someone is choosing invites them to treat it as the
+                      price, which is the one thing it is not.
                     */}
 
                     {quantity === 0 ? (
@@ -593,18 +548,82 @@ export default function OrderMedicines() {
                     )}
                   </View>
                 );
-              })}
-            </View>
-          )}
+              }}
+              ListEmptyComponent={
+                /*
+                 * Three ways the list comes up empty. Loading only shows
+                 * when there is nothing cached to show instead; the failure
+                 * only shows when a dead network left the screen with nothing,
+                 * since a stale catalogue beats an error message.
+                 */
+                isLoading && medicines.length === 0 ? (
+                  <View className="gd-med-box-empty">
+                    <ActivityIndicator size="small" color={colors.brandDark} />
+                    <Text className="gd-empty-text mt-2">
+                      {t("order.loading")}
+                    </Text>
+                  </View>
+                ) : failed && medicines.length === 0 ? (
+                  <View className="gd-med-box-empty">
+                    <Text className="gd-empty-text">
+                      {t("order.loadFailed")}
+                    </Text>
+                    <Pressable
+                      className="gd-empty-add"
+                      style={pressSmall}
+                      onPress={refresh}
+                      accessibilityRole="button"
+                    >
+                      <MaterialCommunityIcons
+                        name="refresh"
+                        size={16}
+                        color={colors.brandDark}
+                      />
+                      <Text className="gd-empty-action">
+                        {t("order.retry")}
+                      </Text>
+                    </Pressable>
+                  </View>
+                ) : (
+                  <View className="gd-med-box-empty">
+                    <Text className="gd-empty-text">{t("order.empty")}</Text>
 
-          {/* Says what was left out, so a capped list never reads as all of it. */}
-          {hidden > 0 ? (
-            <Text className="gd-custom-note">
-              {t("order.moreResults", { count: hidden })}
-            </Text>
-          ) : null}
+                    {/*
+                     * The catalogue is one pharmacy's stock, so "no results"
+                     * is a normal outcome for a real prescription. Rather than
+                     * dead-end, it takes the name exactly as typed.
+                     */}
+                    {typed && !alreadyTyped ? (
+                      <Pressable
+                        className="gd-empty-add"
+                        style={pressSmall}
+                        onPress={addTyped}
+                        accessibilityRole="button"
+                        accessibilityLabel={t("order.addTyped", {
+                          name: typed,
+                        })}
+                      >
+                        <MaterialCommunityIcons
+                          name="plus"
+                          size={16}
+                          color={colors.brandDark}
+                        />
+                        <Text className="gd-empty-action" numberOfLines={1}>
+                          {t("order.addTyped", { name: typed })}
+                        </Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                )
+              }
+            />
+          </View>
 
-          {/* Anything the catalogue can't cover falls back to a phone call. */}
+          {/*
+            Anything the catalogue can't cover falls back to a phone call, and
+            it sits under the box rather than under the list — it used to be
+            seven hundred rows further down.
+          */}
           <Pressable
             className="gd-call mt-4"
             style={pressRow}
@@ -620,7 +639,9 @@ export default function OrderMedicines() {
               />
             </View>
             <View className="min-w-0 flex-1">
-              <Text className="gd-call-title">{t("order.notFoundTitle")}</Text>
+              <Text className="gd-call-title">
+                {t("order.notFoundTitle")}
+              </Text>
               <Text className="gd-call-body" numberOfLines={1}>
                 {t("order.notFoundBody")}
               </Text>
@@ -629,7 +650,7 @@ export default function OrderMedicines() {
               <Text className="gd-call-cta-text">{t("home.callNow")}</Text>
             </View>
           </Pressable>
-        </ScrollView>
+        </View>
 
         {/*
           Board frame 06 docks the cart to the bottom. It carries a count and
