@@ -1,7 +1,9 @@
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 
 /**
- * Reading and writing the two things that have to follow a customer.
+ * Reading and writing everything that has to follow a customer between devices:
+ * their address, their order history, the people they order for, and the number
+ * to ring when they cannot be reached.
  *
  * Everything here is best-effort. A failed read leaves whatever is cached on
  * the device on screen, and a failed write leaves the device copy as the record
@@ -217,6 +219,168 @@ export const clearOrders = async (userId: string): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from("orders")
+      .delete()
+      .eq("user_id", userId);
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+/* -------------------------------------------------------- family members */
+
+type MemberRow = {
+  id: string;
+  name: string;
+  relation: string | null;
+  age: string | null;
+};
+
+const toMember = (row: MemberRow): FamilyMember => ({
+  id: row.id,
+  name: row.name,
+  ...(row.relation ? { relation: row.relation } : {}),
+  ...(row.age ? { age: row.age } : {}),
+});
+
+export const fetchFamily = async (
+  userId: string,
+): Promise<FamilyMember[] | null> => {
+  if (!supabase || !isSupabaseConfigured) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from("family_members")
+      .select("*")
+      .eq("user_id", userId)
+      .order("updated_at", { ascending: true });
+
+    // null, not [], on failure: an empty family and a failed read look the
+    // same to a caller, and only one of them should replace what is cached.
+    if (error || !data) return null;
+    return (data as MemberRow[]).map(toMember);
+  } catch {
+    return null;
+  }
+};
+
+export const pushMember = async (
+  userId: string,
+  member: FamilyMember,
+): Promise<boolean> => {
+  if (!supabase || !isSupabaseConfigured) return false;
+
+  try {
+    const { error } = await supabase.from("family_members").upsert(
+      {
+        id: member.id,
+        user_id: userId,
+        name: member.name,
+        relation: member.relation ?? null,
+        age: member.age ?? null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,id" },
+    );
+
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+export const deleteMember = async (
+  userId: string,
+  id: string,
+): Promise<boolean> => {
+  if (!supabase || !isSupabaseConfigured) return false;
+
+  try {
+    const { error } = await supabase
+      .from("family_members")
+      .delete()
+      .eq("user_id", userId)
+      .eq("id", id);
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+/** Sends up members this device has that the account does not — the migration. */
+export const pushMissingMembers = async (
+  userId: string,
+  local: FamilyMember[],
+  remote: FamilyMember[],
+): Promise<void> => {
+  const known = new Set(remote.map((member) => member.id));
+  for (const member of local) {
+    if (!known.has(member.id)) await pushMember(userId, member);
+  }
+};
+
+/* ---------------------------------------------------- emergency contact */
+
+type ContactRow = {
+  name: string;
+  relation: string | null;
+  phone: string;
+};
+
+export const fetchEmergency = async (
+  userId: string,
+): Promise<EmergencyContact | null> => {
+  if (!supabase || !isSupabaseConfigured) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from("emergency_contacts")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    const row = data as ContactRow;
+    return {
+      name: row.name,
+      ...(row.relation ? { relation: row.relation } : {}),
+      phone: row.phone,
+    };
+  } catch {
+    return null;
+  }
+};
+
+export const pushEmergency = async (
+  userId: string,
+  contact: EmergencyContact,
+): Promise<boolean> => {
+  if (!supabase || !isSupabaseConfigured) return false;
+
+  try {
+    const { error } = await supabase.from("emergency_contacts").upsert(
+      {
+        user_id: userId,
+        name: contact.name,
+        relation: contact.relation ?? null,
+        phone: contact.phone,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    );
+
+    return !error;
+  } catch {
+    return false;
+  }
+};
+
+export const deleteEmergency = async (userId: string): Promise<boolean> => {
+  if (!supabase || !isSupabaseConfigured) return false;
+
+  try {
+    const { error } = await supabase
+      .from("emergency_contacts")
       .delete()
       .eq("user_id", userId);
     return !error;

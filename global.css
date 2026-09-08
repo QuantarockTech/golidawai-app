@@ -587,6 +587,24 @@
   @apply border-emergency;
 }
 
+/* Holds a password box and the reveal toggle laid over its right end. */
+.ga-input-wrap {
+  @apply relative;
+}
+
+/* Room for the eye, so a long password doesn't run underneath it. */
+.ga-input-secure {
+  @apply pr-12;
+}
+
+/*
+ * Full height of the field, so the tap target is the whole right end rather
+ * than the eye itself — a 20px icon is under half of what a thumb needs.
+ */
+.ga-input-eye {
+  @apply absolute inset-y-0 right-0 w-12 items-center justify-center rounded-r-2xl;
+}
+
 .ga-input-code {
   @apply text-center text-[22px] tracking-[8px] font-ui-semibold;
 }
@@ -1576,6 +1594,36 @@
 
 .gd-profile-phone {
   @apply mt-0.5 text-[13px] font-body text-ink-muted;
+}
+
+/*
+ * The quieter half of a pair of buttons — "Cancel" beside "Save".
+ *
+ * No border and no fill: it has to be reachable without competing with the
+ * action next to it, and a second outlined button reads as a second choice of
+ * equal weight, which cancel never is.
+ */
+.gd-btn-ghost {
+  @apply mt-2 flex-row items-center justify-center gap-2 rounded-2xl py-3.5;
+}
+
+.gd-btn-ghost-text {
+  @apply text-[15px] font-ui text-ink-muted;
+}
+
+/*
+ * "Signed in with Google" under the account details.
+ *
+ * Quiet, and a row rather than a line, so the provider icon sits with the
+ * words. It answers a question nobody asks until it matters — and by then
+ * they are staring at "account not found" on another device.
+ */
+.gd-signin-tag {
+  @apply mt-1.5 flex-row items-center gap-1 self-start rounded-full bg-mist px-2 py-0.5;
+}
+
+.gd-signin-tag-text {
+  @apply text-[11px] font-body text-ink-muted;
 }
 
 .gd-list-card {

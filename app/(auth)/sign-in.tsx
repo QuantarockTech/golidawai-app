@@ -21,6 +21,7 @@ import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 import AuthToggle from "@/components/AuthToggle";
 import BrandMark from "@/components/BrandMark";
 import LanguageToggle from "@/components/LanguageToggle";
+import PasswordField from "@/components/PasswordField";
 import VerifyCodeStep from "@/components/VerifyCodeStep";
 import { colors } from "@/constants/theme";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -376,12 +377,11 @@ const SignIn = () => {
 
             <View className="ga-field">
               <Text className="ga-label">{t("auth.password")}</Text>
-              <TextInput
+              <PasswordField
                 className={`ga-input ${passwordTouched && !passwordValid ? "ga-input-error" : ""}`}
                 value={password}
                 placeholder="••••••••"
                 placeholderTextColor="#8fa3a1"
-                secureTextEntry
                 onChangeText={setPassword}
                 onBlur={() => setPasswordTouched(true)}
                 autoComplete="current-password"

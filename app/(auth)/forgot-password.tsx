@@ -17,6 +17,7 @@ import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 import BrandMark from "@/components/BrandMark";
 import LanguageToggle from "@/components/LanguageToggle";
+import PasswordField from "@/components/PasswordField";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useKeyboardVisible } from "@/lib/useKeyboardVisible";
 import { isEmailLike, readErrorMessage } from "@/lib/auth";
@@ -244,12 +245,11 @@ const ForgotPassword = () => {
             {step === "password" ? (
               <View className="ga-field">
                 <Text className="ga-label">{t("reset.newPassword")}</Text>
-                <TextInput
+                <PasswordField
                   className={`ga-input ${passwordTouched && !passwordValid ? "ga-input-error" : ""}`}
                   value={password}
                   placeholder="••••••••"
                   placeholderTextColor="#8fa3a1"
-                  secureTextEntry
                   onChangeText={setPassword}
                   onBlur={() => setPasswordTouched(true)}
                   autoComplete="new-password"

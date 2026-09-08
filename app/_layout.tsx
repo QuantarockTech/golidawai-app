@@ -21,6 +21,7 @@ import { DeliveryProvider } from "@/contexts/DeliveryContext";
 import { OrderDraftProvider } from "@/contexts/OrderDraftContext";
 import { OrderPrefsProvider } from "@/contexts/OrderPrefsContext";
 import { OrdersProvider } from "@/contexts/OrdersContext";
+import { PeopleProvider } from "@/contexts/PeopleContext";
 import { posthog } from "@/lib/posthog";
 import { setSupabaseTokenReader } from "@/lib/supabase";
 
@@ -122,6 +123,7 @@ export default function RootLayout() {
       <CatalogueProvider>
         <CartProvider>
           <DeliveryProvider>
+            <PeopleProvider>
             <OrderPrefsProvider>
               <OrderDraftProvider>
                 <OrdersProvider>
@@ -129,6 +131,7 @@ export default function RootLayout() {
                 </OrdersProvider>
               </OrderDraftProvider>
             </OrderPrefsProvider>
+            </PeopleProvider>
           </DeliveryProvider>
         </CartProvider>
       </CatalogueProvider>

@@ -1,8 +1,8 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { clsx } from "clsx";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { styled } from "nativewind";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -61,7 +61,25 @@ export default function OrderMedicines() {
   const { t } = useLanguage();
   const router = useRouter();
   const { quantityOf, add, remove, itemCount } = useCart();
-  const { medicines, categories, isLoading, failed, refresh } = useCatalogue();
+  const { medicines, categories, isLoading, failed, refresh, refreshIfStale } =
+    useCatalogue();
+
+  /*
+   * Read the sheet again when the customer arrives on this screen.
+   *
+   * The catalogue is fetched once when the app starts, which on a phone left
+   * open for a day means a price the pharmacy changed this morning is still
+   * the one being ordered against tonight. Focus is the moment that matters —
+   * it is the last instant before anyone reads the list — and the provider
+   * ignores the call unless the copy in hand is old enough to be worth
+   * replacing, so browsing between screens costs no extra requests.
+   */
+  useFocusEffect(
+    useCallback(() => {
+      refreshIfStale();
+    }, [refreshIfStale]),
+  );
+
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
   /*

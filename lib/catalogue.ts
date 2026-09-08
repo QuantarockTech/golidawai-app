@@ -199,6 +199,22 @@ const writeCachedCatalogue = async (medicines: Medicine[]): Promise<void> => {
 };
 
 /**
+ * Adds a parameter no two requests share, so nothing can answer from a cache.
+ *
+ * The published CSV comes back `Cache-Control: private, max-age=300`. Against a
+ * fixed URL that let the browser's own cache answer for five minutes without
+ * the request ever reaching Google, so a sheet edit stayed invisible long after
+ * Google had finished publishing it — the app was refusing data it had already
+ * been given. A unique parameter leaves the cache nothing to match on.
+ *
+ * `cache: "no-store"` below says the same thing and is the tidier way to say
+ * it, but React Native's fetch is a polyfill over XMLHttpRequest and ignores
+ * the option; the parameter is the half that works on every platform.
+ */
+const cacheBusted = (url: string): string =>
+  `${url}${url.includes("?") ? "&" : "?"}_=${Date.now()}`;
+
+/**
  * Fetches the sheet and caches what comes back.
  *
  * Throws rather than returning empty on failure, so the caller can tell "the
@@ -210,9 +226,10 @@ export const fetchCatalogue = async (): Promise<Medicine[]> => {
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
   try {
-    const response = await fetch(CATALOGUE_URL, {
+    const response = await fetch(cacheBusted(CATALOGUE_URL), {
       signal: controller.signal,
       headers: { Accept: "text/csv" },
+      cache: "no-store",
     });
 
     if (!response.ok) {

@@ -130,6 +130,33 @@ declare global {
    * because a map pin locates a house in a way an Indore address rarely does.
    */
   /**
+   * Someone this customer orders medicines for.
+   *
+   * A pharmacy order is frequently not for the person placing it — a son orders
+   * for his mother, a daughter for her father — and the pharmacist checking a
+   * prescription needs to know whose it is. Age is a string because it is
+   * transcribed, not calculated, and "6 months" is a real answer.
+   */
+  interface FamilyMember {
+    id: string;
+    name: string;
+    relation?: string;
+    age?: string;
+  }
+
+  /**
+   * Who to ring when the customer cannot be reached.
+   *
+   * One contact, not a list. A second name is a second phone call nobody makes
+   * in the moment, and the rider needs one number they can try.
+   */
+  interface EmergencyContact {
+    name: string;
+    relation?: string;
+    phone: string;
+  }
+
+  /**
    * House, office or somewhere else.
    *
    * One address is saved at a time, so this is a note for the rider rather than

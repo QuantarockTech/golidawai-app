@@ -97,3 +97,59 @@ create policy "orders are private to their owner"
 -- Newest first is the only order the history is ever read in.
 create index if not exists orders_user_sent_at_idx
   on public.orders (user_id, sent_at desc);
+
+-- ---------------------------------------------------------- family members
+--
+-- The people a customer orders medicines for. A pharmacy order is frequently
+-- not for the person placing it — a son orders for his mother — and the
+-- pharmacist checking a prescription needs to know whose it is.
+
+create table if not exists public.family_members (
+  -- Minted on the device so a row can be added with no round trip, and stays
+  -- the same when it syncs. Not a uuid default: the client needs the id first.
+  id text not null,
+  user_id text not null,
+
+  name text not null,
+  relation text,
+
+  -- Text, not an integer. It is transcribed rather than calculated, and
+  -- "6 months" is a real answer on a paediatric prescription.
+  age text,
+
+  updated_at timestamptz not null default now(),
+
+  primary key (user_id, id)
+);
+
+alter table public.family_members enable row level security;
+
+drop policy if exists "family is private to its owner" on public.family_members;
+create policy "family is private to its owner"
+  on public.family_members
+  for all
+  using ((auth.jwt() ->> 'sub') = user_id)
+  with check ((auth.jwt() ->> 'sub') = user_id);
+
+-- ------------------------------------------------------ emergency contacts
+--
+-- One per customer, so the user id is the whole key. A second name is a second
+-- phone call nobody makes in the moment a rider is standing at the wrong gate.
+
+create table if not exists public.emergency_contacts (
+  user_id text primary key,
+  name text not null,
+  relation text,
+  phone text not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.emergency_contacts enable row level security;
+
+drop policy if exists "emergency contact is private to its owner"
+  on public.emergency_contacts;
+create policy "emergency contact is private to its owner"
+  on public.emergency_contacts
+  for all
+  using ((auth.jwt() ->> 'sub') = user_id)
+  with check ((auth.jwt() ->> 'sub') = user_id);

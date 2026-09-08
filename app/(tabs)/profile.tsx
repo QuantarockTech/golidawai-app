@@ -10,6 +10,7 @@ import LanguageToggle from "@/components/LanguageToggle";
 import { colors } from "@/constants/theme";
 import { describeAddress, useDelivery } from "@/contexts/DeliveryContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePeople } from "@/contexts/PeopleContext";
 import "@/global.css";
 import type { TranslationKey } from "@/lib/i18n/translations";
 import { confirm, notify } from "@/lib/dialog";
@@ -31,8 +32,18 @@ const HEALTH_ROWS: Row[] = [
     labelKey: "profile.prescriptions",
     href: "/upload-prescription",
   },
-  { key: "family", icon: "account-multiple-outline", labelKey: "profile.family" },
-  { key: "emergency", icon: "phone-outline", labelKey: "profile.emergency" },
+  {
+    key: "family",
+    icon: "account-multiple-outline",
+    labelKey: "profile.family",
+    href: "/family",
+  },
+  {
+    key: "emergency",
+    icon: "phone-outline",
+    labelKey: "profile.emergency",
+    href: "/emergency-contact",
+  },
 ];
 
 const ACCOUNT_ROWS: Row[] = [
@@ -61,14 +72,46 @@ export default function Profile() {
   const { t } = useLanguage();
   const router = useRouter();
   const { address } = useDelivery();
+  const { family, emergency } = usePeople();
 
   /** What a row has saved, or "" for one that has nothing to show yet. */
-  const subtitleFor = (key: string): string =>
-    key === "addresses" ? describeAddress(address) : "";
+  const subtitleFor = (key: string): string => {
+    if (key === "addresses") return describeAddress(address);
+    if (key === "emergency") {
+      return emergency ? `${emergency.name} · ${emergency.phone}` : "";
+    }
+    if (key === "family") {
+      // Names rather than a count: "Sunita, Ramesh" tells you whether the list
+      // is right, where "2 people" only says it is not empty.
+      return family.map((member) => member.name).join(", ");
+    }
+    return "";
+  };
 
   const displayName =
     user?.fullName || user?.firstName || user?.emailAddresses[0]?.emailAddress || "";
   const initial = (displayName.trim()[0] ?? "G").toUpperCase();
+
+  /*
+   * Which account this is, and how it was signed in to.
+   *
+   * The screen showed a name and a delivery number, neither of which says
+   * which account you are in. That mattered: a customer who signed up with
+   * Google and later tried their email and a guessed password was told the
+   * account did not exist, and had no way to see they had two.
+   *
+   * `externalAccounts` is Clerk's list of linked social providers, so its
+   * first entry is the button they actually pressed to get here.
+   */
+  const email = user?.primaryEmailAddress?.emailAddress ?? "";
+  const socialProvider = user?.externalAccounts?.[0]?.provider ?? "";
+  const signedInWith = socialProvider
+    ? t("profile.viaSocial", {
+        provider:
+          socialProvider.replace(/^oauth_/, "").charAt(0).toUpperCase() +
+          socialProvider.replace(/^oauth_/, "").slice(1),
+      })
+    : t("profile.viaEmail");
   // Sign-up stores the delivery number here; Clerk phone identifiers are paid.
   const phone =
     typeof user?.unsafeMetadata?.phone === "string"
@@ -158,9 +201,30 @@ export default function Profile() {
               <Text className="gd-profile-name" numberOfLines={1}>
                 {displayName}
               </Text>
+
+              {/*
+                The email before the delivery number. It is the account — the
+                thing you would type to sign in somewhere else — where the
+                number is only where a rider rings.
+              */}
+              {email ? (
+                <Text className="gd-profile-phone" numberOfLines={1}>
+                  {email}
+                </Text>
+              ) : null}
+
               <Text className="gd-profile-phone" numberOfLines={1}>
                 {phone || t("profile.noPhone")}
               </Text>
+
+              <View className="gd-signin-tag">
+                <MaterialCommunityIcons
+                  name={socialProvider ? "google" : "email-outline"}
+                  size={12}
+                  color={colors.inkMuted}
+                />
+                <Text className="gd-signin-tag-text">{signedInWith}</Text>
+              </View>
             </View>
           </View>
 

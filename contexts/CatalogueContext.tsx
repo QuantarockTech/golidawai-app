@@ -4,6 +4,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -24,7 +25,21 @@ type CatalogueValue = {
   /** Whether what is on screen came from disk rather than the network. */
   isStale: boolean;
   refresh: () => void;
+  /**
+   * Reads the sheet again, but only if the copy in hand is old enough to be
+   * worth replacing. Safe to call on every screen focus.
+   */
+  refreshIfStale: () => void;
 };
+
+/**
+ * How old the catalogue must be before a screen focus goes back to the sheet.
+ *
+ * Google republishes on roughly a five-minute delay, so asking again sooner
+ * than that cannot return anything newer — it would only spend a customer's
+ * data to be told the same thing.
+ */
+const REFRESH_AFTER_MS = 5 * 60 * 1000;
 
 const CatalogueContext = createContext<CatalogueValue | null>(null);
 
@@ -37,6 +52,10 @@ const CatalogueContext = createContext<CatalogueValue | null>(null);
  * straight away, and a network round trip never stands between them and the
  * list. A failed refresh leaves the cached copy alone rather than emptying the
  * screen — a stale price is worth more than no medicines.
+ *
+ * Fetching once at startup was not enough: an app left open outlives the edits
+ * the pharmacy makes during the day, so screens call `refreshIfStale` when they
+ * come into focus and the catalogue is re-read whenever it has gone cold.
  */
 export function CatalogueProvider({ children }: React.PropsWithChildren) {
   const [medicines, setMedicines] = useState<Medicine[]>([]);
@@ -46,6 +65,14 @@ export function CatalogueProvider({ children }: React.PropsWithChildren) {
 
   /** Bumped by `refresh` to re-run the effect below. */
   const [attempt, setAttempt] = useState(0);
+
+  /**
+   * When the sheet last answered, so `refreshIfStale` can tell a catalogue
+   * worth replacing from one fetched moments ago. Starts at mount rather than
+   * at zero because the first fetch is already on its way by then, and a focus
+   * arriving while it is still in flight should wait for it, not race it.
+   */
+  const lastLoadedAt = useRef(Date.now());
 
   useEffect(() => {
     let cancelled = false;
@@ -72,6 +99,7 @@ export function CatalogueProvider({ children }: React.PropsWithChildren) {
 
         setMedicines(fresh);
         setIsStale(false);
+        lastLoadedAt.current = Date.now();
       } catch {
         if (cancelled) return;
         // Only a failure worth reporting if there is nothing else to show.
@@ -94,6 +122,11 @@ export function CatalogueProvider({ children }: React.PropsWithChildren) {
 
   const refresh = useCallback(() => setAttempt((n) => n + 1), []);
 
+  const refreshIfStale = useCallback(() => {
+    if (Date.now() - lastLoadedAt.current < REFRESH_AFTER_MS) return;
+    setAttempt((n) => n + 1);
+  }, []);
+
   const value = useMemo<CatalogueValue>(
     () => ({
       medicines,
@@ -102,8 +135,9 @@ export function CatalogueProvider({ children }: React.PropsWithChildren) {
       failed,
       isStale,
       refresh,
+      refreshIfStale,
     }),
-    [medicines, isLoading, failed, isStale, refresh],
+    [medicines, isLoading, failed, isStale, refresh, refreshIfStale],
   );
 
   return (
