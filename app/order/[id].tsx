@@ -3,9 +3,17 @@ import { clsx } from "clsx";
 import dayjs from "dayjs";
 import { useLocalSearchParams } from "expo-router";
 import { styled } from "nativewind";
-import { Linking, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Linking,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
+import PrintableOrder from "@/components/PrintableOrder";
 import ScreenHeader from "@/components/ScreenHeader";
 import { PHARMACY_PHONE, WHATSAPP_NUMBER } from "@/constants/data";
 import { colors } from "@/constants/theme";
@@ -172,7 +180,26 @@ export default function OrderDetail() {
           >
             <Text className="gd-link">{t("orderDetail.callInstead")} →</Text>
           </Pressable>
+
+          {/*
+            Web only, because `window.print()` is a browser API and there is no
+            print dialog on a phone. Chrome's own dialog offers "Save as PDF",
+            so this needs no library and produces a real file — the sheet it
+            prints is PrintableOrder, hidden until `@media print` reveals it.
+          */}
+          {Platform.OS === "web" ? (
+            <Pressable
+              className="gd-link-row"
+              style={pressRow}
+              onPress={() => window.print()}
+              accessibilityRole="button"
+            >
+              <Text className="gd-link">{t("orderDetail.print")} →</Text>
+            </Pressable>
+          ) : null}
         </ScrollView>
+
+        <PrintableOrder order={order} />
       </SafeAreaView>
     </View>
   );

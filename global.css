@@ -1741,3 +1741,85 @@ input.ga-input-error:focus {
   border-color: var(--color-emergency);
   box-shadow: 0 0 0 3px rgba(223, 21, 41, 0.15);
 }
+
+/*
+ * The printable order sheet — see components/PrintableOrder.web.tsx.
+ *
+ * Written as plain CSS rather than Tailwind utilities because it targets bare
+ * HTML tags inside the sheet, which is the whole point of that component: React
+ * Native Web's generated flex boxes print badly, so the sheet is real markup.
+ */
+.gd-print-sheet {
+  display: none;
+}
+
+@media print {
+  /*
+   * Everything goes invisible, then the sheet comes back.
+   *
+   * `visibility`, not `display`. Hiding the app with `display: none` collapses
+   * the layout the sheet is positioned inside and Chrome emits a blank first
+   * page; hiding it this way leaves the boxes in place and simply stops them
+   * painting, so the sheet can sit at the top-left of the paper on its own.
+   */
+  body * {
+    visibility: hidden;
+  }
+
+  .gd-print-sheet,
+  .gd-print-sheet * {
+    visibility: visible;
+  }
+
+  .gd-print-sheet {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 24px 28px;
+    color: #000;
+    font-family: Roboto_400Regular, system-ui, sans-serif;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  .gd-print-sheet h1 {
+    margin: 0;
+    font-size: 20pt;
+    letter-spacing: -0.01em;
+  }
+
+  .gd-print-sheet h2 {
+    margin: 18px 0 6px;
+    font-size: 13pt;
+  }
+
+  .gd-print-meta {
+    margin: 2px 0 16px;
+    color: #444;
+    font-size: 11pt;
+  }
+
+  .gd-print-line {
+    margin: 4px 0;
+  }
+
+  .gd-print-sheet ol {
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  .gd-print-sheet li {
+    margin: 2px 0;
+  }
+
+  /* Set off by a rule, so nobody mistakes the sheet for an invoice. */
+  .gd-print-note {
+    margin-top: 22px;
+    padding-top: 10px;
+    border-top: 1px solid #bbb;
+    color: #444;
+    font-size: 10pt;
+  }
+}

@@ -15,9 +15,11 @@ import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 import DeliveryCard from "@/components/DeliveryCard";
 import OrderOptions from "@/components/OrderOptions";
+import PatientPicker from "@/components/PatientPicker";
 import { colors } from "@/constants/theme";
 import { useCart } from "@/contexts/CartContext";
 import { describeAddress, useDelivery } from "@/contexts/DeliveryContext";
+import { usePeople } from "@/contexts/PeopleContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useOrderDraft } from "@/contexts/OrderDraftContext";
 import { useOrderPrefs } from "@/contexts/OrderPrefsContext";
@@ -56,6 +58,18 @@ export default function Cart() {
   const customer = useCustomer();
   const orderReady = useOrderReady();
   const { prefs, clearUrgent } = useOrderPrefs();
+
+  const { family, emergency } = usePeople();
+
+  /*
+   * Who this order is for. Null means the customer themselves, which is the
+   * common case and the default — ordering for yourself should cost no taps.
+   *
+   * Not persisted anywhere. It belongs to this order, the way urgency does:
+   * a basket for a mother today says nothing about the next one.
+   */
+  const [patientId, setPatientId] = useState<string | null>(null);
+  const patient = family.find((member) => member.id === patientId);
 
   const [sending, setSending] = useState(false);
 
@@ -126,6 +140,8 @@ export default function Cart() {
         language,
         prefs,
         delivery: address,
+        ...(patient ? { patient } : {}),
+        ...(emergency ? { emergency } : {}),
         ...(orderLines.length ? { lines: orderLines } : {}),
         ...(typedItems.length ? { typedItems } : {}),
         ...(links.length
@@ -333,6 +349,7 @@ export default function Cart() {
 
               <DeliveryCard />
 
+              <PatientPicker value={patientId} onChange={setPatientId} />
 
               <OrderOptions />
             </ScrollView>

@@ -34,6 +34,17 @@ export type OrderMessage = {
    * first ten seconds.
    */
   language?: Language;
+  /**
+   * Who the medicines are for, when it is not the person ordering.
+   *
+   * Absent means the customer themselves, which is the common case and needs
+   * no line. Present, it is the first thing a pharmacist checking a
+   * prescription wants to know — a dose for a sixty-year-old and one for a
+   * child are different orders of the same box.
+   */
+  patient?: FamilyMember;
+  /** Someone to ring when the customer's own number does not answer. */
+  emergency?: EmergencyContact | null;
   delivery: DeliveryAddress | null;
   lines?: OrderLine[];
   /** Medicines typed by hand, which the catalogue does not stock. */
@@ -127,8 +138,45 @@ export const buildOrderMessage = (order: OrderMessage): string => {
       // It stays as the honest thing to print if one ever slips through.
       order.customer.phone || "Number not given — please ask",
       ...(order.language === "hi" ? ["Speaks Hindi"] : []),
+      /*
+       * The second number, on the same block as the first.
+       *
+       * A separate heading would read as somebody else's order. This is the
+       * fallback for the number above it, and it belongs where whoever is
+       * about to dial is already looking.
+       */
+      ...(order.emergency
+        ? [
+            `Also try ${order.emergency.name}${
+              order.emergency.relation ? ` (${order.emergency.relation})` : ""
+            }: ${order.emergency.phone}`,
+          ]
+        : []),
     ].join("\n"),
   );
+
+  /*
+   * Whose medicines these are, when it is not the customer's own.
+   *
+   * Its own block, above the items, because it changes how the items are
+   * read: a pharmacist checking a prescription against an age needs this
+   * before the list rather than after it.
+   */
+  if (order.patient) {
+    blocks.push(
+      [
+        bold("For"),
+        [
+          order.patient.name,
+          [order.patient.relation, order.patient.age]
+            .filter(Boolean)
+            .join(", "),
+        ]
+          .filter(Boolean)
+          .join(" — "),
+      ].join("\n"),
+    );
+  }
 
   blocks.push([bold("Deliver to"), ...formatDelivery(order.delivery)].join("\n"));
 

@@ -185,6 +185,7 @@ const en = {
   "orderDetail.followUp": "Follow up",
   "orderDetail.openChat": "Open WhatsApp chat",
   "orderDetail.callInstead": "or call the pharmacy",
+  "orderDetail.print": "Print or save as PDF",
   "order.summary": "Order summary",
   "order.rxReview": "Pharmacist is reviewing your prescription.",
   // Delivery address — GPS pin, typed line, or both
@@ -274,6 +275,8 @@ const en = {
   "profile.family": "Family members",
   "profile.emergency": "Emergency contacts",
 
+  "cart.forWhom": "Who are these medicines for?",
+  "cart.forMe": "Me",
   "family.title": "Family members",
   "family.intro": "Add the people you order for, so the pharmacist knows whose prescription it is.",
   "family.empty": "No one added yet.",
@@ -618,6 +621,7 @@ const hi: Record<TranslationKey, string> = {
   "orderDetail.followUp": "\u0906\u0917\u0947 \u092c\u093e\u0924 \u0915\u0930\u0947\u0902",
   "orderDetail.openChat": "\u0935\u094d\u0939\u093e\u091f\u094d\u0938\u0910\u092a \u091a\u0948\u091f \u0916\u094b\u0932\u0947\u0902",
   "orderDetail.callInstead": "\u092f\u093e \u092b\u093c\u093e\u0930\u094d\u092e\u0947\u0938\u0940 \u0915\u094b \u0915\u0949\u0932 \u0915\u0930\u0947\u0902",
+  "orderDetail.print": "\u0911\u0930\u094d\u0921\u0930 \u092a\u094d\u0930\u093f\u0902\u091f \u092f\u093e PDF \u0938\u0939\u0947\u091c\u0947\u0902",
   "order.summary": "\u0911\u0930\u094d\u0921\u0930 \u0935\u093f\u0935\u0930\u0923",
   "order.rxReview": "\u092b\u093e\u0930\u094d\u092e\u093e\u0938\u093f\u0938\u094d\u091f \u092a\u0930\u094d\u091a\u0940 \u091c\u093e\u0901\u091a \u0930\u0939\u0947 \u0939\u0948\u0902\u0964",
   // \u0921\u093f\u0932\u0940\u0935\u0930\u0940 \u092a\u0924\u093e \u2014 \u0928\u0915\u094d\u0936\u093e \u092a\u093f\u0928, \u0932\u093f\u0916\u093e \u0939\u0941\u0906 \u092a\u0924\u093e, \u092f\u093e \u0926\u094b\u0928\u094b\u0902
@@ -706,6 +710,8 @@ const hi: Record<TranslationKey, string> = {
   "profile.family": "\u092a\u0930\u093f\u0935\u093e\u0930 \u0915\u0947 \u0938\u0926\u0938\u094d\u092f",
   "profile.emergency": "\u0906\u092a\u093e\u0924 \u0938\u0902\u092a\u0930\u094d\u0915",
 
+  "cart.forWhom": "\u092f\u0939 \u0926\u0935\u093e \u0915\u093f\u0938\u0915\u0947 \u0932\u093f\u090f \u0939\u0948?",
+  "cart.forMe": "\u092e\u0947\u0930\u0947 \u0932\u093f\u090f",
   "family.title": "\u092a\u0930\u093f\u0935\u093e\u0930 \u0915\u0947 \u0938\u0926\u0938\u094d\u092f",
   "family.intro": "\u091c\u093f\u0928\u0915\u0947 \u0932\u093f\u090f \u0906\u092a \u0926\u0935\u093e \u092e\u0902\u0917\u093e\u0924\u0947 \u0939\u0948\u0902, \u0909\u0928\u094d\u0939\u0947\u0902 \u091c\u094b\u0921\u093c\u0947\u0902 \u2014 \u0924\u093e\u0915\u093f \u092b\u093c\u093e\u0930\u094d\u092e\u093e\u0938\u093f\u0938\u094d\u091f \u0915\u094b \u092a\u0924\u093e \u0930\u0939\u0947 \u092a\u0930\u094d\u091a\u0940 \u0915\u093f\u0938\u0915\u0940 \u0939\u0948\u0964",
   "family.empty": "\u0905\u092d\u0940 \u0915\u094b\u0908 \u0928\u0939\u0940\u0902 \u091c\u094b\u0921\u093c\u093e\u0964",
