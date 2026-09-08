@@ -1741,3 +1741,34 @@ input.ga-input-error:focus {
   border-color: var(--color-emergency);
   box-shadow: 0 0 0 3px rgba(223, 21, 41, 0.15);
 }
+
+/*
+ * The error screen — see components/ErrorScreen.tsx.
+ *
+ * Deliberately plain, and not brand-coloured. It appears when something has
+ * already failed, so it must not depend on anything that could be part of the
+ * failure — a theme token, a font that never loaded, an icon set.
+ */
+.gd-error-screen {
+  @apply flex-1 bg-white;
+}
+
+.gd-error-body {
+  @apply px-5 pb-10 pt-16;
+}
+
+.gd-error-title {
+  @apply text-[20px] font-ui-semibold text-ink;
+}
+
+.gd-error-hint {
+  @apply mt-1 text-[13px] font-body text-ink-muted;
+}
+
+.gd-error-message {
+  @apply mt-4 rounded-xl bg-mist p-3 text-[13px] text-emergency;
+}
+
+.gd-error-stack {
+  @apply mt-3 text-[11px] leading-[16px] text-ink-muted;
+}

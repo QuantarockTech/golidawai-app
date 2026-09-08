@@ -14,6 +14,7 @@ import { SplashScreen, Stack } from "expo-router";
 import { PostHogErrorBoundary, PostHogProvider } from "posthog-react-native";
 import { useEffect, useRef } from "react";
 
+import ErrorScreen from "@/components/ErrorScreen";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { CatalogueProvider } from "@/contexts/CatalogueContext";
@@ -33,8 +34,42 @@ if (!publishableKey) {
   throw new Error("Add your Clerk Publishable Key to the .env file");
 }
 
-function RootErrorFallback() {
-  return null;
+function RootErrorFallback(props: { error?: unknown }) {
+  return <ErrorScreen error={props?.error} />;
+}
+
+/*
+ * Errors React never sees.
+ *
+ * An error boundary only catches what happens during render. A throw inside an
+ * effect, a promise nobody awaited, or a module failing as it loads goes
+ * straight past it to the runtime, which in a release build closes the app
+ * without a word — the exact symptom that cost a wrong diagnosis and a rebuild.
+ *
+ * Held in module scope rather than a hook so it is installed as this file is
+ * evaluated, which is before any screen has had the chance to fail.
+ */
+const globalErrors = (globalThis as { ErrorUtils?: ErrorUtilsLike }).ErrorUtils;
+
+type ErrorUtilsLike = {
+  getGlobalHandler?: () => ((error: unknown, isFatal?: boolean) => void) | undefined;
+  setGlobalHandler?: (handler: (error: unknown, isFatal?: boolean) => void) => void;
+};
+
+if (globalErrors?.setGlobalHandler) {
+  const previous = globalErrors.getGlobalHandler?.();
+
+  globalErrors.setGlobalHandler((error, isFatal) => {
+    // Reported before anything else, so a crash that happens too early to
+    // render still reaches somewhere it can be read.
+    posthog?.capture("app_crashed", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: (error instanceof Error && error.stack) || "",
+      fatal: Boolean(isFatal),
+    });
+
+    previous?.(error, isFatal);
+  });
 }
 
 function RootLayoutContent() {
