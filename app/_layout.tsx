@@ -22,6 +22,7 @@ import { OrderDraftProvider } from "@/contexts/OrderDraftContext";
 import { OrderPrefsProvider } from "@/contexts/OrderPrefsContext";
 import { OrdersProvider } from "@/contexts/OrdersContext";
 import { posthog } from "@/lib/posthog";
+import { setSupabaseTokenReader } from "@/lib/supabase";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -36,7 +37,20 @@ function RootErrorFallback() {
 }
 
 function RootLayoutContent() {
-  const { isLoaded: authLoaded } = useAuth();
+  const { isLoaded: authLoaded, getToken } = useAuth();
+
+  /*
+   * Hands Supabase a way to ask Clerk for a fresh token.
+   *
+   * A reader rather than a token: Clerk's session tokens are short-lived and
+   * refreshed behind the scenes, so anything captured once goes stale within
+   * the minute. Cleared on unmount so a signed-out app cannot keep reading
+   * with the last session it saw.
+   */
+  useEffect(() => {
+    setSupabaseTokenReader(() => getToken());
+    return () => setSupabaseTokenReader(null);
+  }, [getToken]);
   const { user, isLoaded: userLoaded } = useUser();
   const { isLoaded: languageLoaded } = useLanguage();
   const identifiedUserId = useRef<string | null>(null);

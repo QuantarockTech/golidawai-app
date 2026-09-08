@@ -1,3 +1,4 @@
+import { useUser } from "@clerk/clerk-expo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {
   createContext,
@@ -7,6 +8,8 @@ import React, {
   useMemo,
   useState,
 } from "react";
+
+import { deleteAddress, fetchAddress, pushAddress } from "@/lib/sync";
 
 const STORAGE_KEY = "golidawayi.deliveryAddress";
 
@@ -75,14 +78,23 @@ const migrate = (address: DeliveryAddress): DeliveryAddress => {
 };
 
 /**
- * The one delivery address, kept on this device and nowhere else.
+ * The one delivery address, on this device and on the customer's account.
  *
- * Deliberately local: the client asked that no customer data be stored off the
- * phone, so this is a convenience for the customer — type it once, not at every
- * order — rather than a record anyone else can read. It reaches the pharmacy
- * only inside a WhatsApp message the customer presses send on.
+ * Device first, server second, and in that order deliberately. The copy on the
+ * phone is what the screen reads, so an address appears the instant the app
+ * opens and works with no signal at all; Supabase is what makes it survive a
+ * new phone, a reinstall, or signing in on a laptop — the gap that made someone
+ * retype their address on every device they owned.
+ *
+ * A failed sync is never allowed to matter. A read that fails leaves the local
+ * copy on screen, and a write that fails leaves the device holding the record
+ * until the next save. Losing an address to a dropped connection would be worse
+ * than briefly showing an old one.
  */
 export function DeliveryProvider({ children }: React.PropsWithChildren) {
+  const { user } = useUser();
+  const userId = user?.id ?? null;
+
   const [address, setAddress] = useState<DeliveryAddress | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -115,15 +127,71 @@ export function DeliveryProvider({ children }: React.PropsWithChildren) {
     };
   }, []);
 
-  const save = useCallback((next: DeliveryAddress) => {
-    setAddress(next);
-    void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(() => {});
-  }, []);
+  /*
+   * Reconciles with the account once Clerk knows who is signed in.
+   *
+   * Newest wins, by `savedAt`. That is the right rule for one address edited on
+   * whichever phone the customer had to hand: a laptop holding last month's
+   * address should take this morning's from the server, and a phone that just
+   * saved one should send it up rather than have it overwritten.
+   *
+   * A device with an address and an account with none is the migration path for
+   * everyone who used the app before any of this existed — their address goes
+   * up on the first launch after signing in, and they never notice.
+   */
+  useEffect(() => {
+    if (!userId || !isLoaded) return;
+
+    let cancelled = false;
+
+    const reconcile = async () => {
+      const remote = await fetchAddress(userId);
+      if (cancelled) return;
+
+      if (!remote) {
+        if (address) void pushAddress(userId, address);
+        return;
+      }
+
+      if (!address || remote.savedAt > address.savedAt) {
+        setAddress(remote);
+        void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(remote)).catch(
+          () => {},
+        );
+        return;
+      }
+
+      if (address.savedAt > remote.savedAt) void pushAddress(userId, address);
+    };
+
+    void reconcile();
+
+    return () => {
+      cancelled = true;
+    };
+    // Runs when the customer is known, not on every edit — `save` already sends
+    // its own writes up, and depending on `address` would re-fetch after each.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, isLoaded]);
+
+  const save = useCallback(
+    (next: DeliveryAddress) => {
+      setAddress(next);
+      void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(
+        () => {},
+      );
+      // Not awaited: the screen closes on save, and an address that reached the
+      // device has been saved as far as the customer is concerned.
+      if (userId) void pushAddress(userId, next);
+    },
+    [userId],
+  );
 
   const clear = useCallback(() => {
     setAddress(null);
     void AsyncStorage.removeItem(STORAGE_KEY).catch(() => {});
-  }, []);
+    if (userId) void deleteAddress(userId);
+  }, [userId]);
 
   const value = useMemo<DeliveryContextValue>(
     () => ({ address, save, clear, isLoaded }),
