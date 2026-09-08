@@ -3,17 +3,9 @@ import { clsx } from "clsx";
 import dayjs from "dayjs";
 import { useLocalSearchParams } from "expo-router";
 import { styled } from "nativewind";
-import {
-  Linking,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { Linking, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
-import PrintableOrder from "@/components/PrintableOrder";
 import ScreenHeader from "@/components/ScreenHeader";
 import { PHARMACY_PHONE, WHATSAPP_NUMBER } from "@/constants/data";
 import { colors } from "@/constants/theme";
@@ -22,6 +14,7 @@ import { useOrders } from "@/contexts/OrdersContext";
 import "@/global.css";
 import { KIND_LABELS } from "@/lib/orderKind";
 import { pressRow } from "@/lib/press";
+import { printOrder } from "@/lib/printOrder";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
@@ -182,24 +175,19 @@ export default function OrderDetail() {
           </Pressable>
 
           {/*
-            Web only, because `window.print()` is a browser API and there is no
-            print dialog on a phone. Chrome's own dialog offers "Save as PDF",
-            so this needs no library and produces a real file — the sheet it
-            prints is PrintableOrder, hidden until `@media print` reveals it.
+            Both platforms, from one document. Chrome's dialog and Android's
+            both carry "Save as PDF", so this reaches a real file without the
+            app writing one — see lib/orderSheet.ts for the page itself.
           */}
-          {Platform.OS === "web" ? (
-            <Pressable
-              className="gd-link-row"
-              style={pressRow}
-              onPress={() => window.print()}
-              accessibilityRole="button"
-            >
-              <Text className="gd-link">{t("orderDetail.print")} →</Text>
-            </Pressable>
-          ) : null}
+          <Pressable
+            className="gd-link-row"
+            style={pressRow}
+            onPress={() => void printOrder(order)}
+            accessibilityRole="button"
+          >
+            <Text className="gd-link">{t("orderDetail.print")} →</Text>
+          </Pressable>
         </ScrollView>
-
-        <PrintableOrder order={order} />
       </SafeAreaView>
     </View>
   );
