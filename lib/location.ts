@@ -144,13 +144,23 @@ const describeNative = async (
   const [parts] = await Location.reverseGeocodeAsync({ latitude, longitude });
   if (!parts) return "";
 
+  /*
+   * The locality, and nothing narrower or wider.
+   *
+   * `name` is dropped because on Android it is usually the house or plot
+   * number at the coordinates — "C310" — and that is the one part of an
+   * address the customer supplies themselves. Leaving it in produced lines
+   * like "B 326, Shalimar Bunglow Park, C310, Sukhliya", carrying somebody
+   * else's door number next to their own.
+   *
+   * `subregion` and `region` go for the opposite reason: "Indore Division"
+   * and "Madhya Pradesh" are true of every customer this pharmacy has, so
+   * they take up the line without narrowing anything.
+   */
   return joinParts([
-    parts.name,
     parts.street,
     parts.district,
-    parts.subregion,
     parts.city,
-    parts.region,
     parts.postalCode,
   ]);
 };
@@ -225,9 +235,9 @@ const describeOverHttp = async (
     const parts = body.address;
     if (!parts) return "";
 
-    const houseAndRoad = [parts.house_number, parts.road]
-      .filter(Boolean)
-      .join(" ");
+    // The road on its own. `house_number` is deliberately left out — see the
+    // note in describeNative: the door number belongs to the customer.
+    const road = parts.road;
 
     const city = parts.city ?? parts.town ?? parts.village;
 
@@ -242,8 +252,7 @@ const describeOverHttp = async (
         : parts.city_district;
 
     return joinParts([
-      parts.house_name ?? parts.building ?? parts.amenity ?? parts.shop,
-      houseAndRoad,
+      road,
       parts.residential,
       parts.city_block,
       parts.quarter,
@@ -251,7 +260,6 @@ const describeOverHttp = async (
       parts.suburb,
       district,
       city,
-      parts.state,
       parts.postcode,
     ]);
   } finally {

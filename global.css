@@ -1270,15 +1270,12 @@
  * rather than another box to fill in, which is the whole reason the location
  * moved to a step of its own. "Change" goes back to the map.
  */
-.gd-locality {
- @apply flex-row items-center gap-3 rounded-2xl border-hairline-soft bg-mist px-4 py-3;
-  border-width: 1px;
-  border-style: solid;
+/* The "Area / locality" heading with its "Change" button on the same line. */
+.gd-locality-head {
+  @apply flex-row items-center justify-between;
 }
 
-.gd-locality-text {
-  @apply text-[14px] leading-[19px] font-body text-ink-muted;
-}
+
 
 .gd-locality-change {
  @apply flex-row items-center gap-1 rounded-full border-brand/40 bg-white px-3 py-1.5;

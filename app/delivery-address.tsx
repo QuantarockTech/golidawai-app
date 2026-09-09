@@ -447,20 +447,22 @@ export default function DeliveryAddressScreen() {
           ) : (
           <>
           {/*
-            The chosen location, stated rather than offered for editing.
+            The chosen location, editable.
 
-            This is the Swiggy shape and it is the right one: the string comes
+            It was read-only at first, on Swiggy's reasoning: the string comes
             from a geocoder and belongs to the map, so the way to correct it is
-            to pick a different point — not to retype it and leave the
-            coordinates pointing somewhere else.
+            to pick a different point. That reasoning assumes the geocoder is
+            right about the place once the point is right, and here it is not —
+            across most of Indore it returns a colony and a pincode at best,
+            and sometimes somebody else's plot number. A customer who can see
+            it is wrong should be able to say so.
+
+            "Change" still goes back to the map, because moving the point is a
+            different act from fixing its name — and only the map can move the
+            coordinates the rider actually navigates by.
           */}
-          <Text className="gd-section-title mt-0">{t("address.area")}</Text>
-          <View className="gd-locality">
-            <View className="min-w-0 flex-1">
-              <Text className="gd-locality-text">
-                {area || t("address.areaUnknown")}
-              </Text>
-            </View>
+          <View className="gd-locality-head">
+            <Text className="gd-section-title mt-0">{t("address.area")}</Text>
             <Pressable
               className="gd-locality-change"
               style={pressRow}
@@ -477,6 +479,13 @@ export default function DeliveryAddressScreen() {
               </Text>
             </Pressable>
           </View>
+          <TextInput
+            className="gd-input-line"
+            value={area}
+            onChangeText={setArea}
+            placeholder={t("address.areaPlaceholder")}
+            placeholderTextColor={colors.inkFaint}
+          />
 
           {/* What kind of place this is. A note for the rider, not a chooser. */}
           <Text className="gd-section-title">{t("address.labelTitle")}</Text>
