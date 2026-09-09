@@ -419,7 +419,7 @@ export default function Cart() {
               <OrderOptions />
             </ScrollView>
 
-            <View className="px-5 pb-3 pt-1">
+            <View className="gd-dock pb-3 pt-1">
               <Pressable
                 className="gd-btn-whatsapp"
                 style={pressRow}

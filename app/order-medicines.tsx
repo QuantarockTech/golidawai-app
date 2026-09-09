@@ -684,16 +684,18 @@ export default function OrderMedicines() {
           The cart adds it up, and says there that it is an estimate.
         */}
         {itemCount > 0 ? (
-          <Pressable
-            className="gd-cart-dock"
-            style={pressRow}
-            onPress={() => router.push("/cart")}
-            accessibilityRole="button"
-          >
-            <Text className="gd-cart-dock-text">
-              {t("home.inCart", { count: itemCount })}
-            </Text>
-          </Pressable>
+          <View className="gd-dock">
+            <Pressable
+              className="gd-cart-dock"
+              style={pressRow}
+              onPress={() => router.push("/cart")}
+              accessibilityRole="button"
+            >
+              <Text className="gd-cart-dock-text">
+                {t("home.inCart", { count: itemCount })}
+              </Text>
+            </Pressable>
+          </View>
         ) : null}
       </SafeAreaView>
     </View>

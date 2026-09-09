@@ -216,7 +216,33 @@ const SignIn = () => {
         authSessionResult,
       } = await startSSOFlow({
         strategy: "oauth_google",
-        redirectUrl: AuthSession.makeRedirectUri(),
+        /*
+         * The path matters, and it is the whole reason this used to fail on
+         * Android while working on web.
+         *
+         * `makeRedirectUri()` with no arguments returned a bare
+         * `golidawayi://` — no host, no path. iOS accepts that, because
+         * ASWebAuthenticationSession matches the redirect on the scheme alone
+         * and ignores everything after it. Android matches through an intent
+         * filter, where a URI with an empty host resolves to nothing: the
+         * browser closed, the app came back to the foreground, and the flow
+         * ended as `{ type: "dismiss" }` with no session — indistinguishable
+         * from the user backing out, which is why it read as one.
+         *
+         * `golidawayi://sso-callback` has a host to match. It is also what
+         * Clerk defaults to when no redirect is given, so it has to be on the
+         * allowlist in the Clerk dashboard for the redirect to be honoured.
+         *
+         * Native only, deliberately. `makeRedirectUri` ignores `scheme` on the
+         * web but still applies `path`, which would move the web redirect from
+         * the site root to `/sso-callback` — a change to a flow that already
+         * works, in service of a bug that only exists on Android.
+         */
+        redirectUrl: AuthSession.makeRedirectUri(
+          Platform.OS === "web"
+            ? {}
+            : { scheme: "golidawayi", path: "sso-callback" },
+        ),
       });
 
       if (createdSessionId && setActiveSSO) {

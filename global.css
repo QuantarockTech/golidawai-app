@@ -1526,14 +1526,33 @@
 }
 
 
+/*
+ * The strip below a scroll area that holds a screen's terminal action — the
+ * cart's send button, the catalogue's running basket.
+ *
+ * Geometry only, so each screen keeps its own vertical spacing: the cart sits
+ * above the tab bar, while the catalogue takes the bottom safe-area inset and
+ * needs less room under its bar.
+ *
+ * The column cap is the point. A docked bar is the one thing on a page that
+ * sits outside `.gd-scroll-content`, and without this it was the one thing
+ * ignoring the column — on a browser the content held a centred column while
+ * the button stretched the whole window.
+ */
+.gd-dock {
+  @apply w-full max-w-[440px] self-center px-5 md:max-w-[1120px] md:px-8;
+}
+
 /* Sticky cart bar — frame 06 */
 /*
  * mb-2, not mb-3. The screens that dock this now include the bottom safe-area
  * inset, so the gap under it is the system's plus this one — a phone with a
  * gesture bar was spending both.
+ *
+ * No horizontal margin: `.gd-dock` wraps it and pads the column.
  */
 .gd-cart-dock {
-  @apply mx-5 mb-2 flex-row items-center gap-3 rounded-2xl bg-brand-dark px-4 py-3;
+  @apply mb-2 flex-row items-center gap-3 rounded-2xl bg-brand-dark px-4 py-3;
 }
 
 .gd-cart-dock-text {
