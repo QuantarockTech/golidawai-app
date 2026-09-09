@@ -1,6 +1,7 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { clsx } from "clsx";
 import dayjs from "dayjs";
+import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { styled } from "nativewind";
 import { Linking, Pressable, ScrollView, Text, View } from "react-native";
@@ -12,6 +13,7 @@ import { colors } from "@/constants/theme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useOrders } from "@/contexts/OrdersContext";
 import "@/global.css";
+import { LINK_LIFETIME_DAYS } from "@/lib/imgbb";
 import { KIND_LABELS } from "@/lib/orderKind";
 import { pressRow } from "@/lib/press";
 import { printOrder } from "@/lib/printOrder";
@@ -125,16 +127,58 @@ export default function OrderDetail() {
           ) : null}
 
           {order.prescriptionCount > 0 ? (
-            <View className="gd-address mt-4">
-              <MaterialCommunityIcons
-                name="file-image-outline"
-                size={20}
-                color={colors.brandDark}
-              />
-              <Text className="gd-address-text">
-                {t("orders.rxCount", { count: order.prescriptionCount })}
-              </Text>
-            </View>
+            <>
+              <View className="gd-address mt-4">
+                <MaterialCommunityIcons
+                  name="file-image-outline"
+                  size={20}
+                  color={colors.brandDark}
+                />
+                <Text className="gd-address-text">
+                  {t("orders.rxCount", { count: order.prescriptionCount })}
+                </Text>
+              </View>
+
+              {/*
+                The prescriptions themselves, and this is the only place they
+                appear. They were briefly printed on the order sheet, which put
+                a URL anyone could open onto a piece of paper — a name, a
+                doctor and a diagnosis, with nothing between them and it. Here
+                they sit behind the customer's own sign-in, which is where a
+                prescription belongs.
+
+                Thumbnails rather than links: this is a photo, and a photo is
+                recognised faster than it is read.
+              */}
+              {order.prescriptionLinks?.length ? (
+                <>
+                  <View className="gd-rx-thumbs">
+                    {order.prescriptionLinks.map((url, index) => (
+                      <Pressable
+                        key={url}
+                        className="gd-rx-thumb"
+                        style={pressRow}
+                        onPress={() => void Linking.openURL(url)}
+                        accessibilityRole="button"
+                        accessibilityLabel={t("orderDetail.openRx", {
+                          number: index + 1,
+                        })}
+                      >
+                        <Image
+                          source={{ uri: url }}
+                          style={{ width: "100%", height: "100%" }}
+                          contentFit="cover"
+                          transition={150}
+                        />
+                      </Pressable>
+                    ))}
+                  </View>
+                  <Text className="gd-custom-note">
+                    {t("orderDetail.rxExpiry", { days: LINK_LIFETIME_DAYS })}
+                  </Text>
+                </>
+              ) : null}
+            </>
           ) : null}
 
           <Text className="gd-section-title">{t("rx.deliverTo")}</Text>

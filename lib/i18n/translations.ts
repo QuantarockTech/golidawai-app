@@ -194,6 +194,9 @@ const en = {
   "orderDetail.openChat": "Open WhatsApp chat",
   "orderDetail.callInstead": "or call the pharmacy",
   "orderDetail.print": "Print or save as PDF",
+  "orderDetail.openRx": "Open prescription {number}",
+  "orderDetail.rxExpiry":
+    "Tap a prescription to open it. They stop opening {days} days after the order was sent.",
   "order.summary": "Order summary",
   "order.rxReview": "Pharmacist is reviewing your prescription.",
   // Delivery address — GPS pin, typed line, or both
@@ -639,6 +642,9 @@ const hi: Record<TranslationKey, string> = {
   "orderDetail.openChat": "\u0935\u094d\u0939\u093e\u091f\u094d\u0938\u0910\u092a \u091a\u0948\u091f \u0916\u094b\u0932\u0947\u0902",
   "orderDetail.callInstead": "\u092f\u093e \u092b\u093c\u093e\u0930\u094d\u092e\u0947\u0938\u0940 \u0915\u094b \u0915\u0949\u0932 \u0915\u0930\u0947\u0902",
   "orderDetail.print": "\u0911\u0930\u094d\u0921\u0930 \u092a\u094d\u0930\u093f\u0902\u091f \u092f\u093e PDF \u0938\u0939\u0947\u091c\u0947\u0902",
+  "orderDetail.openRx": "\u092a\u0930\u094d\u091a\u0940 {number} \u0916\u094b\u0932\u0947\u0902",
+  "orderDetail.rxExpiry":
+    "\u092a\u0930\u094d\u091a\u0940 \u0926\u0947\u0916\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u0909\u0938 \u092a\u0930 \u091f\u0948\u092a \u0915\u0930\u0947\u0902\u0964 \u0911\u0930\u094d\u0921\u0930 \u092d\u0947\u091c\u0928\u0947 \u0915\u0947 {days} \u0926\u093f\u0928 \u092c\u093e\u0926 \u092f\u0947 \u0928\u0939\u0940\u0902 \u0916\u0941\u0932\u0947\u0902\u0917\u0940\u0964",
   "order.summary": "\u0911\u0930\u094d\u0921\u0930 \u0935\u093f\u0935\u0930\u0923",
   "order.rxReview": "\u092b\u093e\u0930\u094d\u092e\u093e\u0938\u093f\u0938\u094d\u091f \u092a\u0930\u094d\u091a\u0940 \u091c\u093e\u0901\u091a \u0930\u0939\u0947 \u0939\u0948\u0902\u0964",
   // \u0921\u093f\u0932\u0940\u0935\u0930\u0940 \u092a\u0924\u093e \u2014 \u0928\u0915\u094d\u0936\u093e \u092a\u093f\u0928, \u0932\u093f\u0916\u093e \u0939\u0941\u0906 \u092a\u0924\u093e, \u092f\u093e \u0926\u094b\u0928\u094b\u0902
