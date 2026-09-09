@@ -106,6 +106,13 @@ const VerifyCodeStep = ({
                 onChangeText={(value) =>
                   onChangeCode(value.replace(/\D/g, "").slice(0, 6))
                 }
+                /*
+                 * A prop, not a class. react-native-css maps TextInput's
+                 * textAlign with a boolean where it expects a string path, and
+                 * calls .split on it — so any input whose *style* centres its
+                 * text throws while rendering. See .ga-input-code.
+                 */
+                textAlign="center"
                 keyboardType="number-pad"
                 autoComplete="one-time-code"
                 textContentType="oneTimeCode"

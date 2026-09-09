@@ -661,8 +661,17 @@
   @apply absolute inset-y-0 right-0 w-12 items-center justify-center rounded-r-2xl;
 }
 
+/*
+ * The six-digit code box.
+ *
+ * No `text-center` here, and it cannot go here. react-native-css declares
+ * TextInput's mapping as `nativeStyleMapping: { textAlign: true }`, and the
+ * code that reads it calls `path.split(".")` on that value — `true.split` is
+ * undefined, so any TextInput whose style sets textAlign throws while
+ * rendering. The alignment is a `textAlign` prop on the input instead.
+ */
 .ga-input-code {
-  @apply text-center text-[22px] tracking-[8px] font-ui-semibold;
+  @apply text-[22px] tracking-[8px] font-ui-semibold;
 }
 
 .ga-error {
