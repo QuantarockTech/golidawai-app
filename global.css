@@ -1082,9 +1082,17 @@
   @apply size-8 items-center justify-center rounded-lg bg-brand;
 }
 
-/* Floating WhatsApp button — sits clear of the tab bar */
+/*
+  Floating WhatsApp button — sits clear of the tab bar.
+
+  The fill and the press response belong here rather than on a `style`
+  callback: NativeWind merges an inline style into the class styles by putting
+  it in an array, and a function in that array is silently dropped on native,
+  which left the button white and stranded at the top of the screen.
+*/
 .gd-fab {
-  @apply absolute right-5 size-14 items-center justify-center rounded-full;
+  @apply absolute right-5 size-14 items-center justify-center rounded-full bg-whatsapp;
+  @apply active:scale-[0.97] active:opacity-[0.62];
   box-shadow: 0 8px 18px rgba(37, 211, 102, 0.45);
 }
 

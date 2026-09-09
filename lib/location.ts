@@ -86,6 +86,36 @@ export const mapsEmbedUrl = (latitude: number, longitude: number): string =>
   `&z=${EMBED_ZOOM}&output=embed`;
 
 /**
+ * The same map, wrapped in a page, for a WebView to load.
+ *
+ * Google refuses to render the embed as a top-level document — it answers
+ * "the Google Maps Embed API must be used in an iframe" and nothing else. A
+ * browser satisfies that by construction, because the web build puts the URL
+ * in a real `<iframe>`. A WebView pointed straight at the URL does not: that
+ * is a navigation, not a frame, so the phone showed the refusal text where the
+ * map should have been.
+ *
+ * So the WebView is handed this document instead, and the iframe lives inside
+ * it. The page is deliberately bare — no scripts, nothing to load, no styling
+ * beyond filling the frame — because everything visible comes from Google.
+ */
+export const mapsEmbedHtml = (latitude: number, longitude: number): string =>
+  `<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #f7fcfc; }
+  iframe { display: block; border: 0; width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<iframe src="${mapsEmbedUrl(latitude, longitude)}" loading="lazy"></iframe>
+</body>
+</html>`;
+
+/**
  * Joins address fields, widest last, into one readable line.
  *
  * Reverse geocoding returns fields that are frequently empty or duplicated in

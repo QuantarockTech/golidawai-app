@@ -8,7 +8,7 @@ import {
 import { colors } from "@/constants/theme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import "@/global.css";
-import { mapsEmbedUrl, mapsLink } from "@/lib/location";
+import { mapsEmbedHtml, mapsLink } from "@/lib/location";
 import { pressRow } from "@/lib/press";
 
 /*
@@ -64,17 +64,23 @@ export default function MapPreview({
       {WebView ? (
         <View className="gd-mapview" pointerEvents="none">
           <WebView
-            source={{ uri: mapsEmbedUrl(latitude, longitude) }}
+            /*
+             * A page holding an iframe, not the embed URL itself. Google
+             * refuses to render the embed as a top-level document and answers
+             * with "the Google Maps Embed API must be used in an iframe",
+             * which is what a WebView pointed at the URL displayed instead of
+             * a map. `baseUrl` gives the page an https origin, without which
+             * the frame loads from about:blank and Google rejects it again.
+             */
+            source={{
+              html: mapsEmbedHtml(latitude, longitude),
+              baseUrl: "https://www.google.com",
+            }}
             style={{ height: PREVIEW_HEIGHT, backgroundColor: colors.mist }}
             scrollEnabled={false}
             nestedScrollEnabled={false}
             javaScriptEnabled
             domStorageEnabled
-            /*
-             * Google serves the embed as a full page and expects to be told it
-             * is on a phone; without this it lays out for a desktop viewport
-             * and the pin lands off-centre in a 180pt-tall frame.
-             */
             setSupportMultipleWindows={false}
             originWhitelist={["https://*"]}
           />
