@@ -152,7 +152,8 @@
   }
 
   .list-action {
-    @apply rounded-full border border-black/20 px-4 py-1;
+ @apply rounded-full border-black/20 px-4 py-1;
+    border-width: 1px;
     border-style: solid;
   }
 
@@ -161,7 +162,8 @@
   }
 
   .upcoming-card {
-    @apply mr-4 w-44 rounded-2xl border border-black/10 bg-background p-4;
+ @apply mr-4 w-44 rounded-2xl border-black/10 bg-background p-4;
+    border-width: 1px;
     border-style: solid;
   }
 
@@ -186,7 +188,8 @@
   }
 
   .sub-card {
-    @apply rounded-2xl border border-border p-4;
+ @apply rounded-2xl border-border p-4;
+    border-width: 1px;
     border-style: solid;
   }
 
@@ -271,7 +274,8 @@
   }
 
   .subscription-search {
-    @apply flex-row items-center rounded-2xl border border-border bg-card;
+ @apply flex-row items-center rounded-2xl border-border bg-card;
+    border-width: 1px;
     border-style: solid;
   }
 
@@ -300,7 +304,8 @@
   }
 
   .subscription-empty {
-    @apply items-center rounded-2xl border border-border bg-card px-5 py-10;
+ @apply items-center rounded-2xl border-border bg-card px-5 py-10;
+    border-width: 1px;
     border-style: solid;
   }
 
@@ -353,7 +358,8 @@
   }
 
   .auth-card {
-    @apply mt-8 rounded-3xl border border-border bg-card p-5;
+ @apply mt-8 rounded-3xl border-border bg-card p-5;
+    border-width: 1px;
     border-style: solid;
   }
 
@@ -370,7 +376,8 @@
   }
 
   .auth-input {
-    @apply rounded-2xl border border-border bg-background px-4 py-4 text-base font-sans-medium text-primary;
+ @apply rounded-2xl border-border bg-background px-4 py-4 text-base font-sans-medium text-primary;
+    border-width: 1px;
     border-style: solid;
   }
 
@@ -399,7 +406,8 @@
   }
 
   .auth-secondary-button {
-    @apply items-center rounded-2xl border border-accent/30 bg-accent/10 py-3;
+ @apply items-center rounded-2xl border-accent/30 bg-accent/10 py-3;
+    border-width: 1px;
     border-style: solid;
   }
 
@@ -441,7 +449,8 @@
   }
 
   .modal-header {
-    @apply flex-row items-center justify-between border-b border-border px-5 py-4;
+ @apply flex-row items-center justify-between border-border px-5 py-4;
+    border-bottom-width: 1px;
     border-style: solid;
   }
 
@@ -466,7 +475,8 @@
   }
 
   .picker-option {
-    @apply flex-1 items-center rounded-2xl border border-border bg-background py-3;
+ @apply flex-1 items-center rounded-2xl border-border bg-background py-3;
+    border-width: 1px;
     border-style: solid;
   }
 
@@ -487,7 +497,8 @@
   }
 
   .category-chip {
-    @apply rounded-full border border-border bg-background px-4 py-2;
+ @apply rounded-full border-border bg-background px-4 py-2;
+    border-width: 1px;
     border-style: solid;
   }
 
@@ -554,7 +565,8 @@
  * than as content passing under a fixed header.
  */
 .ga-fixed-header {
-  @apply w-full self-center items-center border-b border-hairline-soft px-5 pb-2 pt-2;
+ @apply w-full self-center items-center border-hairline-soft px-5 pb-2 pt-2;
+  border-bottom-width: 1px;
   border-style: solid;
 }
 
@@ -572,7 +584,8 @@
  * as bounded top and bottom rather than as content clipped at random.
  */
 .ga-fixed-footer {
-  @apply w-full max-w-[440px] self-center border-t border-hairline-soft px-5 pb-4 pt-2;
+ @apply w-full max-w-[440px] self-center border-hairline-soft px-5 pb-4 pt-2;
+  border-top-width: 1px;
   border-style: solid;
 }
 
@@ -589,12 +602,14 @@
  * mist screen a white-on-mist pill is ~3% contrast and reads as unselected.
  */
 .ga-toggle {
-  @apply mb-3 w-full flex-row rounded-2xl border border-hairline-soft bg-brand/10 p-1;
+ @apply mb-3 w-full flex-row rounded-2xl border-hairline-soft bg-brand/10 p-1;
+  border-width: 1px;
   border-style: solid;
 }
 
 .ga-toggle-item {
-  @apply flex-1 items-center justify-center rounded-xl border border-transparent py-2.5;
+ @apply flex-1 items-center justify-center rounded-xl border-transparent py-2.5;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -619,7 +634,8 @@
 }
 
 .ga-input {
-  @apply rounded-2xl border border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
+ @apply rounded-2xl border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -674,7 +690,8 @@
 }
 
 .ga-btn-outline {
-  @apply mt-3 flex-row items-center justify-center gap-2 rounded-2xl border border-brand bg-white py-4;
+ @apply mt-3 flex-row items-center justify-center gap-2 rounded-2xl border-brand bg-white py-4;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -708,7 +725,8 @@
  * from position, height and shadow instead of fill.
  */
 .ga-google-btn {
-  @apply w-full flex-row items-center justify-center gap-2.5 rounded-2xl border border-hairline bg-white py-4;
+ @apply w-full flex-row items-center justify-center gap-2.5 rounded-2xl border-hairline bg-white py-4;
+  border-width: 1px;
   border-style: solid;
   box-shadow: 0 1px 3px rgba(15, 60, 61, 0.1);
 }
@@ -757,7 +775,8 @@
 }
 
 .ga-lang-on-light {
-  @apply border border-hairline-soft bg-mist;
+ @apply border-hairline-soft bg-mist;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -897,7 +916,8 @@
 
 /* Search */
 .gd-search {
-  @apply mb-4 flex-row items-center gap-2 rounded-2xl border border-hairline bg-white px-4 py-3;
+ @apply mb-4 flex-row items-center gap-2 rounded-2xl border-hairline bg-white px-4 py-3;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -929,7 +949,8 @@
 }
 
 .gd-tile {
-  @apply w-[31%] items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-2 py-3 md:w-[15.5%] md:py-5;
+ @apply w-[31%] items-center gap-2 rounded-2xl border-hairline-soft bg-white px-2 py-3 md:w-[15.5%] md:py-5;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -952,7 +973,8 @@
 
 /* Call to order */
 .gd-call {
-  @apply flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+ @apply flex-row items-center gap-3 rounded-2xl border-hairline-soft bg-white px-4 py-3;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -969,7 +991,8 @@
 }
 
 .gd-call-cta {
-  @apply rounded-full border border-brand px-3 py-1.5;
+ @apply rounded-full border-brand px-3 py-1.5;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -979,7 +1002,8 @@
 
 /* Reorder list */
 .gd-med-card {
-  @apply rounded-2xl border border-hairline-soft bg-white px-4;
+ @apply rounded-2xl border-hairline-soft bg-white px-4;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -988,7 +1012,8 @@
 }
 
 .gd-med-divider {
-  @apply border-t border-hairline-soft;
+ @apply border-hairline-soft;
+  border-top-width: 1px;
   border-style: solid;
 }
 
@@ -1002,7 +1027,8 @@
  * content, and the box grows past the screen instead of scrolling.
  */
 .gd-med-box {
-  @apply min-h-0 flex-1 overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+ @apply min-h-0 flex-1 overflow-hidden rounded-2xl border-hairline-soft bg-white;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1017,7 +1043,8 @@
  * catalogue box off the bottom of the screen.
  */
 .gd-typed-box {
-  @apply max-h-[240px] grow-0 rounded-2xl border border-hairline-soft bg-white;
+ @apply max-h-[240px] grow-0 rounded-2xl border-hairline-soft bg-white;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1059,7 +1086,8 @@
 
 /* Quantity stepper, shown on a reorder row once it is in the cart */
 .gd-stepper {
-  @apply flex-row items-center gap-1 rounded-lg border border-brand/40 bg-brand/10 px-1 py-0.5;
+ @apply flex-row items-center gap-1 rounded-lg border-brand/40 bg-brand/10 px-1 py-0.5;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1073,7 +1101,8 @@
 
 /* Cart summary strip under the reorder list */
 .gd-cart-bar {
-  @apply mt-3 flex-row items-center justify-between rounded-2xl border border-brand/40 bg-brand/10 px-4 py-3;
+ @apply mt-3 flex-row items-center justify-between rounded-2xl border-brand/40 bg-brand/10 px-4 py-3;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1098,7 +1127,8 @@
 
 /* Empty state when a search matches nothing */
 .gd-empty {
-  @apply items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-4 py-8;
+ @apply items-center gap-2 rounded-2xl border-hairline-soft bg-white px-4 py-8;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1112,7 +1142,8 @@
 
 /* "Add what you typed" — the way out of the empty state */
 .gd-empty-add {
-  @apply mt-1 flex-row items-center gap-1.5 rounded-full border border-brand px-3.5 py-2;
+ @apply mt-1 flex-row items-center gap-1.5 rounded-full border-brand px-3.5 py-2;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1135,7 +1166,8 @@
 
 /* The row turns into this while a typed name is being corrected. */
 .gd-custom-input {
-  @apply flex-1 rounded-lg border border-brand bg-white px-3 py-2 text-[15px] font-body text-ink;
+ @apply flex-1 rounded-lg border-brand bg-white px-3 py-2 text-[15px] font-body text-ink;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1163,7 +1195,8 @@
 
 /* Upload Prescription — frame 05 */
 .gd-rx-drop {
-  @apply items-center gap-1 rounded-2xl border-[1.6px] border-dashed border-brand bg-brand/8 px-4 py-7;
+ @apply items-center gap-1 rounded-2xl border-brand bg-brand/8 px-4 py-7;
+  border-width: 1.6px;
 }
 
 .gd-rx-drop-icon {
@@ -1191,11 +1224,13 @@
 }
 
 .gd-rx-add {
-  @apply size-16 items-center justify-center rounded-xl border-[1.4px] border-dashed border-brand/50;
+ @apply size-16 items-center justify-center rounded-xl border-brand/50;
+  border-width: 1.4px;
 }
 
 .gd-textarea {
-  @apply h-24 rounded-2xl border border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
+ @apply h-24 rounded-2xl border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1206,7 +1241,8 @@
  * thing rather than three.
  */
 .gd-input-line {
-  @apply rounded-2xl border border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
+ @apply rounded-2xl border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1218,7 +1254,8 @@
  * moved to a step of its own. "Change" goes back to the map.
  */
 .gd-locality {
-  @apply flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-mist px-4 py-3;
+ @apply flex-row items-center gap-3 rounded-2xl border-hairline-soft bg-mist px-4 py-3;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1227,7 +1264,8 @@
 }
 
 .gd-locality-change {
-  @apply flex-row items-center gap-1 rounded-full border border-brand/40 bg-white px-3 py-1.5;
+ @apply flex-row items-center gap-1 rounded-full border-brand/40 bg-white px-3 py-1.5;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1242,7 +1280,8 @@
 
 
 .gd-address {
-  @apply flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+ @apply flex-row items-center gap-3 rounded-2xl border-hairline-soft bg-white px-4 py-3;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1256,7 +1295,8 @@
 
 /* Delivery address — the "use my current location" row */
 .gd-locate {
-  @apply flex-row items-center gap-3 rounded-2xl border border-brand/30 bg-brand/8 px-4 py-3.5;
+ @apply flex-row items-center gap-3 rounded-2xl border-brand/30 bg-brand/8 px-4 py-3.5;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1280,7 +1320,8 @@
 }
 
 .gd-search-results {
-  @apply mt-2 overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+ @apply mt-2 overflow-hidden rounded-2xl border-hairline-soft bg-white;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1294,7 +1335,8 @@
  * a stray line under it inside a rounded card.
  */
 .gd-search-result-divided {
-  @apply border-t border-hairline-soft;
+ @apply border-hairline-soft;
+  border-top-width: 1px;
   border-style: solid;
 }
 
@@ -1326,7 +1368,8 @@
  * one. This rule only draws the frame around it.
  */
 .gd-mapview {
-  @apply mt-2.5 overflow-hidden rounded-2xl border border-hairline-soft bg-mist;
+ @apply mt-2.5 overflow-hidden rounded-2xl border-hairline-soft bg-mist;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1345,7 +1388,8 @@
 
 /* Handling — substitution, urgency and payment, on every ordering screen. */
 .gd-prefs {
-  @apply overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+ @apply overflow-hidden rounded-2xl border-hairline-soft bg-white;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1358,7 +1402,8 @@
 }
 
 .gd-pref-divider {
-  @apply border-t border-hairline-soft;
+ @apply border-hairline-soft;
+  border-top-width: 1px;
   border-style: solid;
 }
 
@@ -1371,7 +1416,8 @@
 }
 
 .gd-pay {
-  @apply flex-1 flex-row items-center justify-center gap-2 rounded-xl border border-hairline-soft bg-mist px-3 py-2.5;
+ @apply flex-1 flex-row items-center justify-center gap-2 rounded-xl border-hairline-soft bg-mist px-3 py-2.5;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1394,7 +1440,8 @@
 
 /* Sent-order header — replaces the tracker on the order detail screen. */
 .gd-sent-banner {
-  @apply flex-row items-center gap-3 rounded-2xl border border-brand/25 bg-brand/8 px-4 py-3.5;
+ @apply flex-row items-center gap-3 rounded-2xl border-brand/25 bg-brand/8 px-4 py-3.5;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1418,7 +1465,8 @@
 .gd-chip {
   /* Row + gap so a chip can carry an icon; the category chips have none and
    * are unaffected by either. */
-  @apply flex-row items-center gap-1.5 rounded-full border border-hairline bg-mist px-3.5 py-1.5;
+ @apply flex-row items-center gap-1.5 rounded-full border-hairline bg-mist px-3.5 py-1.5;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1465,7 +1513,8 @@
 
 /* "What to tell them" — the checklist that replaced a selector doing nothing. */
 .gd-tell {
-  @apply mt-1 overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+ @apply mt-1 overflow-hidden rounded-2xl border-hairline-soft bg-white;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1474,7 +1523,8 @@
 }
 
 .gd-tell-divider {
-  @apply border-t border-hairline-soft;
+ @apply border-hairline-soft;
+  border-top-width: 1px;
   border-style: solid;
 }
 
@@ -1506,7 +1556,8 @@
 
 /* Service request — no board frame */
 .gd-service-hero {
-  @apply items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-4 py-6;
+ @apply items-center gap-2 rounded-2xl border-hairline-soft bg-white px-4 py-6;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1528,7 +1579,8 @@
 }
 
 .gd-contact-btn {
-  @apply flex-1 flex-row items-center justify-center gap-2 rounded-2xl border border-hairline bg-white py-3.5;
+ @apply flex-1 flex-row items-center justify-center gap-2 rounded-2xl border-hairline bg-white py-3.5;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1564,7 +1616,8 @@
 }
 
 .gd-totals {
-  @apply mt-4 gap-2 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+ @apply mt-4 gap-2 rounded-2xl border-hairline-soft bg-white px-4 py-3;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1581,7 +1634,8 @@
 }
 
 .gd-total-grand {
-  @apply mt-1 border-t border-hairline-soft pt-2;
+ @apply mt-1 border-hairline-soft pt-2;
+  border-top-width: 1px;
   border-style: solid;
 }
 
@@ -1595,7 +1649,8 @@
 
 /* Orders list */
 .gd-order-card {
-  @apply mb-2.5 flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+ @apply mb-2.5 flex-row items-center gap-3 rounded-2xl border-hairline-soft bg-white px-4 py-3;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1704,7 +1759,8 @@
 }
 
 .gd-list-card {
-  @apply overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+ @apply overflow-hidden rounded-2xl border-hairline-soft bg-white;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -1714,7 +1770,8 @@
 
 /* Applied from index > 0; :last-child has no meaning on native. */
 .gd-list-divider {
-  @apply border-t border-hairline-soft;
+ @apply border-hairline-soft;
+  border-top-width: 1px;
   border-style: solid;
 }
 
@@ -1754,7 +1811,8 @@
 /* ---- Website chrome (browser only, md and up) ---- */
 
 .gd-webnav {
-  @apply w-full border-b border-hairline-soft bg-white;
+ @apply w-full border-hairline-soft bg-white;
+  border-bottom-width: 1px;
   border-style: solid;
 }
 
