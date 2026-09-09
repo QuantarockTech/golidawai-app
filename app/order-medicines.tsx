@@ -184,7 +184,14 @@ export default function OrderMedicines() {
 
   return (
     <View className="gd-screen">
-      <SafeAreaView className="flex-1" edges={["top"]}>
+      {/*
+        Bottom edge included, unlike most screens. This one docks the cart
+        button to the bottom of the window and is not inside the tabs group,
+        so there is no tab bar beneath it to hold the inset — with edge-to-edge
+        on, the dock drew underneath Android's navigation bar and the two
+        shared the same strip of screen.
+      */}
+      <SafeAreaView className="flex-1" edges={["top", "bottom"]}>
         <ScreenHeader title={t("order.title")} />
 
         {/*

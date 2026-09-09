@@ -1498,8 +1498,13 @@
 
 
 /* Sticky cart bar — frame 06 */
+/*
+ * mb-2, not mb-3. The screens that dock this now include the bottom safe-area
+ * inset, so the gap under it is the system's plus this one — a phone with a
+ * gesture bar was spending both.
+ */
 .gd-cart-dock {
-  @apply mx-5 mb-3 flex-row items-center gap-3 rounded-2xl bg-brand-dark px-4 py-3.5;
+  @apply mx-5 mb-2 flex-row items-center gap-3 rounded-2xl bg-brand-dark px-4 py-3;
 }
 
 .gd-cart-dock-text {
