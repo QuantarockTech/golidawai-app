@@ -17,7 +17,10 @@ type CartValue = {
   /** Quantity of one item, or 0 when it isn't in the cart. */
   quantityOf: (id: string) => number;
   add: (item: ReorderItem) => void;
+  /** Takes one off a line, dropping the line when the last one goes. */
   remove: (id: string) => void;
+  /** Drops a whole line at once, however many of it are in the cart. */
+  removeLine: (id: string) => void;
   clear: () => void;
   itemCount: number;
   /** True when any line needs a prescription, which gates checkout messaging. */
@@ -65,6 +68,15 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     );
   }, []);
 
+  /*
+   * The way out of tapping minus once per unit. Emptying a cart holding four
+   * of something otherwise costs four taps on the same button, and the trash
+   * icon only appears on the last of them.
+   */
+  const removeLine = useCallback((id: string) => {
+    setLines((current) => current.filter((line) => line.item.id !== id));
+  }, []);
+
   const clear = useCallback(() => setLines([]), []);
 
   const value = useMemo<CartValue>(() => {
@@ -77,11 +89,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       quantityOf,
       add,
       remove,
+      removeLine,
       clear,
       itemCount,
       needsPharmacistReview,
     };
-  }, [add, clear, lines, quantityOf, remove]);
+  }, [add, clear, lines, quantityOf, remove, removeLine]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };

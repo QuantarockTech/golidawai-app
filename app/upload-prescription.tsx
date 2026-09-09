@@ -128,7 +128,6 @@ export default function UploadPrescription() {
             className="gd-rx-drop"
             style={pressRow}
             onPress={() => pick(true)}
-            onLongPress={() => pick(false)}
             accessibilityRole="button"
             accessibilityLabel={t("rx.dropTitle")}
           >
@@ -141,6 +140,30 @@ export default function UploadPrescription() {
             </View>
             <Text className="gd-rx-drop-title">{t("rx.dropTitle")}</Text>
             <Text className="gd-rx-drop-hint">{t("rx.dropHint")}</Text>
+          </Pressable>
+
+          {/*
+            The other half of what the card above promises.
+
+            It used to be a long-press on that card, which is a gesture nobody
+            tries on something that looks like a button — so a screen offering
+            to "take a photo or upload" could only take one, and the gallery
+            was reachable solely through the small "+" that appears once a
+            photo already exists. A prescription is more often already in the
+            camera roll than about to be taken.
+          */}
+          <Pressable
+            className="gd-rx-gallery"
+            style={pressRow}
+            onPress={() => pick(false)}
+            accessibilityRole="button"
+          >
+            <MaterialCommunityIcons
+              name="image-multiple-outline"
+              size={18}
+              color={colors.brandDark}
+            />
+            <Text className="gd-rx-gallery-text">{t("rx.fromGallery")}</Text>
           </Pressable>
 
           {photos.length > 0 ? (

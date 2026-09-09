@@ -25,7 +25,7 @@ import { useOrderDraft } from "@/contexts/OrderDraftContext";
 import { useOrderPrefs } from "@/contexts/OrderPrefsContext";
 import { useOrders } from "@/contexts/OrdersContext";
 import "@/global.css";
-import { notify } from "@/lib/dialog";
+import { confirm, notify } from "@/lib/dialog";
 import {
   LINK_LIFETIME_DAYS,
   canUploadImages,
@@ -51,7 +51,8 @@ const SafeAreaView = styled(RNSafeAreaView);
 export default function Cart() {
   const { t, language } = useLanguage();
   const router = useRouter();
-  const { lines, add, remove, clear, needsPharmacistReview } = useCart();
+  const { lines, add, remove, removeLine, clear, needsPharmacistReview } =
+    useCart();
   const { typedItems, photos, notes, clear: clearDraft } = useOrderDraft();
   const { nextId, record } = useOrders();
   const { address } = useDelivery();
