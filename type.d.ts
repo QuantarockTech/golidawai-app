@@ -274,6 +274,15 @@ declare global {
     /** Free-text medicines the customer typed rather than picked. */
     typedItems: TypedItem[];
     prescriptionCount: number;
+    /**
+     * Where the uploaded photos live, for as long as they do.
+     *
+     * Kept alongside the count so a printed order can carry the prescription
+     * rather than just say one was attached. They expire — see
+     * LINK_LIFETIME_DAYS in lib/imgbb.ts — which is why anything showing them
+     * says so rather than presenting a dead link as a live one.
+     */
+    prescriptionLinks?: string[];
     /** Flattened at send time; the saved address can change afterwards. */
     deliveryText: string;
     needsPharmacistReview: boolean;

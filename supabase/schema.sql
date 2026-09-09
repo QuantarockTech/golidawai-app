@@ -153,3 +153,12 @@ create policy "emergency contact is private to its owner"
   for all
   using ((auth.jwt() ->> 'sub') = user_id)
   with check ((auth.jwt() ->> 'sub') = user_id);
+
+-- Prescription links on an order, added after the fact.
+--
+-- The count alone was stored at first, which was enough to say a prescription
+-- came with an order but not to show it again — so a printed order could not
+-- carry the thing the pharmacy was actually asked to read. Nullable and
+-- defaulted, so rows written before this keep working untouched.
+alter table public.orders
+  add column if not exists prescription_links jsonb not null default '[]'::jsonb;

@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 
 import { PHARMACY } from "@/constants/data";
+import { LINK_LIFETIME_DAYS } from "@/lib/imgbb";
 
 /**
  * An order as a printable page, for both platforms.
@@ -65,8 +66,26 @@ export const orderSheetHtml = (
   }
 
   if (order.prescriptionCount > 0) {
+    const links = order.prescriptionLinks ?? [];
+
+    /*
+     * The links themselves, printed in full rather than hidden behind text.
+     *
+     * A sheet is read on paper as often as on screen, where a hyperlink is
+     * only as useful as the address it shows. And the expiry is stated beside
+     * them: these are hosted on a service that drops them after a set window,
+     * so a page kept for months would otherwise offer a dead link as if it
+     * were live.
+     */
     sections.push(
-      line("Prescriptions attached", String(order.prescriptionCount)),
+      links.length > 0
+        ? `<h2>Prescriptions</h2><ol>${links
+            .map(
+              (url) =>
+                `<li><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></li>`,
+            )
+            .join("")}</ol><p class="note-inline">These links expire ${LINK_LIFETIME_DAYS} days after the order was sent.</p>`
+        : line("Prescriptions attached", String(order.prescriptionCount)),
     );
   }
 
@@ -89,6 +108,10 @@ export const orderSheetHtml = (
   h2 { margin: 18px 0 6px; font-size: 13pt; }
   .meta { margin: 2px 0 16px; color: #444; font-size: 11pt; }
   .line { margin: 4px 0; }
+  a { color: #0f5d61; }
+  /* Long URLs must wrap rather than run off the edge of the paper. */
+  ol a { word-break: break-all; }
+  .note-inline { margin: 6px 0 0; color: #444; font-size: 10pt; }
   ol { margin: 0; padding-left: 20px; }
   li { margin: 2px 0; }
   /* Set off by a rule, so nobody mistakes the page for an invoice. */

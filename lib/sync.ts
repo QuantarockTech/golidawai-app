@@ -125,6 +125,7 @@ type OrderRow = {
   lines: OrderLine[] | null;
   typed_items: TypedItem[] | null;
   prescription_count: number;
+  prescription_links: string[] | null;
   delivery_text: string;
   needs_pharmacist_review: boolean;
 };
@@ -136,6 +137,9 @@ const toOrder = (row: OrderRow): SentOrder => ({
   lines: row.lines ?? [],
   typedItems: row.typed_items ?? [],
   prescriptionCount: row.prescription_count ?? 0,
+  ...(row.prescription_links?.length
+    ? { prescriptionLinks: row.prescription_links }
+    : {}),
   deliveryText: row.delivery_text ?? "",
   needsPharmacistReview: Boolean(row.needs_pharmacist_review),
 });
@@ -180,6 +184,7 @@ export const pushOrder = async (
         lines: order.lines,
         typed_items: order.typedItems,
         prescription_count: order.prescriptionCount,
+        prescription_links: order.prescriptionLinks ?? [],
         delivery_text: order.deliveryText,
         needs_pharmacist_review: order.needsPharmacistReview,
       },

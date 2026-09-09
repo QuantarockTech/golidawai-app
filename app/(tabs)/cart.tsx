@@ -78,6 +78,48 @@ export default function Cart() {
     lines.length === 0 && typedItems.length === 0 && photos.length === 0;
 
   /**
+   * Empties the basket in one go.
+   *
+   * Everything, not only the catalogue lines: this screen's own idea of empty
+   * spans typed names and prescription photos too, so clearing `lines` alone
+   * would leave a "cleared" cart still showing things. Nothing here is
+   * recoverable — the basket is in-memory and the photos would have to be
+   * taken again — which is why it asks first.
+   */
+  const emptyCart = () => {
+    confirm({
+      title: t("cart.clearTitle"),
+      message: t("cart.clearBody"),
+      confirmLabel: t("cart.clear"),
+      cancelLabel: t("common.cancel"),
+      destructive: true,
+      onConfirm: () => {
+        clear();
+        clearDraft();
+        // Urgency described this basket, and there is no basket now.
+        clearUrgent();
+      },
+    });
+  };
+
+  /**
+   * Long-press on a line's minus button: takes the line, not one off it.
+   *
+   * Only worth offering above a quantity of one, where minus already shows a
+   * trash can and removes the line on a single tap.
+   */
+  const confirmRemoveLine = (line: (typeof lines)[number]) => {
+    confirm({
+      title: t("cart.removeAll", { name: line.item.name }),
+      message: t("cart.removeAllBody", { count: line.quantity }),
+      confirmLabel: t("cart.removeAllConfirm"),
+      cancelLabel: t("common.cancel"),
+      destructive: true,
+      onConfirm: () => removeLine(line.item.id),
+    });
+  };
+
+  /**
    * Hands the whole basket to WhatsApp, as one message.
    *
    * Nothing is placed here — there is no payment step and no server to place it
@@ -163,6 +205,7 @@ export default function Cart() {
       lines: orderLines,
       typedItems,
       prescriptionCount: links.length,
+      ...(links.length ? { prescriptionLinks: links } : {}),
       deliveryText: describeAddress(address),
       needsPharmacistReview: needsPharmacistReview || links.length > 0,
     });
@@ -188,6 +231,17 @@ export default function Cart() {
       <SafeAreaView className="flex-1" edges={["top"]}>
         <View className="gd-topbar">
           <Text className="gd-topbar-title">{t("cart.title")}</Text>
+
+          {isEmpty ? null : (
+            <Pressable
+              className="gd-topbar-action"
+              onPress={emptyCart}
+              accessibilityRole="button"
+              hitSlop={8}
+            >
+              <Text className="gd-topbar-action-text">{t("cart.clear")}</Text>
+            </Pressable>
+          )}
         </View>
 
         {isEmpty ? (
@@ -245,10 +299,20 @@ export default function Cart() {
                         className="gd-stepper-btn"
                         style={pressSmall}
                         onPress={() => remove(line.item.id)}
+                        onLongPress={
+                          line.quantity > 1
+                            ? () => confirmRemoveLine(line)
+                            : undefined
+                        }
                         accessibilityRole="button"
                         accessibilityLabel={t("home.removeFromCart", {
                           name: line.item.name,
                         })}
+                        accessibilityHint={
+                          line.quantity > 1
+                            ? t("cart.removeAllHint")
+                            : undefined
+                        }
                         hitSlop={8}
                       >
                         <MaterialCommunityIcons
