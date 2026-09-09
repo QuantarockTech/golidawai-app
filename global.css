@@ -1858,26 +1858,38 @@
  *
  * Suppressed and replaced rather than simply deleted: a keyboard user still
  * needs to see which field they are in, so focus moves to the field's own
- * border plus a soft brand halo. Native draws no default ring, so none of
- * these rules apply there.
+ * border plus a soft brand halo.
+ *
+ * Behind a hover query, and that is load-bearing rather than tidy. These rules
+ * were written with an `input` qualifier on the assumption that native would
+ * skip anything selecting a DOM element. It does not: the compiler drops the
+ * qualifier, `.ga-input:focus` applies on Android too, and `outline` has no
+ * native equivalent — so the style mapping resolves to nothing and throws
+ * while the view is rendering. Any autofocused field crashed the screen it was
+ * on, which is what took down the sign-up verification step.
+ *
+ * A hover-capable pointer is the honest test anyway: this exists for a mouse
+ * and keyboard, and phones have neither.
  */
-input:focus,
-textarea:focus {
-  outline: none;
-}
+@media (hover: hover) and (pointer: fine) {
+  input:focus,
+  textarea:focus {
+    outline: none;
+  }
 
-.gd-search:focus-within,
-input.ga-input:focus,
-input.gd-custom-input:focus,
-textarea.gd-textarea:focus {
-  border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px rgba(63, 187, 192, 0.18);
-}
+  .gd-search:focus-within,
+  input.ga-input:focus,
+  input.gd-custom-input:focus,
+  textarea.gd-textarea:focus {
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px rgba(63, 187, 192, 0.18);
+  }
 
-/* A field flagged invalid keeps its red border while focused. */
-input.ga-input-error:focus {
-  border-color: var(--color-emergency);
-  box-shadow: 0 0 0 3px rgba(223, 21, 41, 0.15);
+  /* A field flagged invalid keeps its red border while focused. */
+  input.ga-input-error:focus {
+    border-color: var(--color-emergency);
+    box-shadow: 0 0 0 3px rgba(223, 21, 41, 0.15);
+  }
 }
 
 /*
