@@ -152,7 +152,8 @@
   }
 
   .list-action {
-    @apply border-solid rounded-full border border-black/20 px-4 py-1;
+    @apply rounded-full border border-black/20 px-4 py-1;
+    border-style: solid;
   }
 
   .list-action-text {
@@ -160,7 +161,8 @@
   }
 
   .upcoming-card {
-    @apply border-solid mr-4 w-44 rounded-2xl border border-black/10 bg-background p-4;
+    @apply mr-4 w-44 rounded-2xl border border-black/10 bg-background p-4;
+    border-style: solid;
   }
 
   .upcoming-row {
@@ -184,7 +186,8 @@
   }
 
   .sub-card {
-    @apply border-solid rounded-2xl border border-border p-4;
+    @apply rounded-2xl border border-border p-4;
+    border-style: solid;
   }
 
   .sub-card-expanded {
@@ -268,7 +271,8 @@
   }
 
   .subscription-search {
-    @apply border-solid flex-row items-center rounded-2xl border border-border bg-card;
+    @apply flex-row items-center rounded-2xl border border-border bg-card;
+    border-style: solid;
   }
 
   .subscription-header {
@@ -296,7 +300,8 @@
   }
 
   .subscription-empty {
-    @apply border-solid items-center rounded-2xl border border-border bg-card px-5 py-10;
+    @apply items-center rounded-2xl border border-border bg-card px-5 py-10;
+    border-style: solid;
   }
 
   .auth-safe-area {
@@ -348,7 +353,8 @@
   }
 
   .auth-card {
-    @apply border-solid mt-8 rounded-3xl border border-border bg-card p-5;
+    @apply mt-8 rounded-3xl border border-border bg-card p-5;
+    border-style: solid;
   }
 
   .auth-form {
@@ -364,7 +370,8 @@
   }
 
   .auth-input {
-    @apply border-solid rounded-2xl border border-border bg-background px-4 py-4 text-base font-sans-medium text-primary;
+    @apply rounded-2xl border border-border bg-background px-4 py-4 text-base font-sans-medium text-primary;
+    border-style: solid;
   }
 
   .auth-input-error {
@@ -392,7 +399,8 @@
   }
 
   .auth-secondary-button {
-    @apply border-solid items-center rounded-2xl border border-accent/30 bg-accent/10 py-3;
+    @apply items-center rounded-2xl border border-accent/30 bg-accent/10 py-3;
+    border-style: solid;
   }
 
   .auth-secondary-button-text {
@@ -404,7 +412,8 @@
   }
 
   .auth-divider-line {
-    @apply border-solid h-px flex-1 bg-border;
+    @apply h-px flex-1 bg-border;
+    border-style: solid;
   }
 
   .auth-divider-text {
@@ -432,7 +441,8 @@
   }
 
   .modal-header {
-    @apply border-solid flex-row items-center justify-between border-b border-border px-5 py-4;
+    @apply flex-row items-center justify-between border-b border-border px-5 py-4;
+    border-style: solid;
   }
 
   .modal-title {
@@ -456,7 +466,8 @@
   }
 
   .picker-option {
-    @apply border-solid flex-1 items-center rounded-2xl border border-border bg-background py-3;
+    @apply flex-1 items-center rounded-2xl border border-border bg-background py-3;
+    border-style: solid;
   }
 
   .picker-option-active {
@@ -476,7 +487,8 @@
   }
 
   .category-chip {
-    @apply border-solid rounded-full border border-border bg-background px-4 py-2;
+    @apply rounded-full border border-border bg-background px-4 py-2;
+    border-style: solid;
   }
 
   .category-chip-active {
@@ -542,7 +554,8 @@
  * than as content passing under a fixed header.
  */
 .ga-fixed-header {
-  @apply border-solid w-full self-center items-center border-b border-hairline-soft px-5 pb-2 pt-2;
+  @apply w-full self-center items-center border-b border-hairline-soft px-5 pb-2 pt-2;
+  border-style: solid;
 }
 
 /*
@@ -559,7 +572,8 @@
  * as bounded top and bottom rather than as content clipped at random.
  */
 .ga-fixed-footer {
-  @apply border-solid w-full max-w-[440px] self-center border-t border-hairline-soft px-5 pb-4 pt-2;
+  @apply w-full max-w-[440px] self-center border-t border-hairline-soft px-5 pb-4 pt-2;
+  border-style: solid;
 }
 
 .ga-title {
@@ -575,11 +589,13 @@
  * mist screen a white-on-mist pill is ~3% contrast and reads as unselected.
  */
 .ga-toggle {
-  @apply border-solid mb-3 w-full flex-row rounded-2xl border border-hairline-soft bg-brand/10 p-1;
+  @apply mb-3 w-full flex-row rounded-2xl border border-hairline-soft bg-brand/10 p-1;
+  border-style: solid;
 }
 
 .ga-toggle-item {
-  @apply border-solid flex-1 items-center justify-center rounded-xl border border-transparent py-2.5;
+  @apply flex-1 items-center justify-center rounded-xl border border-transparent py-2.5;
+  border-style: solid;
 }
 
 .ga-toggle-item-active {
@@ -603,7 +619,8 @@
 }
 
 .ga-input {
-  @apply border-solid rounded-2xl border border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
+  @apply rounded-2xl border border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
+  border-style: solid;
 }
 
 .ga-input-error {
@@ -657,7 +674,8 @@
 }
 
 .ga-btn-outline {
-  @apply border-solid mt-3 flex-row items-center justify-center gap-2 rounded-2xl border border-brand bg-white py-4;
+  @apply mt-3 flex-row items-center justify-center gap-2 rounded-2xl border border-brand bg-white py-4;
+  border-style: solid;
 }
 
 .ga-btn-outline-text {
@@ -690,7 +708,8 @@
  * from position, height and shadow instead of fill.
  */
 .ga-google-btn {
-  @apply border-solid w-full flex-row items-center justify-center gap-2.5 rounded-2xl border border-hairline bg-white py-4;
+  @apply w-full flex-row items-center justify-center gap-2.5 rounded-2xl border border-hairline bg-white py-4;
+  border-style: solid;
   box-shadow: 0 1px 3px rgba(15, 60, 61, 0.1);
 }
 
@@ -738,7 +757,8 @@
 }
 
 .ga-lang-on-light {
-  @apply border-solid border border-hairline-soft bg-mist;
+  @apply border border-hairline-soft bg-mist;
+  border-style: solid;
 }
 
 .ga-lang-item {
@@ -877,7 +897,8 @@
 
 /* Search */
 .gd-search {
-  @apply border-solid mb-4 flex-row items-center gap-2 rounded-2xl border border-hairline bg-white px-4 py-3;
+  @apply mb-4 flex-row items-center gap-2 rounded-2xl border border-hairline bg-white px-4 py-3;
+  border-style: solid;
 }
 
 .gd-search-text {
@@ -908,7 +929,8 @@
 }
 
 .gd-tile {
-  @apply border-solid w-[31%] items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-2 py-3 md:w-[15.5%] md:py-5;
+  @apply w-[31%] items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-2 py-3 md:w-[15.5%] md:py-5;
+  border-style: solid;
 }
 
 .gd-tile-icon {
@@ -930,7 +952,8 @@
 
 /* Call to order */
 .gd-call {
-  @apply border-solid flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+  @apply flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+  border-style: solid;
 }
 
 .gd-call-icon {
@@ -946,7 +969,8 @@
 }
 
 .gd-call-cta {
-  @apply border-solid rounded-full border border-brand px-3 py-1.5;
+  @apply rounded-full border border-brand px-3 py-1.5;
+  border-style: solid;
 }
 
 .gd-call-cta-text {
@@ -955,7 +979,8 @@
 
 /* Reorder list */
 .gd-med-card {
-  @apply border-solid rounded-2xl border border-hairline-soft bg-white px-4;
+  @apply rounded-2xl border border-hairline-soft bg-white px-4;
+  border-style: solid;
 }
 
 .gd-med-row {
@@ -963,7 +988,8 @@
 }
 
 .gd-med-divider {
-  @apply border-solid border-t border-hairline-soft;
+  @apply border-t border-hairline-soft;
+  border-style: solid;
 }
 
 /*
@@ -976,7 +1002,8 @@
  * content, and the box grows past the screen instead of scrolling.
  */
 .gd-med-box {
-  @apply border-solid min-h-0 flex-1 overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+  @apply min-h-0 flex-1 overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+  border-style: solid;
 }
 
 /* Loading, failed and no-match, drawn inside the box that already has a card. */
@@ -990,7 +1017,8 @@
  * catalogue box off the bottom of the screen.
  */
 .gd-typed-box {
-  @apply border-solid max-h-[240px] grow-0 rounded-2xl border border-hairline-soft bg-white;
+  @apply max-h-[240px] grow-0 rounded-2xl border border-hairline-soft bg-white;
+  border-style: solid;
 }
 
 /* A horizontal scroller in a column would otherwise grow into the box's height. */
@@ -1031,7 +1059,8 @@
 
 /* Quantity stepper, shown on a reorder row once it is in the cart */
 .gd-stepper {
-  @apply border-solid flex-row items-center gap-1 rounded-lg border border-brand/40 bg-brand/10 px-1 py-0.5;
+  @apply flex-row items-center gap-1 rounded-lg border border-brand/40 bg-brand/10 px-1 py-0.5;
+  border-style: solid;
 }
 
 .gd-stepper-btn {
@@ -1044,7 +1073,8 @@
 
 /* Cart summary strip under the reorder list */
 .gd-cart-bar {
-  @apply border-solid mt-3 flex-row items-center justify-between rounded-2xl border border-brand/40 bg-brand/10 px-4 py-3;
+  @apply mt-3 flex-row items-center justify-between rounded-2xl border border-brand/40 bg-brand/10 px-4 py-3;
+  border-style: solid;
 }
 
 .gd-cart-count {
@@ -1068,7 +1098,8 @@
 
 /* Empty state when a search matches nothing */
 .gd-empty {
-  @apply border-solid items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-4 py-8;
+  @apply items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-4 py-8;
+  border-style: solid;
 }
 
 .gd-empty-text {
@@ -1081,7 +1112,8 @@
 
 /* "Add what you typed" — the way out of the empty state */
 .gd-empty-add {
-  @apply border-solid mt-1 flex-row items-center gap-1.5 rounded-full border border-brand px-3.5 py-2;
+  @apply mt-1 flex-row items-center gap-1.5 rounded-full border border-brand px-3.5 py-2;
+  border-style: solid;
 }
 
 /*
@@ -1103,7 +1135,8 @@
 
 /* The row turns into this while a typed name is being corrected. */
 .gd-custom-input {
-  @apply border-solid flex-1 rounded-lg border border-brand bg-white px-3 py-2 text-[15px] font-body text-ink;
+  @apply flex-1 rounded-lg border border-brand bg-white px-3 py-2 text-[15px] font-body text-ink;
+  border-style: solid;
 }
 
 .gd-custom-note {
@@ -1162,7 +1195,8 @@
 }
 
 .gd-textarea {
-  @apply border-solid h-24 rounded-2xl border border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
+  @apply h-24 rounded-2xl border border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
+  border-style: solid;
 }
 
 /*
@@ -1172,7 +1206,8 @@
  * thing rather than three.
  */
 .gd-input-line {
-  @apply border-solid rounded-2xl border border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
+  @apply rounded-2xl border border-hairline bg-white px-4 py-3 text-[15px] font-body text-ink;
+  border-style: solid;
 }
 
 /*
@@ -1183,7 +1218,8 @@
  * moved to a step of its own. "Change" goes back to the map.
  */
 .gd-locality {
-  @apply border-solid flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-mist px-4 py-3;
+  @apply flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-mist px-4 py-3;
+  border-style: solid;
 }
 
 .gd-locality-text {
@@ -1191,7 +1227,8 @@
 }
 
 .gd-locality-change {
-  @apply border-solid flex-row items-center gap-1 rounded-full border border-brand/40 bg-white px-3 py-1.5;
+  @apply flex-row items-center gap-1 rounded-full border border-brand/40 bg-white px-3 py-1.5;
+  border-style: solid;
 }
 
 .gd-locality-change-text {
@@ -1205,7 +1242,8 @@
 
 
 .gd-address {
-  @apply border-solid flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+  @apply flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+  border-style: solid;
 }
 
 .gd-address-text {
@@ -1218,7 +1256,8 @@
 
 /* Delivery address — the "use my current location" row */
 .gd-locate {
-  @apply border-solid flex-row items-center gap-3 rounded-2xl border border-brand/30 bg-brand/8 px-4 py-3.5;
+  @apply flex-row items-center gap-3 rounded-2xl border border-brand/30 bg-brand/8 px-4 py-3.5;
+  border-style: solid;
 }
 
 .gd-locate-title {
@@ -1241,7 +1280,8 @@
 }
 
 .gd-search-results {
-  @apply border-solid mt-2 overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+  @apply mt-2 overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+  border-style: solid;
 }
 
 .gd-search-result {
@@ -1254,7 +1294,8 @@
  * a stray line under it inside a rounded card.
  */
 .gd-search-result-divided {
-  @apply border-solid border-t border-hairline-soft;
+  @apply border-t border-hairline-soft;
+  border-style: solid;
 }
 
 .gd-search-result-title {
@@ -1285,7 +1326,8 @@
  * one. This rule only draws the frame around it.
  */
 .gd-mapview {
-  @apply border-solid mt-2.5 overflow-hidden rounded-2xl border border-hairline-soft bg-mist;
+  @apply mt-2.5 overflow-hidden rounded-2xl border border-hairline-soft bg-mist;
+  border-style: solid;
 }
 
 /* The "open in Google Maps" line under the map, which is the whole card's tap. */
@@ -1303,7 +1345,8 @@
 
 /* Handling — substitution, urgency and payment, on every ordering screen. */
 .gd-prefs {
-  @apply border-solid overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+  @apply overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+  border-style: solid;
 }
 
 .gd-pref-row {
@@ -1315,7 +1358,8 @@
 }
 
 .gd-pref-divider {
-  @apply border-solid border-t border-hairline-soft;
+  @apply border-t border-hairline-soft;
+  border-style: solid;
 }
 
 .gd-pref-label {
@@ -1327,7 +1371,8 @@
 }
 
 .gd-pay {
-  @apply border-solid flex-1 flex-row items-center justify-center gap-2 rounded-xl border border-hairline-soft bg-mist px-3 py-2.5;
+  @apply flex-1 flex-row items-center justify-center gap-2 rounded-xl border border-hairline-soft bg-mist px-3 py-2.5;
+  border-style: solid;
 }
 
 .gd-pay-active {
@@ -1349,7 +1394,8 @@
 
 /* Sent-order header — replaces the tracker on the order detail screen. */
 .gd-sent-banner {
-  @apply border-solid flex-row items-center gap-3 rounded-2xl border border-brand/25 bg-brand/8 px-4 py-3.5;
+  @apply flex-row items-center gap-3 rounded-2xl border border-brand/25 bg-brand/8 px-4 py-3.5;
+  border-style: solid;
 }
 
 .gd-sent-title {
@@ -1372,7 +1418,8 @@
 .gd-chip {
   /* Row + gap so a chip can carry an icon; the category chips have none and
    * are unaffected by either. */
-  @apply border-solid flex-row items-center gap-1.5 rounded-full border border-hairline bg-mist px-3.5 py-1.5;
+  @apply flex-row items-center gap-1.5 rounded-full border border-hairline bg-mist px-3.5 py-1.5;
+  border-style: solid;
 }
 
 .gd-chip-active {
@@ -1418,7 +1465,8 @@
 
 /* "What to tell them" — the checklist that replaced a selector doing nothing. */
 .gd-tell {
-  @apply border-solid mt-1 overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+  @apply mt-1 overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+  border-style: solid;
 }
 
 .gd-tell-row {
@@ -1426,7 +1474,8 @@
 }
 
 .gd-tell-divider {
-  @apply border-solid border-t border-hairline-soft;
+  @apply border-t border-hairline-soft;
+  border-style: solid;
 }
 
 .gd-tell-num {
@@ -1457,7 +1506,8 @@
 
 /* Service request — no board frame */
 .gd-service-hero {
-  @apply border-solid items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-4 py-6;
+  @apply items-center gap-2 rounded-2xl border border-hairline-soft bg-white px-4 py-6;
+  border-style: solid;
 }
 
 .gd-service-icon {
@@ -1478,7 +1528,8 @@
 }
 
 .gd-contact-btn {
-  @apply border-solid flex-1 flex-row items-center justify-center gap-2 rounded-2xl border border-hairline bg-white py-3.5;
+  @apply flex-1 flex-row items-center justify-center gap-2 rounded-2xl border border-hairline bg-white py-3.5;
+  border-style: solid;
 }
 
 .gd-contact-text {
@@ -1513,7 +1564,8 @@
 }
 
 .gd-totals {
-  @apply border-solid mt-4 gap-2 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+  @apply mt-4 gap-2 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+  border-style: solid;
 }
 
 .gd-total-row {
@@ -1529,7 +1581,8 @@
 }
 
 .gd-total-grand {
-  @apply border-solid mt-1 border-t border-hairline-soft pt-2;
+  @apply mt-1 border-t border-hairline-soft pt-2;
+  border-style: solid;
 }
 
 .gd-total-grand-label {
@@ -1542,7 +1595,8 @@
 
 /* Orders list */
 .gd-order-card {
-  @apply border-solid mb-2.5 flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+  @apply mb-2.5 flex-row items-center gap-3 rounded-2xl border border-hairline-soft bg-white px-4 py-3;
+  border-style: solid;
 }
 
 .gd-order-id {
@@ -1650,7 +1704,8 @@
 }
 
 .gd-list-card {
-  @apply border-solid overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+  @apply overflow-hidden rounded-2xl border border-hairline-soft bg-white;
+  border-style: solid;
 }
 
 .gd-list-item {
@@ -1659,7 +1714,8 @@
 
 /* Applied from index > 0; :last-child has no meaning on native. */
 .gd-list-divider {
-  @apply border-solid border-t border-hairline-soft;
+  @apply border-t border-hairline-soft;
+  border-style: solid;
 }
 
 .gd-list-icon {
@@ -1698,7 +1754,8 @@
 /* ---- Website chrome (browser only, md and up) ---- */
 
 .gd-webnav {
-  @apply border-solid w-full border-b border-hairline-soft bg-white;
+  @apply w-full border-b border-hairline-soft bg-white;
+  border-style: solid;
 }
 
 .gd-webnav-inner {
