@@ -329,7 +329,7 @@ export default function DeliveryAddressScreen() {
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerClassName="gd-scroll-content"
+          contentContainerClassName="gd-scroll-content gd-scroll-flush"
           keyboardShouldPersistTaps="handled"
         >
           {step === "location" ? (

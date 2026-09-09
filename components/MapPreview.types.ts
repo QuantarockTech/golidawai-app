@@ -18,7 +18,7 @@ export interface MapPreviewProps {
 /**
  * How tall the map sits.
  *
- * Enough to show the surrounding blocks, not so much that the address fields
- * below it fall off the bottom of a phone screen.
+ * Enough to show the surrounding blocks, not so much that the rest of the
+ * screen needs scrolling to reach — which is what 180 cost on a phone.
  */
-export const PREVIEW_HEIGHT = 180;
+export const PREVIEW_HEIGHT = 150;

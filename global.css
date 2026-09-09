@@ -1371,7 +1371,7 @@
 
 /* Separates the search box from the fallback below it. */
 .gd-search-or {
-  @apply mt-4 mb-2 text-center text-[12px] font-body text-ink-faint;
+  @apply mt-2.5 mb-1.5 text-center text-[12px] font-body text-ink-faint;
 }
 
 /*
@@ -1938,4 +1938,19 @@
 
 .gd-error-stack {
   @apply mt-3 text-[11px] leading-[16px] text-ink-muted;
+}
+
+/*
+ * For a scroll area with no sticky bar under it.
+ *
+ * gd-scroll-content ends in pb-28 so a cart dock never sits on top of the last
+ * row. Screens that keep their action inline — the delivery address, whose
+ * button is the last thing in the scroll — pay 112px for a bar that is not
+ * there, which is most of the reason that screen scrolled at all.
+ *
+ * A plain declaration rather than a utility, so it wins regardless of where
+ * Tailwind sorts it.
+ */
+.gd-scroll-flush {
+  padding-bottom: 32px;
 }
