@@ -1,6 +1,7 @@
+import { useAuth } from "@clerk/clerk-expo";
 import { clsx } from "clsx";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter, type Href } from "expo-router";
+import { Redirect, useRouter, type Href } from "expo-router";
 import { styled } from "nativewind";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
@@ -25,8 +26,24 @@ const HERO_END = { x: 0.18, y: 1 } as const;
 
 /** Splash / Welcome — concept board frame 01. */
 const Onboarding = () => {
+  const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
   const { t, isHindi } = useLanguage();
+
+  /*
+   * Signing in with Google leaves the app here, and it used to stay here.
+   *
+   * The provider hands control back through the app's own scheme, which lands
+   * on the root route. app/index.tsx decides where to go from there, and at
+   * that instant Clerk has often not finished activating the session — so it
+   * reads as signed out and sends the customer to this screen. Nothing then
+   * moved them off it: this screen never asked who was signed in, so a
+   * successful sign-in ended on the welcome screen it started from.
+   *
+   * Checked on every render rather than once, because the answer changes a
+   * beat after arriving.
+   */
+  if (isLoaded && isSignedIn) return <Redirect href={"/(tabs)" as Href} />;
 
   return (
     <LinearGradient

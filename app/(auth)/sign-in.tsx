@@ -1,8 +1,8 @@
-import { useSSO, useSignIn } from "@clerk/clerk-expo";
+import { useAuth, useSSO, useSignIn } from "@clerk/clerk-expo";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { clsx } from "clsx";
 import * as AuthSession from "expo-auth-session";
-import { useRouter, type Href } from "expo-router";
+import { Redirect, useRouter, type Href } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { usePostHog } from "posthog-react-native";
 import { useCallback, useEffect, useState } from "react";
@@ -40,6 +40,7 @@ const HOME_ROUTE = "/(tabs)" as Href;
 
 const SignIn = () => {
   const { signIn, isLoaded, setActive } = useSignIn();
+  const { isSignedIn, isLoaded: authLoaded } = useAuth();
   const { startSSOFlow } = useSSO();
   const { t, isHindi } = useLanguage();
   const keyboardVisible = useKeyboardVisible();
@@ -247,6 +248,14 @@ const SignIn = () => {
       setIsSubmitting(false);
     }
   };
+
+  /*
+   * Already signed in — most often a Google sign-in returning through the
+   * app's scheme a moment before Clerk finishes activating the session. The
+   * same guard is on the onboarding screen, which is the other place that
+   * redirect can land.
+   */
+  if (authLoaded && isSignedIn) return <Redirect href={HOME_ROUTE} />;
 
   if (!isLoaded || !signIn) return null;
 
