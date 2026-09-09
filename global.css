@@ -1831,21 +1831,30 @@
   @apply size-8 items-center justify-center rounded-lg bg-emergency/10;
 }
 
+/*
+ * Carries no flex of its own. Whatever fills the row — this label on a plain
+ * row, `.gd-list-body` on a row that also has a subtitle — says so at the call
+ * site with a `flex-1` utility.
+ *
+ * It used to claim `flex-1` here and hand it back through a
+ * `.gd-list-body .gd-list-label` override, which cost the profile screen its
+ * tappable labels. A descendant selector compiles to a container query, and a
+ * container registers itself for press state, which lands an `onPress` on the
+ * ancestor — and react-native-css promotes any View holding an `onPress` to a
+ * Pressable. `.gd-list-body` became a Pressable with a no-op handler sitting
+ * inside the real one, swallowing every tap that landed on the text. Keep
+ * descendant selectors out of this file.
+ */
 .gd-list-label {
-  @apply flex-1 text-[14px] font-ui text-ink;
+  @apply text-[14px] font-ui text-ink;
 }
 
 /*
  * A row that has something to say beneath its label — the saved delivery
- * address under "Addresses". The label loses its own `flex-1` inside this,
- * or the two lines fight each other for the row's width.
+ * address under "Addresses".
  */
 .gd-list-body {
   @apply min-w-0 flex-1;
-}
-
-.gd-list-body .gd-list-label {
-  @apply flex-none;
 }
 
 .gd-list-sub {

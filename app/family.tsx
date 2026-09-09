@@ -126,7 +126,7 @@ export default function FamilyScreen() {
                     />
                   </View>
 
-                  <Text className="gd-list-label" numberOfLines={2}>
+                  <Text className="gd-list-label flex-1" numberOfLines={2}>
                     {describeMember(member)}
                   </Text>
 

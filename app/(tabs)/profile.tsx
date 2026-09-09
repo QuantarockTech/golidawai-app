@@ -175,7 +175,7 @@ export default function Profile() {
           </Text>
         </View>
       ) : (
-        <Text className="gd-list-label">{t(row.labelKey)}</Text>
+        <Text className="gd-list-label flex-1">{t(row.labelKey)}</Text>
       )}
 
       <MaterialCommunityIcons
@@ -247,7 +247,9 @@ export default function Profile() {
                   color={colors.brandDark}
                 />
               </View>
-              <Text className="gd-list-label">{t("profile.language")}</Text>
+              <Text className="gd-list-label flex-1">
+                {t("profile.language")}
+              </Text>
               <LanguageToggle />
             </View>
           </View>
