@@ -81,7 +81,24 @@ export function LanguageProvider({ children }: React.PropsWithChildren) {
 
   const t = useCallback(
     (key: TranslationKey, vars?: Record<string, string | number>) => {
-      const template = translations[language][key];
+      /*
+       * The key itself when there is no translation for it.
+       *
+       * TypeScript keeps both languages in step — `hi` is a
+       * Record<TranslationKey, string>, so a missing one will not compile — but
+       * that guarantee ends at the bundle. A half-applied update, a stale
+       * cached bundle, or a language value that is neither "en" nor "hi" all
+       * produce an undefined template at runtime.
+       *
+       * That used to be fatal rather than ugly. `template` went into the reduce
+       * below as its initial value, so a missing key with variables threw
+       * "undefined is not an object (evaluating 'text.split')" and took the
+       * whole app down with it — a blank screen from one absent string.
+       *
+       * Showing "cart.forWhom" to a customer is bad. Showing them nothing at
+       * all because a pharmacy app crashed is worse.
+       */
+      const template = translations[language]?.[key] ?? key;
 
       if (!vars) return template;
 
