@@ -12,8 +12,9 @@ import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { PostHogErrorBoundary, PostHogProvider } from "posthog-react-native";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import BrandedSplash from "@/components/BrandedSplash";
 import ErrorScreen from "@/components/ErrorScreen";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import { CartProvider } from "@/contexts/CartContext";
@@ -27,6 +28,15 @@ import { posthog } from "@/lib/posthog";
 import { setSupabaseTokenReader } from "@/lib/supabase";
 
 SplashScreen.preventAutoHideAsync();
+
+/*
+ * How long the branded splash stays up at minimum, in ms.
+ *
+ * Without a floor a warm start flashes the logo for a frame or two, which reads
+ * as a glitch rather than a brand. Short enough that a cold start, which takes
+ * longer than this anyway, waits on nothing.
+ */
+const BRAND_SPLASH_MIN_MS = 900;
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
@@ -109,12 +119,22 @@ function RootLayoutContent() {
     Poppins_700Bold,
   });
 
+  const [minSplashElapsed, setMinSplashElapsed] = useState(false);
+
   useEffect(() => {
-    // Hide splash only when fonts, auth and the saved language are all ready
-    if (fontsLoaded && authLoaded && languageLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded, authLoaded, languageLoaded]);
+    const timer = setTimeout(() => setMinSplashElapsed(true), BRAND_SPLASH_MIN_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
+  /*
+   * Hands the native splash over to our own the moment there is a frame to hand
+   * it to. The branded splash is one image and waits on nothing, so this fires
+   * long before fonts, auth or the language choice have landed — and because
+   * both screens sit on the same white, the swap is invisible.
+   */
+  const handleSplashLayout = useCallback(() => {
+    SplashScreen.hideAsync();
+  }, []);
 
   useEffect(() => {
     if (!userLoaded) {
@@ -141,9 +161,12 @@ function RootLayoutContent() {
     identifiedUserId.current = user.id;
   }, [user, userLoaded]);
 
-  // Don't render app until fonts, auth and the language choice are all ready —
+  // Hold the app back until fonts, auth and the language choice are all ready —
   // rendering earlier would flash English before a Hindi user's saved choice loads.
-  if (!fontsLoaded || !authLoaded || !languageLoaded) return null;
+  // The branded splash covers the wait instead of a blank screen.
+  if (!fontsLoaded || !authLoaded || !languageLoaded || !minSplashElapsed) {
+    return <BrandedSplash onLayout={handleSplashLayout} />;
+  }
 
   return <Stack screenOptions={{ headerShown: false }} />;
 }
