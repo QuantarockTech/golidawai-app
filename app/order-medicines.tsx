@@ -1,6 +1,6 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { clsx } from "clsx";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { styled } from "nativewind";
 import { useCallback, useMemo, useState } from "react";
 import {
@@ -80,7 +80,15 @@ export default function OrderMedicines() {
     }, [refreshIfStale]),
   );
 
-  const [query, setQuery] = useState("");
+  /*
+   * What home was searching for, carried across rather than retyped.
+   *
+   * Only seeds the initial state: once the screen is up the box belongs to the
+   * customer, and re-reading the param would undo their edits every render.
+   */
+  const { q } = useLocalSearchParams<{ q?: string }>();
+
+  const [query, setQuery] = useState(q ?? "");
   const [category, setCategory] = useState<string | null>(null);
   /*
    * Medicines the customer typed that the catalogue doesn't stock.

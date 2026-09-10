@@ -1157,6 +1157,14 @@
   @apply text-[13px] font-ui-semibold text-brand-dark;
 }
 
+/*
+ * "See all N results" — home shows a screenful of catalogue hits and sends the
+ * rest to the order screen, which has the viewport for them.
+ */
+.gd-search-more {
+  @apply mt-2 items-center py-1;
+}
+
 /* "Add what you typed" — the way out of the empty state */
 .gd-empty-add {
  @apply mt-1 flex-row items-center gap-1.5 rounded-full border-brand px-3.5 py-2;
